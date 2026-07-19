@@ -1,9 +1,10 @@
 "use client";
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { scrollToPageTop } from "@/lib/public-scroll";
 
 function isAdminPath(pathname: string | null): boolean {
   return pathname?.startsWith("/admin") ?? false;
@@ -25,6 +26,7 @@ export function PublicPageTransition({ children }: { children: ReactNode }) {
 
 export function PublicSiteEffects() {
   const pathname = usePathname();
+  const router = useRouter();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pathnameRef = useRef(pathname);
   const loaderFrameRef = useRef(0);
@@ -69,6 +71,7 @@ export function PublicSiteEffects() {
     };
 
     const startLoader = () => {
+      scrollToPageTop();
       if (hideLoaderFrameRef.current) {
         window.cancelAnimationFrame(hideLoaderFrameRef.current);
         hideLoaderFrameRef.current = 0;
@@ -111,7 +114,9 @@ export function PublicSiteEffects() {
       const isSameRoute = nextUrl.pathname === currentPath;
 
       if (!isSameRoute) {
+        event.preventDefault();
         startLoader();
+        router.push(`${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`, { scroll: false });
       }
     };
 
@@ -145,7 +150,7 @@ export function PublicSiteEffects() {
         hideLoaderFrameRef.current = 0;
       }
     };
-  }, [isAdmin]);
+  }, [isAdmin, router]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -159,7 +164,7 @@ export function PublicSiteEffects() {
     }
 
     if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "auto";
+      window.history.scrollRestoration = "manual";
     }
 
     if (!initializedRef.current) {
@@ -196,7 +201,8 @@ export function PublicSiteEffects() {
     if (isAdmin) return;
 
     let timeout = 0;
-    let frame = 0;
+    let registerFrame = 0;
+    let activateFrame = 0;
     let observer: IntersectionObserver | null = null;
     let revealElements: HTMLElement[] = [];
 
@@ -239,19 +245,35 @@ export function PublicSiteEffects() {
         }
       );
 
+      const elementsInView: HTMLElement[] = [];
+
       revealElements.forEach((element) => {
         const rect = element.getBoundingClientRect();
         const alreadyInView = rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
 
         element.dataset.revealArmed = "true";
-        element.dataset.revealState = alreadyInView ? "visible" : "pending";
+        element.dataset.revealState = "pending";
         observer?.observe(element);
+
+        if (alreadyInView) {
+          elementsInView.push(element);
+        }
+      });
+
+      activateFrame = window.requestAnimationFrame(() => {
+        elementsInView.forEach((element) => {
+          element.dataset.revealState = "visible";
+
+          if (element.dataset.revealOnce !== "false") {
+            observer?.unobserve(element);
+          }
+        });
       });
     };
 
     const scheduleRegister = () => {
       timeout = window.setTimeout(() => {
-        frame = window.requestAnimationFrame(registerRevealElements);
+        registerFrame = window.requestAnimationFrame(registerRevealElements);
       }, revealInitializedRef.current ? 0 : 120);
       revealInitializedRef.current = true;
     };
@@ -265,7 +287,8 @@ export function PublicSiteEffects() {
     return () => {
       window.removeEventListener("load", scheduleRegister);
       window.clearTimeout(timeout);
-      if (frame) window.cancelAnimationFrame(frame);
+      if (registerFrame) window.cancelAnimationFrame(registerFrame);
+      if (activateFrame) window.cancelAnimationFrame(activateFrame);
       observer?.disconnect();
       showAll();
     };
@@ -328,7 +351,7 @@ export function PublicSiteEffects() {
       aria-label="Scroll to top"
       aria-hidden={!scrollTopVisible}
       tabIndex={scrollTopVisible ? 0 : -1}
-      onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
+      onClick={scrollToPageTop}
       style={{ "--scroll-progress": "0" } as CSSProperties}
       className={cn(
         "scroll-top-button fixed bottom-5 right-5 md:bottom-8 md:right-8 z-40",

@@ -16,6 +16,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useTranslation } from "@/lib/use-dictionary";
+import { scrollToPageTop } from "@/lib/public-scroll";
 
 const iconMap: Record<string, React.ReactNode> = {
   Rocket: <Rocket size={24} />,
@@ -60,7 +61,8 @@ export function PricingCard({ pkg, index = 0, onPlanProject }: PricingCardProps)
     if (pkg.customPrice && onPlanProject) {
       onPlanProject();
     } else {
-      router.push(`/contact?package=${pkg.id}`);
+      scrollToPageTop();
+      router.push(`/contact?package=${pkg.id}`, { scroll: false });
     }
   };
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { quizContent } from "@/data/quiz";
 import { useTranslation } from "@/lib/use-dictionary";
+import { scrollToPageTop } from "@/lib/public-scroll";
 import type { QuizOption } from "@/data/quiz";
 import {
   X,
@@ -404,7 +405,8 @@ export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
                     onClick={() => {
                       resetQuiz();
                       onClose();
-                      router.push("/");
+                      scrollToPageTop();
+                      router.push("/", { scroll: false });
                     }}
                     className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)] text-sm font-medium hover:opacity-90 transition-all duration-300 cursor-pointer"
                   >

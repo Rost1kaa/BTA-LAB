@@ -12,6 +12,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useTranslation } from "@/lib/use-dictionary";
+import { scrollToPageTop } from "@/lib/public-scroll";
 
 const iconMap: Record<string, React.ReactNode> = {
   Search: <Search size={24} />,
@@ -34,7 +35,8 @@ export function ServiceAddonCard({
   const { t } = useTranslation();
 
   const handleCta = () => {
-    router.push(`/contact?service=${addon.id}`);
+    scrollToPageTop();
+    router.push(`/contact?service=${addon.id}`, { scroll: false });
   };
 
   return (
