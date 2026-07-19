@@ -14,7 +14,7 @@
  *   ADMIN_DISPLAY_NAME
  *
  * Required when creating a new Auth user:
- *   ADMIN_PASSWORD       — Must be at least 8 characters
+ *   ADMIN_PASSWORD       — Must be at least 12 characters and include mixed character types
  */
 
 import { config } from "dotenv";
@@ -83,6 +83,16 @@ function deterministicId(seed: string): string {
 
 const KA_DICT = kaDict as Record<string, string>;
 const EN_DICT = enDict as Record<string, string>;
+
+const COMMON_PASSWORDS = new Set([
+  "password",
+  "password123",
+  "admin123",
+  "admin123456",
+  "btalab123",
+  "qwerty123",
+  "letmein123",
+]);
 
 const categoryLabelsKa: Record<string, string> = {
   Web: "ვებ",
@@ -159,6 +169,28 @@ function inferPriceSuffixKa(price: string | undefined) {
   if (!price) return "";
   if (price.endsWith("-დან")) return "-დან";
   return "";
+}
+
+function validateAdminPassword(password: string): string | null {
+  const normalized = password.toLowerCase();
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+  if (password.length < 12) {
+    return "ADMIN_PASSWORD must be at least 12 characters.";
+  }
+
+  if (COMMON_PASSWORDS.has(normalized)) {
+    return "ADMIN_PASSWORD is too common.";
+  }
+
+  if ([hasLowercase, hasUppercase, hasNumber, hasSymbol].filter(Boolean).length < 3) {
+    return "ADMIN_PASSWORD must include at least three of: lowercase, uppercase, number, symbol.";
+  }
+
+  return null;
 }
 
 function withBilingualProject(project: PortfolioProjectSeed, enabled: boolean) {
@@ -310,14 +342,13 @@ async function resolveAdminUser(): Promise<ResolvedAdmin> {
   if (!ADMIN_PASSWORD) {
     throw new Error(
       "ADMIN_PASSWORD is required because no existing Auth user was found. " +
-      "Provide a password of at least 8 characters."
+      "Provide a password of at least 12 characters."
     );
   }
 
-  if (ADMIN_PASSWORD.length < 8) {
-    throw new Error(
-      "ADMIN_PASSWORD must be at least 8 characters."
-    );
+  const passwordError = validateAdminPassword(ADMIN_PASSWORD);
+  if (passwordError) {
+    throw new Error(passwordError);
   }
 
   console.log("  ℹ  Creating administrator account");

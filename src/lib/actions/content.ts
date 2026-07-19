@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminMutation } from "@/lib/auth/admin";
 import { getRevalidationPaths } from "@/lib/cms";
 
 const contentUpdateSchema = z.object({
@@ -19,7 +19,7 @@ const contentUpdateSchema = z.object({
 export type ContentUpdateInput = z.infer<typeof contentUpdateSchema>;
 
 export async function upsertContent(input: ContentUpdateInput) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("content:upsert");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = contentUpdateSchema.safeParse(input);
@@ -55,7 +55,7 @@ export async function upsertContent(input: ContentUpdateInput) {
 }
 
 export async function upsertContentBatch(entries: ContentUpdateInput[]) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("content:batch");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = z.array(contentUpdateSchema).min(1).max(250).safeParse(entries);

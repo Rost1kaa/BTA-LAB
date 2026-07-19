@@ -66,9 +66,12 @@ function LanguageSwitcher() {
       return;
     }
     setOpen(false);
-    document.cookie = `locale=${newLocale};path=/;max-age=31536000;SameSite=Lax`;
     startTransition(() => {
-      router.refresh();
+      void fetch("/api/locale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: newLocale }),
+      }).finally(() => router.refresh());
     });
   }, [locale, router]);
 

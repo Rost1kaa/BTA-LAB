@@ -15,8 +15,13 @@ export default async function AdminLoginPage({
 
   const initialError =
     params.error === "unauthorized"
-      ? "This account is not authorized to access the Admin Panel."
+      ? "Unable to sign in. Check your credentials and try again."
       : null;
 
-  return <LoginForm initialError={initialError} />;
+  return (
+    <LoginForm
+      initialError={initialError}
+      turnstileSiteKey={process.env.TURNSTILE_SITE_KEY || null}
+    />
+  );
 }

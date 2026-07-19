@@ -26,10 +26,126 @@ export function PublicPageTransition({ children }: { children: ReactNode }) {
 export function PublicSiteEffects() {
   const pathname = usePathname();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [visible, setVisible] = useState(false);
+  const pathnameRef = useRef(pathname);
+  const loaderFrameRef = useRef(0);
+  const hideLoaderFrameRef = useRef(0);
+  const [scrollTopVisible, setScrollTopVisible] = useState(false);
+  const [routeLoading, setRouteLoading] = useState(false);
   const initializedRef = useRef(false);
   const revealInitializedRef = useRef(false);
   const isAdmin = isAdminPath(pathname);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+    if (loaderFrameRef.current) {
+      window.cancelAnimationFrame(loaderFrameRef.current);
+      loaderFrameRef.current = 0;
+    }
+
+    if (!isAdmin && !hideLoaderFrameRef.current) {
+      hideLoaderFrameRef.current = window.requestAnimationFrame(() => {
+        hideLoaderFrameRef.current = 0;
+        setRouteLoading(false);
+      });
+    }
+
+    return () => {
+      if (hideLoaderFrameRef.current) {
+        window.cancelAnimationFrame(hideLoaderFrameRef.current);
+        hideLoaderFrameRef.current = 0;
+      }
+    };
+  }, [isAdmin, pathname]);
+
+  useEffect(() => {
+    if (isAdmin) return;
+
+    const stopLoader = () => {
+      if (loaderFrameRef.current) {
+        window.cancelAnimationFrame(loaderFrameRef.current);
+        loaderFrameRef.current = 0;
+      }
+      setRouteLoading(false);
+    };
+
+    const startLoader = () => {
+      if (hideLoaderFrameRef.current) {
+        window.cancelAnimationFrame(hideLoaderFrameRef.current);
+        hideLoaderFrameRef.current = 0;
+      }
+      if (loaderFrameRef.current) return;
+      loaderFrameRef.current = window.requestAnimationFrame(() => {
+        loaderFrameRef.current = 0;
+        setRouteLoading(true);
+      });
+    };
+
+    const handleNavigationIntent = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const link = (event.target as Element | null)?.closest("a[href]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (link.target && link.target !== "_self") return;
+      if (link.hasAttribute("download")) return;
+
+      let nextUrl: URL;
+      try {
+        nextUrl = new URL(link.href, window.location.href);
+      } catch {
+        return;
+      }
+
+      if (nextUrl.origin !== window.location.origin) return;
+      if (isAdminPath(nextUrl.pathname)) return;
+
+      const currentPath = pathnameRef.current || window.location.pathname;
+      const isSameRoute = nextUrl.pathname === currentPath;
+
+      if (!isSameRoute) {
+        startLoader();
+      }
+    };
+
+    const handlePopState = () => {
+      if (
+        window.location.pathname !== pathnameRef.current &&
+        !isAdminPath(window.location.pathname)
+      ) {
+        startLoader();
+      }
+    };
+
+    const handlePageShow = () => {
+      stopLoader();
+    };
+
+    document.addEventListener("click", handleNavigationIntent, true);
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      document.removeEventListener("click", handleNavigationIntent, true);
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("pageshow", handlePageShow);
+      if (loaderFrameRef.current) {
+        window.cancelAnimationFrame(loaderFrameRef.current);
+        loaderFrameRef.current = 0;
+      }
+      if (hideLoaderFrameRef.current) {
+        window.cancelAnimationFrame(hideLoaderFrameRef.current);
+        hideLoaderFrameRef.current = 0;
+      }
+    };
+  }, [isAdmin]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -180,7 +296,7 @@ export function PublicSiteEffects() {
 
       if (nextVisible !== lastVisible) {
         lastVisible = nextVisible;
-        setVisible(nextVisible);
+        setScrollTopVisible(nextVisible);
       }
     };
 
@@ -205,12 +321,13 @@ export function PublicSiteEffects() {
   }
 
   return (
+    <>
     <button
       ref={buttonRef}
       type="button"
       aria-label="Scroll to top"
-      aria-hidden={!visible}
-      tabIndex={visible ? 0 : -1}
+      aria-hidden={!scrollTopVisible}
+      tabIndex={scrollTopVisible ? 0 : -1}
       onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "smooth" })}
       style={{ "--scroll-progress": "0" } as CSSProperties}
       className={cn(
@@ -218,12 +335,42 @@ export function PublicSiteEffects() {
         "flex h-12 w-12 items-center justify-center rounded-full",
         "text-[var(--color-fg-primary)] shadow-lg transition-all duration-300",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22c55e]/60",
-        visible
+        scrollTopVisible
           ? "translate-y-0 opacity-100 pointer-events-auto"
           : "translate-y-3 opacity-0 pointer-events-none"
       )}
     >
       <ArrowUp size={20} aria-hidden="true" />
     </button>
+    <PublicRouteLoader active={routeLoading} />
+    </>
+  );
+}
+
+function PublicRouteLoader({ active }: { active: boolean }) {
+  if (!active) return null;
+
+  return (
+    <div
+      className="bta-route-loader"
+      role="status"
+      aria-live="polite"
+      aria-label="BTA LAB is loading"
+    >
+      <div className="flex w-full max-w-xs flex-col items-center gap-5 px-6">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl font-semibold tracking-tight text-[var(--color-fg-primary)]">
+            BTA
+          </span>
+          <span className="h-px w-10 bg-[var(--color-fg-tertiary)]/50" />
+          <span className="text-sm font-light tracking-[0.3em] text-[var(--color-fg-tertiary)] uppercase">
+            LAB
+          </span>
+        </div>
+        <div className="relative h-px w-full overflow-hidden bg-[var(--color-border-primary)]">
+          <span className="absolute inset-y-0 left-0 w-2/3 origin-center bg-[var(--color-fg-primary)] animate-bta-loading-scan" />
+        </div>
+      </div>
+    </div>
   );
 }

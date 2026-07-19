@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TranslationProvider } from "@/components/providers/locale-provider";
 import { Navigation } from "@/components/layout/navigation";
 import { Footer } from "@/components/layout/footer";
+import { CookieConsent } from "@/components/layout/cookie-consent";
 import {
   PublicPageTransition,
   PublicSiteEffects,
@@ -16,10 +17,12 @@ import {
 import { getServerLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/get-dictionary";
 import { getSiteConfigServer } from "@/lib/cms-server";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
+  const siteUrl = getSiteUrl();
   const title =
     locale === "ka"
       ? "BTA LAB | ციფრული ინოვაციების ლაბორატორია"
@@ -47,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url: "https://bta-lab.com",
+      url: siteUrl,
       siteName: "BTA LAB",
       locale: locale === "ka" ? "ka_GE" : "en_US",
       type: "website",
@@ -84,6 +87,7 @@ export default async function RootLayout({
             </main>
             <Footer siteConfig={siteConfig} />
             <PublicSiteEffects />
+            <CookieConsent />
           </TranslationProvider>
         </ThemeProvider>
       </body>

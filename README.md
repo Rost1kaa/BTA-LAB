@@ -46,7 +46,7 @@ The seed script:
 1. Loads environment variables from `.env` in the project root
 2. Uses the Supabase **service-role key** (bypasses Row Level Security — server-side only)
 3. Finds the Auth user automatically by `ADMIN_EMAIL` — paginates through all users
-4. If the user does not exist, creates the Auth user (requires `ADMIN_PASSWORD` — minimum 8 characters)
+4. If the user does not exist, creates the Auth user (requires a strong `ADMIN_PASSWORD`)
 5. Confirms newly created users automatically
 6. Uses the Auth UUID automatically — no manual ID copying needed
 7. Upserts the `admin_profiles` row linked to that UUID
@@ -66,6 +66,10 @@ The seed script:
    NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   NEXT_PUBLIC_SITE_URL=https://your-domain.com
+   SERVER_ACTION_ALLOWED_ORIGINS=your-domain.com,https://your-domain.com
+   TURNSTILE_SITE_KEY=your-turnstile-site-key
+   TURNSTILE_SECRET_KEY=your-turnstile-secret-key
    ADMIN_EMAIL=admin@example.com
    ADMIN_PASSWORD=your-password
    ADMIN_DISPLAY_NAME=Admin
@@ -78,8 +82,9 @@ The seed script:
    Apply the SQL files in `supabase/migrations` in numeric order before using the
    Admin Panel. For an existing database created from `001_initial_schema.sql`,
    apply `002_fix_admin_profiles_rls.sql` and
-   `003_secure_admin_cms_policies.sql`. The latter removes automatic admin grants,
-   secures all CMS/storage writes, and corrects legacy image paths.
+   every later migration. `003_secure_admin_cms_policies.sql` removes automatic
+   admin grants and secures CMS/storage writes. `008_security_hardening.sql`
+   reinforces storage MIME, extension, and size controls.
 
    Use the Supabase SQL Editor, or `supabase db push` when the project is linked
    to the Supabase CLI.
@@ -114,8 +119,19 @@ The seed script:
 
 - `ADMIN_PASSWORD` is **only required** when no existing Auth user with the configured email is found
 - If the user already exists, the existing password is never changed
-- New passwords must be at least 8 characters
+- New passwords must be at least 12 characters and include at least three of: lowercase, uppercase, number, symbol
+- Common passwords such as `password123` and `admin123456` are rejected
 - The password is never printed or logged
+
+## Security Operations
+
+- Serve production only over HTTPS. In Coolify, terminate TLS with a valid certificate and redirect HTTP to HTTPS before traffic reaches Next.js.
+- Keep `NEXT_PUBLIC_SITE_URL` set to the canonical `https://` origin. HSTS is emitted in production by `next.config.ts`.
+- Put the app behind a WAF or reverse proxy rule set that rate limits `/admin/login`, `/api/contact`, `/api/quiz`, and upload-heavy Admin paths.
+- Configure Supabase Auth MFA for administrator accounts. The app enforces verified TOTP factors for protected Admin routes when enrolled.
+- Store `SUPABASE_SERVICE_ROLE_KEY`, `TURNSTILE_SECRET_KEY`, and `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` only as server-side secrets.
+- Schedule Supabase database backups and periodic restore tests. Keep object storage backups for uploaded portfolio/team images.
+- Review security logs for repeated `admin_login_failed`, `admin_unauthorized`, `captcha_failed`, `contact_rate_limited`, `quiz_rate_limited`, and `upload_rejected` events. Set `SECURITY_ALERT_WEBHOOK_URL` when a webhook-based alert target is available.
 
 ### Idempotency
 

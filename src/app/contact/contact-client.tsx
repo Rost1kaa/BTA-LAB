@@ -35,7 +35,9 @@ function ContactFormContent({
   packages: ServicePackage[];
 }) {
   const [submitted, setSubmitted] = useState(false);
-  const { t } = useTranslation();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { locale, t } = useTranslation();
   const searchParams = useSearchParams();
   const preselectedPackage = searchParams.get("package") || "";
   const [selectedPackage, setSelectedPackage] = useState(preselectedPackage);
@@ -47,9 +49,36 @@ function ContactFormContent({
     .filter((item) => item.section !== "addons")
     .map((item) => ({ id: item.id, name: item.name }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => ({}))) as { error?: string };
+        setSubmitError(
+          result.error ||
+            (locale === "ka"
+              ? "შეტყობინების გაგზავნა ვერ მოხერხდა. სცადეთ თავიდან."
+              : "We could not send your message. Please try again.")
+        );
+        return;
+      }
+
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -60,6 +89,12 @@ function ContactFormContent({
           <div className="p-8 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
             {!submitted ? (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {submitError && (
+                  <p role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-500">
+                    {submitError}
+                  </p>
+                )}
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="name" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
@@ -67,6 +102,7 @@ function ContactFormContent({
                     </label>
                     <input
                       id="name"
+                      name="name"
                       type="text"
                       required
                       placeholder={t("contact.form.namePlaceholder")}
@@ -79,6 +115,7 @@ function ContactFormContent({
                     </label>
                     <input
                       id="email"
+                      name="email"
                       type="email"
                       required
                       placeholder={t("contact.form.emailPlaceholder")}
@@ -94,6 +131,7 @@ function ContactFormContent({
                     </label>
                     <input
                       id="phone"
+                      name="phone"
                       type="tel"
                       placeholder={t("contact.form.phonePlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
@@ -105,6 +143,7 @@ function ContactFormContent({
                     </label>
                     <input
                       id="company"
+                      name="company"
                       type="text"
                       placeholder={t("contact.form.companyPlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
@@ -119,6 +158,7 @@ function ContactFormContent({
                     </label>
                     <select
                       id="service"
+                      name="service"
                       value={selectedPackage}
                       onChange={(e) => setSelectedPackage(e.target.value)}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
@@ -135,6 +175,7 @@ function ContactFormContent({
                     </label>
                     <select
                       id="budget"
+                      name="budget"
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
                     >
                       <option value="">{t("contact.form.budgetPlaceholder")}</option>
@@ -152,6 +193,7 @@ function ContactFormContent({
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     rows={5}
                     required
                     placeholder={t("contact.form.messagePlaceholder")}
@@ -159,7 +201,7 @@ function ContactFormContent({
                   />
                 </div>
 
-                <Button type="submit" variant="primary" size="lg" className="w-full gap-2 group">
+                <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full gap-2 group">
                   {t("contact.form.submit")}
                   <Send size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Button>

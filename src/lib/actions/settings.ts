@@ -2,7 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminMutation } from "@/lib/auth/admin";
 import { createServerSupabaseClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 const settingSchema = z.object({
@@ -72,7 +72,7 @@ export async function upsertSetting(key: string, value: string) {
 }
 
 export async function upsertSettings(entries: SettingInput[]) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("settings:upsert");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = z.array(settingSchema).min(1).max(100).safeParse(entries);

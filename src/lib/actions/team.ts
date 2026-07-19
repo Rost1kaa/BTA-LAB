@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminMutation } from "@/lib/auth/admin";
 import type { TeamMember } from "@/types/supabase";
 
 const httpUrl = z.string().url().refine((value) => {
@@ -74,7 +74,7 @@ export async function getTeamMemberById(id: string): Promise<TeamMember | null> 
 }
 
 export async function createTeamMember(input: MemberInput) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("team:create");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = memberSchema.safeParse(input);
@@ -93,7 +93,7 @@ export async function createTeamMember(input: MemberInput) {
 }
 
 export async function updateTeamMember(id: string, input: Partial<MemberInput>) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("team:update");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = memberSchema.partial().safeParse(input);
@@ -131,7 +131,7 @@ function toMemberPayload(input: Partial<MemberInput>) {
 }
 
 export async function deleteTeamMember(id: string) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("team:delete");
   if (!admin) return { error: "Unauthorized." };
 
   const { error } = await admin.supabase.from("team_members").delete().eq("id", id);
@@ -143,7 +143,7 @@ export async function deleteTeamMember(id: string) {
 }
 
 export async function reorderTeamMembers(orderedIds: string[]) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("team:reorder");
   if (!admin) return { error: "Unauthorized." };
 
   const results = await Promise.all(

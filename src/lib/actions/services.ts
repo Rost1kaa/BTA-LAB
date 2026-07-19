@@ -2,7 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdminMutation } from "@/lib/auth/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ServicePackage } from "@/types/supabase";
 
@@ -60,7 +60,7 @@ export async function getServicePackages(includeDrafts = false): Promise<Service
 }
 
 export async function createServicePackage(input: ServicePackageInput) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("services:create");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = servicePackageSchema.safeParse(input);
@@ -91,7 +91,7 @@ export async function createServicePackage(input: ServicePackageInput) {
 }
 
 export async function updateServicePackage(id: string, input: ServicePackageInput) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("services:update");
   if (!admin) return { error: "Unauthorized." };
 
   const idResult = z.string().uuid().safeParse(id);
@@ -127,7 +127,7 @@ export async function updateServicePackage(id: string, input: ServicePackageInpu
 }
 
 export async function deleteServicePackage(id: string) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("services:delete");
   if (!admin) return { error: "Unauthorized." };
   if (!z.string().uuid().safeParse(id).success) return { error: "Invalid package identifier." };
 

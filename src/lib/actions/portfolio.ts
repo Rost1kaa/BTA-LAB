@@ -4,7 +4,9 @@ import { revalidatePath, updateTag } from "next/cache";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/auth/admin";
+import { requireAdmin, requireAdminMutation } from "@/lib/auth/admin";
+import { logSecurityEvent } from "@/lib/security/logging";
+import { validateUploadedImage } from "@/lib/security/upload";
 import type { PortfolioProject } from "@/types/supabase";
 import { slugifyGeorgian } from "@/lib/georgian-slug";
 
@@ -161,7 +163,7 @@ export async function getProjectById(id: string): Promise<PortfolioProject | nul
 }
 
 export async function createProject(input: ProjectInput) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:create");
   if (!admin) return { error: "Unauthorized." };
 
   const parsed = projectSchema.safeParse(input);
@@ -202,7 +204,7 @@ export async function createProject(input: ProjectInput) {
 }
 
 export async function updateProject(id: string, input: Partial<ProjectInput>) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:update");
   if (!admin) return { error: "Unauthorized." };
   if (!z.string().uuid().safeParse(id).success) return { error: "Invalid project identifier." };
 
@@ -268,7 +270,7 @@ export async function updateProject(id: string, input: Partial<ProjectInput>) {
 }
 
 export async function deleteProject(id: string) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:delete");
   if (!admin) return { error: "Unauthorized." };
   if (!z.string().uuid().safeParse(id).success) return { error: "Invalid project identifier." };
 
@@ -297,7 +299,7 @@ export async function deleteProject(id: string) {
 }
 
 export async function reorderProjects(orderedIds: string[]) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:reorder");
   if (!admin) return { error: "Unauthorized." };
   if (!z.array(z.string().uuid()).max(500).safeParse(orderedIds).success) {
     return { error: "Invalid project order." };
@@ -317,22 +319,21 @@ export async function reorderProjects(orderedIds: string[]) {
 }
 
 export async function uploadProjectImage(file: File): Promise<{ url?: string; error?: string }> {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:upload");
   if (!admin) return { error: "Unauthorized." };
 
-  const extensionsByMime: Record<string, readonly string[]> = {
-    "image/webp": ["webp"],
-    "image/png": ["png"],
-    "image/jpeg": ["jpg", "jpeg"],
-  };
-  const allowedExtensions = extensionsByMime[file.type];
-  const originalExtension = file.name.split(".").pop()?.toLowerCase() ?? "";
-  if (!allowedExtensions || !allowedExtensions.includes(originalExtension)) {
-    return { error: "Invalid image. The file extension must match WebP, PNG, or JPEG content." };
+  const validationError = await validateUploadedImage(file, 5 * 1024 * 1024);
+  if (validationError) {
+    logSecurityEvent({
+      event: "upload_rejected",
+      userId: admin.user.id,
+      reason: validationError,
+      route: "portfolio:upload",
+    });
+    return { error: validationError };
   }
-  if (file.size === 0) return { error: "The selected image is empty." };
-  if (file.size > 5 * 1024 * 1024) return { error: "File too large. Maximum size is 5MB." };
 
+  const originalExtension = file.name.split(".").pop()?.toLowerCase() ?? "";
   const normalizedExtension = file.type === "image/jpeg" ? "jpg" : originalExtension;
   const filePath = `projects/${admin.user.id}/${randomUUID()}.${normalizedExtension}`;
 
@@ -347,7 +348,7 @@ export async function uploadProjectImage(file: File): Promise<{ url?: string; er
 }
 
 export async function deleteProjectImage(url: string) {
-  const admin = await requireAdmin({ redirectToLogin: false });
+  const admin = await requireAdminMutation("portfolio:image-delete");
   if (!admin) return { error: "Unauthorized." };
 
   const path = extractStoragePath(url);

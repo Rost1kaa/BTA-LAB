@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import Script from "next/script";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { login, type LoginState } from "@/lib/actions/auth";
 
@@ -12,6 +13,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending}
       className="w-full h-12 flex items-center justify-center gap-2 bg-[var(--color-accent)] text-[var(--color-accent-foreground)] font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-tertiary)]/40"
     >
       {pending ? (
@@ -32,13 +34,26 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ initialError }: { initialError: string | null }) {
+export function LoginForm({
+  initialError,
+  turnstileSiteKey,
+}: {
+  initialError: string | null;
+  turnstileSiteKey: string | null;
+}) {
   const initialState: LoginState = { error: initialError };
   const [state, formAction] = useActionState(login, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const showCaptcha = state.captchaRequired && turnstileSiteKey;
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center px-4">
+      {showCaptcha && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+        />
+      )}
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -65,6 +80,7 @@ export function LoginForm({ initialError }: { initialError: string | null }) {
               autoComplete="email"
               spellCheck={false}
               required
+              defaultValue={state.email ?? ""}
               placeholder="admin@example.com"
               className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-tertiary)]/30 transition-colors"
             />
@@ -92,6 +108,37 @@ export function LoginForm({ initialError }: { initialError: string | null }) {
               </button>
             </div>
           </div>
+
+          {state.mfaRequired && (
+            <div className="space-y-2">
+              <label htmlFor="admin-totp" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Authenticator Code</label>
+              <input
+                id="admin-totp"
+                name="totp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                placeholder="123456"
+                className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-tertiary)]/30 transition-colors"
+              />
+              <p className="text-xs text-[var(--color-fg-tertiary)]/60">
+                Use the code from the authenticator app enrolled in Supabase MFA.
+              </p>
+            </div>
+          )}
+
+          {showCaptcha && (
+            <div className="flex justify-center">
+              <div
+                className="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-theme="auto"
+              />
+            </div>
+          )}
 
           <SubmitButton />
         </form>
