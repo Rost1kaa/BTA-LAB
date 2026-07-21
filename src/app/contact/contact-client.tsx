@@ -30,9 +30,11 @@ type SiteConfigShape = {
 function ContactFormContent({
   siteConfig,
   packages,
+  content,
 }: {
   siteConfig: SiteConfigShape;
   packages: ServicePackage[];
+  content: Record<string, Record<string, string>>;
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +50,8 @@ function ContactFormContent({
   const allPricingPackages = packages
     .filter((item) => item.section !== "addons")
     .map((item) => ({ id: item.id, name: item.name }));
+  const formContent = content.form || {};
+  const formText = (key: string) => formContent[key] || t(`contact.form.${key}`);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,12 +70,7 @@ function ContactFormContent({
 
       if (!response.ok) {
         const result = (await response.json().catch(() => ({}))) as { error?: string };
-        setSubmitError(
-          result.error ||
-            (locale === "ka"
-              ? "შეტყობინების გაგზავნა ვერ მოხერხდა. სცადეთ თავიდან."
-              : "We could not send your message. Please try again.")
-        );
+        setSubmitError(result.error || t("contact.form.errorGeneric"));
         return;
       }
 
@@ -95,30 +94,31 @@ function ContactFormContent({
                   </p>
                 )}
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+                <input type="hidden" name="locale" value={locale} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="name" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.name")}
+                      {formText("name")}
                     </label>
                     <input
                       id="name"
                       name="name"
                       type="text"
                       required
-                      placeholder={t("contact.form.namePlaceholder")}
+                      placeholder={formText("namePlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.email")}
+                      {formText("email")}
                     </label>
                     <input
                       id="email"
                       name="email"
                       type="email"
                       required
-                      placeholder={t("contact.form.emailPlaceholder")}
+                      placeholder={formText("emailPlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
                     />
                   </div>
@@ -127,25 +127,25 @@ function ContactFormContent({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="phone" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.phone")}
+                      {formText("phone")}
                     </label>
                     <input
                       id="phone"
                       name="phone"
                       type="tel"
-                      placeholder={t("contact.form.phonePlaceholder")}
+                      placeholder={formText("phonePlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="company" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.company")}
+                      {formText("company")}
                     </label>
                     <input
                       id="company"
                       name="company"
                       type="text"
-                      placeholder={t("contact.form.companyPlaceholder")}
+                      placeholder={formText("companyPlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
                     />
                   </div>
@@ -154,7 +154,7 @@ function ContactFormContent({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="service" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.service")}
+                      {formText("service")}
                     </label>
                     <select
                       id="service"
@@ -163,7 +163,7 @@ function ContactFormContent({
                       onChange={(e) => setSelectedPackage(e.target.value)}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
                     >
-                      <option value="">{t("contact.form.servicePlaceholder")}</option>
+                      <option value="">{formText("servicePlaceholder")}</option>
                       {allPricingPackages.map((p) => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
@@ -171,38 +171,38 @@ function ContactFormContent({
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="budget" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {t("contact.form.budget")}
+                      {formText("budget")}
                     </label>
                     <select
                       id="budget"
                       name="budget"
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
                     >
-                      <option value="">{t("contact.form.budgetPlaceholder")}</option>
-                      <option value="small">{t("contact.form.budgetOptions.small")}</option>
-                      <option value="medium">{t("contact.form.budgetOptions.medium")}</option>
-                      <option value="large">{t("contact.form.budgetOptions.large")}</option>
-                      <option value="enterprise">{t("contact.form.budgetOptions.enterprise")}</option>
+                      <option value="">{formText("budgetPlaceholder")}</option>
+                      <option value="small">{formContent.budgetOptions_small || t("contact.form.budgetOptions.small")}</option>
+                      <option value="medium">{formContent.budgetOptions_medium || t("contact.form.budgetOptions.medium")}</option>
+                      <option value="large">{formContent.budgetOptions_large || t("contact.form.budgetOptions.large")}</option>
+                      <option value="enterprise">{formContent.budgetOptions_enterprise || t("contact.form.budgetOptions.enterprise")}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                    {t("contact.form.message")}
+                    {formText("message")}
                   </label>
                   <textarea
                     id="message"
                     name="message"
                     rows={5}
                     required
-                    placeholder={t("contact.form.messagePlaceholder")}
+                    placeholder={formText("messagePlaceholder")}
                     className="w-full px-4 py-3 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all resize-none"
                   />
                 </div>
 
                 <Button type="submit" variant="primary" size="lg" loading={submitting} className="w-full gap-2 group">
-                  {t("contact.form.submit")}
+                  {formText("submit")}
                   <Send size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Button>
               </form>
@@ -216,13 +216,13 @@ function ContactFormContent({
                   <CheckCircle2 size={32} className="text-[var(--color-fg-tertiary)]/70" />
                 </div>
                 <h3 className="text-2xl font-semibold text-[var(--color-fg-primary)]">
-                  {t("contact.form.successTitle")}
+                  {formText("successTitle")}
                 </h3>
                 <p className="mt-3 text-sm text-[var(--color-fg-tertiary)] max-w-sm mx-auto">
-                  {t("contact.form.successDescription")}
+                  {formText("successDescription")}
                 </p>
                 <Button variant="secondary" size="md" className="mt-6" onClick={() => setSubmitted(false)}>
-                  {t("contact.form.sendAnother")}
+                  {formText("sendAnother")}
                 </Button>
               </motion.div>
             )}
@@ -278,7 +278,7 @@ function ContactFormContent({
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="BTA LAB Location"
+                title={t("contact.mapTitle")}
                 className="opacity-70 hover:opacity-100 transition-opacity duration-500"
               />
             </div>
@@ -332,7 +332,7 @@ function ContactPageContent({
       <Section className="py-16 md:py-20">
         <Container>
           <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-[var(--color-overlay)]" />}>
-            <ContactFormContent siteConfig={siteConfig} packages={packages} />
+            <ContactFormContent siteConfig={siteConfig} packages={packages} content={content} />
           </Suspense>
         </Container>
       </Section>

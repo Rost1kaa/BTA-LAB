@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/security/captcha";
 import { clearRateLimit, checkRateLimit, getRateLimitStatus } from "@/lib/security/rate-limit";
 import { logSecurityEvent } from "@/lib/security/logging";
@@ -12,13 +11,6 @@ import {
   createServiceRoleClient,
 } from "@/lib/supabase/server";
 
-const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z.string().min(1, "Enter your password."),
-  totp: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit code.").optional().or(z.literal("")),
-  turnstileToken: z.string().trim().optional().or(z.literal("")),
-});
-
 export interface LoginState {
   error: string | null;
   mfaRequired?: boolean;
@@ -26,30 +18,62 @@ export interface LoginState {
   email?: string;
 }
 
-const GENERIC_LOGIN_ERROR = "Unable to sign in. Check your credentials and try again.";
+const LOGIN_ERRORS = {
+  invalidInput: "Email and password are required.",
+  invalidCredentials: "Invalid admin email or password.",
+  missingAdminProfile: "This Supabase user is not linked to an admin profile. Run npm run admin:sync.",
+  databaseError: "Admin profile verification failed. Check the Supabase schema and server logs.",
+  mfaInvalid: "Invalid authenticator code.",
+} as const;
+
 const LOGIN_RATE_LIMIT = {
   limit: 6,
   windowMs: 10 * 60_000,
   blockMs: 15 * 60_000,
 };
 
+function logAuthLogin(details: {
+  email: string;
+  stage?: string;
+  authError?: string | null;
+  userId?: string | null;
+  profileFound?: boolean | null;
+  profileError?: string | null;
+}) {
+  console.info("AUTH LOGIN:", {
+    email: details.email,
+    stage: details.stage ?? null,
+    supabaseAuthError: details.authError ?? null,
+    userId: details.userId ?? null,
+    adminProfileFound: details.profileFound ?? null,
+    adminProfileError: details.profileError ?? null,
+  });
+}
+
+function getFormString(formData: FormData, name: string): string {
+  const value = formData.get(name);
+  return typeof value === "string" ? value : "";
+}
+
 export async function login(
   _previousState: LoginState,
   formData: FormData
 ): Promise<LoginState> {
   const { ip, route } = await getRequestContext();
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    totp: formData.get("totp"),
-    turnstileToken: formData.get("cf-turnstile-response"),
+  const email = getFormString(formData, "email").trim().toLowerCase();
+  const password = getFormString(formData, "password");
+  const totp = getFormString(formData, "totp").trim();
+  const turnstileToken = getFormString(formData, "cf-turnstile-response").trim();
+
+  logAuthLogin({
+    email,
+    stage: "received",
   });
 
-  if (!parsed.success) {
-    return { error: GENERIC_LOGIN_ERROR };
+  if (!email || !password) {
+    return { error: LOGIN_ERRORS.invalidInput, email };
   }
 
-  const email = parsed.data.email.toLowerCase();
   const ipLimit = checkRateLimit("admin-login-ip", ip, LOGIN_RATE_LIMIT);
   const emailLimit = checkRateLimit("admin-login-email", email, LOGIN_RATE_LIMIT);
   const captchaRequired =
@@ -65,11 +89,11 @@ export async function login(
       email,
       reason: "login_attempt_limit",
     });
-    return { error: GENERIC_LOGIN_ERROR, captchaRequired, email };
+    return { error: LOGIN_ERRORS.invalidCredentials, captchaRequired, email };
   }
 
   if (captchaRequired) {
-    const captcha = await verifyTurnstileToken(parsed.data.turnstileToken, ip);
+    const captcha = await verifyTurnstileToken(turnstileToken, ip);
     if (!captcha.ok) {
       logSecurityEvent({
         event: "captcha_failed",
@@ -78,7 +102,7 @@ export async function login(
         email,
         reason: "admin_login",
       });
-      return { error: GENERIC_LOGIN_ERROR, captchaRequired: true, email };
+      return { error: LOGIN_ERRORS.invalidCredentials, captchaRequired: true, email };
     }
   }
 
@@ -88,10 +112,18 @@ export async function login(
     error: signInError,
   } = await supabase.auth.signInWithPassword({
     email,
-    password: parsed.data.password,
+    password,
   });
 
   if (signInError || !user) {
+    logAuthLogin({
+      email,
+      stage: "supabase-auth",
+      authError: signInError?.message ?? "No user returned from Supabase Auth.",
+      userId: user?.id ?? null,
+      profileFound: null,
+    });
+    if (signInError) console.error("Supabase admin login failed:", signInError.message);
     logSecurityEvent({
       event: "admin_login_failed",
       route,
@@ -100,7 +132,7 @@ export async function login(
       reason: "invalid_credentials",
     });
     return {
-      error: GENERIC_LOGIN_ERROR,
+      error: LOGIN_ERRORS.invalidCredentials,
       captchaRequired,
       email,
     };
@@ -109,15 +141,32 @@ export async function login(
   const adminSupabase = createServiceRoleClient();
   const { data: profile, error: profileError } = await adminSupabase
     .from("admin_profiles")
-    .select("id")
+    .select("id, email")
     .eq("id", user.id)
     .maybeSingle();
 
   if (profileError) {
+    logAuthLogin({
+      email,
+      stage: "admin-profile",
+      authError: null,
+      userId: user.id,
+      profileFound: false,
+      profileError: profileError.message,
+    });
     console.error("Admin profile verification failed:", profileError.message);
     await supabase.auth.signOut();
-    return { error: GENERIC_LOGIN_ERROR };
+    return { error: LOGIN_ERRORS.databaseError, email };
   }
+
+  logAuthLogin({
+    email,
+    stage: "admin-profile",
+    authError: null,
+    userId: user.id,
+    profileFound: Boolean(profile),
+    profileError: null,
+  });
 
   if (!profile) {
     await supabase.auth.signOut();
@@ -129,10 +178,10 @@ export async function login(
       userId: user.id,
       reason: "missing_admin_profile",
     });
-    return { error: GENERIC_LOGIN_ERROR };
+    return { error: LOGIN_ERRORS.missingAdminProfile, email };
   }
 
-  const mfaResult = await verifyAdminMfaIfRequired(supabase, parsed.data.totp || "");
+  const mfaResult = await verifyAdminMfaIfRequired(supabase, totp);
   if (mfaResult.required && !mfaResult.verified) {
     if (mfaResult.failed) {
       logSecurityEvent({
@@ -143,7 +192,7 @@ export async function login(
         userId: user.id,
         reason: "invalid_totp",
       });
-      return { error: GENERIC_LOGIN_ERROR, mfaRequired: true, captchaRequired, email };
+      return { error: LOGIN_ERRORS.mfaInvalid, mfaRequired: true, captchaRequired, email };
     }
     return { error: null, mfaRequired: true, captchaRequired, email };
   }

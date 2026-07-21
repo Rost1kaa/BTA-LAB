@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { upsertContentBatch, type ContentUpdateInput } from "@/lib/actions/content";
+import { getContentDictionaryKey } from "@/lib/content-dictionary-keys";
 import kaDict from "@/locales/ka.json";
 import enDict from "@/locales/en.json";
 import { Save, CheckCircle2, FileText } from "lucide-react";
@@ -117,31 +118,8 @@ const PAGE_DEFINITIONS: PageSection[] = [
 const KA_DICT = kaDict as Record<string, string>;
 const EN_DICT = enDict as Record<string, string>;
 
-const contentKeyOverrides: Record<string, string> = {
-  "home.hero.eyebrow": "hero.eyebrow",
-  "home.hero.heading": "hero.heading",
-  "home.hero.description": "hero.description",
-  "home.hero.primaryCta": "hero.primaryCta",
-  "home.hero.secondaryCta": "hero.secondaryCta",
-  "home.featured.sectionTitle": "home.projectsHeading",
-  "home.featured.sectionDescription": "home.projectsDescription",
-  "home.cta.buttonLabel": "home.ctaButton",
-  "home.cta.learnMoreLabel": "home.ctaLearnMore",
-  "contact.form.budgetOptions_small": "contact.form.budgetOptions.small",
-  "contact.form.budgetOptions_medium": "contact.form.budgetOptions.medium",
-  "contact.form.budgetOptions_large": "contact.form.budgetOptions.large",
-  "contact.form.budgetOptions_enterprise": "contact.form.budgetOptions.enterprise",
-  "footer.brand.description": "footer.brandDescription",
-  "footer.copyright.text": "footer.copyright",
-};
-
 function getContentFieldId(page: string, section: string, key: string) {
   return `${page}.${section}.${key}`;
-}
-
-function getDictionaryKey(page: string, section: string, key: string) {
-  const fieldId = getContentFieldId(page, section, key);
-  return contentKeyOverrides[fieldId] || fieldId;
 }
 
 function getDictionaryValue(
@@ -150,7 +128,7 @@ function getDictionaryValue(
   section: string,
   key: string
 ) {
-  return dictionary[getDictionaryKey(page, section, key)] || "";
+  return dictionary[getContentDictionaryKey(page, section, key)] || "";
 }
 
 function getInitialContentValues(): Record<string, { ka: string; en: string }> {
@@ -183,10 +161,10 @@ export default function ContentEditorPage() {
 
       const map = getInitialContentValues();
       if (data) {
-        data.forEach((item: { page: string; section: string; content_key: string; content_value: string; value_ka?: string; value_en?: string }) => {
+        data.forEach((item: { page: string; section: string; content_key: string; content_value_ka?: string; content_value_en?: string }) => {
           map[getContentFieldId(item.page, item.section, item.content_key)] = {
-            ka: item.value_ka || getDictionaryValue(KA_DICT, item.page, item.section, item.content_key),
-            en: item.value_en || item.content_value || getDictionaryValue(EN_DICT, item.page, item.section, item.content_key),
+            ka: item.content_value_ka || getDictionaryValue(KA_DICT, item.page, item.section, item.content_key),
+            en: item.content_value_en || getDictionaryValue(EN_DICT, item.page, item.section, item.content_key),
           };
         });
       }
@@ -232,9 +210,8 @@ export default function ContentEditorPage() {
           page: section.page,
           section: section.section,
           content_key: field.key,
-          content_value: getValue(section.page, section.section, field.key, "en"),
-          value_ka: getValue(section.page, section.section, field.key, "ka"),
-          value_en: getValue(section.page, section.section, field.key, "en"),
+          content_value_ka: getValue(section.page, section.section, field.key, "ka"),
+          content_value_en: getValue(section.page, section.section, field.key, "en"),
           content_type: field.type === "textarea" ? "textarea" : "text",
         });
       }

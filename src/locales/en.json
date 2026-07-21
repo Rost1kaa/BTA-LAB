@@ -5,7 +5,6 @@
   "hero.primaryCta": "View Our Work",
   "hero.secondaryCta": "Meet the Team",
   "hero.scroll": "Scroll",
-
   "home.servicesBadge": "Services",
   "home.servicesHeading": "Our Services",
   "home.servicesDescription": "From websites to social media management — complete digital solutions for your business.",
@@ -20,7 +19,6 @@
   "home.ctaDescription": "Let's discuss your ideas and turn them into a stunning digital experience.",
   "home.ctaButton": "Start a Project",
   "home.ctaLearnMore": "Learn More",
-
   "about.badge": "About Us",
   "about.heading": "We Are BTA LAB",
   "about.description": "A digital innovation lab where students collaborate to build real-world digital products, websites, and software solutions — bridging the gap between education and industry.",
@@ -45,7 +43,6 @@
   "about.cta.description": "Ready to collaborate? Whether you need a website, branding, or a digital product — we're here to help.",
   "about.cta.getInTouch": "Get in Touch",
   "about.cta.exploreServices": "Explore Services",
-
   "services.badge": "Services",
   "services.heading": "What We Offer",
   "services.description": "Comprehensive digital services designed to help your business grow and succeed online.",
@@ -54,7 +51,6 @@
   "services.cta.heading": "Not Sure Where to Start?",
   "services.cta.description": "Contact us and we'll help you choose the right package for your needs.",
   "services.cta.button": "Contact Us",
-
   "portfolio.badge": "Portfolio",
   "portfolio.heading": "Our Work",
   "portfolio.description": "A showcase of projects built by our team — from websites and e-commerce to branding and marketing.",
@@ -78,16 +74,14 @@
   "portfolio.detail.related": "Related",
   "portfolio.detail.moreProjects": "More Projects",
   "portfolio.detail.viewDetails": "View Details",
-
   "team.badge": "Our Team",
   "team.heading": "Meet the Team",
   "team.description": "A diverse group of talented students, designers, developers, and marketers working together to bring ideas to life.",
   "team.join.heading": "Join Our Team",
   "team.join.description": "We're always looking for passionate students to join BTA LAB. If you're eager to learn and build real projects, we want to hear from you.",
-
   "contact.badge": "Contact",
-  "contact.heading": "Get in Touch",
-  "contact.description": "Have a project in mind or just want to say hello? We'd love to hear from you.",
+  "contact.heading": "Let's Create Something Together",
+  "contact.description": "Have a project in mind? Send us a message and we'll help you bring it to life.",
   "contact.form.name": "Full Name",
   "contact.form.namePlaceholder": "Your name",
   "contact.form.email": "Email",
@@ -113,7 +107,6 @@
   "contact.info.email": "Email",
   "contact.info.phone": "Phone",
   "contact.info.address": "Location",
-
   "footer.brandDescription": "A digital innovation lab where students collaborate to build real-world solutions — bridging education and industry.",
   "footer.company.title": "Company",
   "footer.company.about": "About",
@@ -134,16 +127,13 @@
   "footer.contact.location": "Tbilisi, Georgia",
   "footer.contact.availability": "Working online",
   "footer.copyright": "© %year% BTA LAB. All rights reserved.",
-
   "stats.teamMembers": "Team Members",
   "stats.completedProjects": "Completed Projects",
   "stats.services": "Services",
   "stats.technologies": "Technologies",
-
   "notFound.title": "Page Not Found",
   "notFound.description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
   "notFound.button": "Back to Home",
-
   "data.about.timeline.0.title": "The Beginning",
   "data.about.timeline.0.description": "BTA LAB was founded with a vision to bridge the gap between academic learning and real-world industry experience.",
   "data.about.timeline.1.title": "First Projects",
@@ -154,7 +144,6 @@
   "data.about.timeline.3.description": "Reached 48+ completed projects, built a strong reputation, and received multiple industry recognitions.",
   "data.about.timeline.4.title": "Looking Ahead",
   "data.about.timeline.4.description": "Continuing to grow, innovate, and empower the next generation of digital professionals.",
-
   "language.ka": "Georgian",
   "language.en": "English",
   "language.current": "Language",
@@ -179,5 +168,14 @@
   "portfolio.detail.impactOutcomes": "Impact & Outcomes",
   "portfolio.previewLabel": "Scrollable preview of %alt%. Use arrow keys or scroll to explore.",
   "team.socialLabel": "%name% on %platform%",
-  "team.imageAlt": "%name% portrait"
+  "team.imageAlt": "%name% portrait",
+  "contact.mapTitle": "BTA LAB Location",
+  "contact.form.errorGeneric": "We could not send your message. Please try again.",
+  "api.errors.invalidRequest": "Invalid request.",
+  "api.errors.originRejected": "Request could not be accepted.",
+  "api.errors.rateLimited": "Please wait before submitting again.",
+  "api.errors.formInvalid": "Check the form fields and try again.",
+  "api.errors.captchaFailed": "Request could not be verified.",
+  "api.errors.contactRequired": "Email or phone is required.",
+  "api.success.submissionReceived": "Submission received successfully."
 }

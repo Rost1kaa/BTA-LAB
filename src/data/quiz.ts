@@ -54,6 +54,36 @@ export interface QuizTranslations {
     confirmCloseYes: string;
     confirmCloseNo: string;
   };
+  validation: {
+    nameRequired: string;
+    contactRequired: string;
+    submitFailed: string;
+    unknownError: string;
+  };
+  submitting: string;
+  stepDetails: {
+    currentWebsiteLabel: string;
+    currentWebsitePlaceholder: string;
+    colorsLabel: string;
+    pickColor: string;
+    examplesLabel: string;
+    examplesPlaceholder: string;
+  };
+  contactFields: {
+    name: string;
+    namePlaceholder: string;
+    company: string;
+    companyPlaceholder: string;
+    phone: string;
+    phonePlaceholder: string;
+    email: string;
+    emailPlaceholder: string;
+    preferredContact: string;
+    preferredContactPlaceholder: string;
+    additionalInfo: string;
+    additionalInfoPlaceholder: string;
+  };
+  contactOptions: string[];
 }
 
 export const quizContent: QuizTranslations = {
@@ -223,5 +253,238 @@ export const quizContent: QuizTranslations = {
     confirmCloseMessage: "Your answers will be lost.",
     confirmCloseYes: "Yes, Leave",
     confirmCloseNo: "Continue",
+  },
+  validation: {
+    nameRequired: "Name is required",
+    contactRequired: "Email or phone is required",
+    submitFailed: "Submission failed",
+    unknownError: "An error occurred",
+  },
+  submitting: "Submitting...",
+  stepDetails: {
+    currentWebsiteLabel: "Current website URL (optional)",
+    currentWebsitePlaceholder: "https://example.com",
+    colorsLabel: "What colors would you like on your website?",
+    pickColor: "Pick a color",
+    examplesLabel: "Provide example websites you like (optional)",
+    examplesPlaceholder: "https://example.com, https://another-example.com",
+  },
+  contactFields: {
+    name: "Full Name *",
+    namePlaceholder: "Your name",
+    company: "Company Name",
+    companyPlaceholder: "Company name",
+    phone: "Phone Number",
+    phonePlaceholder: "+1 (555) 000-0000",
+    email: "Email *",
+    emailPlaceholder: "your@email.com",
+    preferredContact: "Preferred Contact Method",
+    preferredContactPlaceholder: "Select",
+    additionalInfo: "Additional Information",
+    additionalInfoPlaceholder: "Any additional information...",
+  },
+  contactOptions: ["Phone", "Email", "Facebook", "Instagram", "WhatsApp"],
+};
+
+export const quizContentByLocale: Record<"ka" | "en", QuizTranslations> = {
+  en: quizContent,
+  ka: {
+    title: "დაგეგმეთ თქვენი პროექტი",
+    subtitle: "უპასუხეთ რამდენიმე კითხვას და მოვამზადებთ თქვენს პროექტზე მორგებულ შეთავაზებას.",
+    steps: {
+      1: {
+        question: "რა ტიპის ვებსაიტი გჭირდებათ?",
+        options: [
+          { id: "landing", label: "ლენდინგ გვერდი", value: "landing" },
+          { id: "one-page", label: "ერთგვერდიანი ვებსაიტი", value: "one-page" },
+          { id: "business", label: "ბიზნეს ვებსაიტი", value: "business" },
+          { id: "ecommerce", label: "ონლაინ მაღაზია", value: "ecommerce" },
+          { id: "portfolio", label: "პორტფოლიო", value: "portfolio" },
+          { id: "blog", label: "ბლოგი ან საინფორმაციო საიტი", value: "blog" },
+          { id: "booking", label: "ჯავშნის სისტემა", value: "booking" },
+          { id: "learning", label: "სასწავლო პლატფორმა", value: "learning" },
+          { id: "custom-web", label: "ინდივიდუალური ვებ პლატფორმა", value: "custom-web" },
+          { id: "unsure", label: "ჯერ არ ვარ დარწმუნებული", value: "unsure" },
+        ],
+      },
+      2: {
+        question: "უკვე გაქვთ ვებსაიტი?",
+        options: [
+          { id: "update", label: "დიახ, არსებული საიტის განახლება მინდა", value: "update" },
+          { id: "new", label: "დიახ, მაგრამ ახლის შექმნა მინდა", value: "new" },
+          { id: "none", label: "არა, ჯერ ვებსაიტი არ მაქვს", value: "none" },
+        ],
+      },
+      3: {
+        question: "დაახლოებით რამდენი გვერდი გჭირდებათ?",
+        description: "აირჩიეთ გვერდების სავარაუდო რაოდენობა",
+        multiple: true,
+        options: [
+          { id: "1", label: "1 გვერდი", value: "1" },
+          { id: "2-4", label: "2-4 გვერდი", value: "2-4" },
+          { id: "5-10", label: "5-10 გვერდი", value: "5-10" },
+          { id: "10+", label: "10-ზე მეტი", value: "10+" },
+          { id: "unknown", label: "ჯერ არ ვიცი", value: "unknown" },
+        ],
+        allowCustomInput: true,
+        customInputLabel: "საჭირო გვერდები",
+        customInputPlaceholder: "მიუთითეთ საჭირო გვერდები...",
+      },
+      4: {
+        question: "რა ფუნქციები გჭირდებათ?",
+        multiple: true,
+        options: [
+          { id: "cms", label: "ადმინ პანელი (CMS)", value: "cms" },
+          { id: "auth", label: "მომხმარებლის ავტორიზაცია", value: "auth" },
+          { id: "payments", label: "ონლაინ გადახდები", value: "payments" },
+          { id: "catalog", label: "პროდუქტების კატალოგი", value: "catalog" },
+          { id: "cart", label: "კალათა და შეკვეთები", value: "cart" },
+          { id: "booking", label: "ონლაინ ჯავშანი", value: "booking" },
+          { id: "multilingual", label: "მრავალენოვანი სისტემა", value: "multilingual" },
+          { id: "search", label: "ძიება და ფილტრები", value: "search" },
+          { id: "contact-form", label: "საკონტაქტო ფორმა", value: "contact-form" },
+          { id: "maps", label: "Google Maps", value: "maps" },
+          { id: "analytics", label: "Google Analytics", value: "analytics" },
+          { id: "email", label: "ბიზნეს ელფოსტა", value: "email" },
+          { id: "crm", label: "CRM ინტეგრაცია", value: "crm" },
+          { id: "api", label: "API ინტეგრაცია", value: "api" },
+          { id: "ai", label: "AI ინტეგრაცია", value: "ai" },
+          { id: "subscription", label: "გამოწერის სისტემა", value: "subscription" },
+          { id: "chat", label: "ცოცხალი ჩატი", value: "chat" },
+          { id: "blog", label: "ბლოგი", value: "blog" },
+        ],
+        allowCustomInput: true,
+        customInputLabel: "სხვა ფუნქციები",
+        customInputPlaceholder: "მიუთითეთ სხვა საჭირო ფუნქციები...",
+      },
+      5: {
+        question: "რა დიზაინის სტილს ანიჭებთ უპირატესობას?",
+        multiple: true,
+        options: [
+          { id: "minimal", label: "მინიმალისტური", value: "minimal" },
+          { id: "modern", label: "თანამედროვე", value: "modern" },
+          { id: "elegant", label: "ელეგანტური", value: "elegant" },
+          { id: "corporate", label: "კორპორატიული", value: "corporate" },
+          { id: "creative", label: "კრეატიული", value: "creative" },
+          { id: "premium", label: "პრემიუმ", value: "premium" },
+          { id: "dark", label: "მუქი დიზაინი", value: "dark" },
+          { id: "light", label: "ღია დიზაინი", value: "light" },
+          { id: "colorful", label: "ფერადი დიზაინი", value: "colorful" },
+          { id: "advise", label: "არ ვარ დარწმუნებული - მირჩიეთ", value: "advise" },
+        ],
+      },
+      6: {
+        question: "გაქვთ ბრენდის მასალები?",
+        multiple: true,
+        optional: true,
+        options: [
+          { id: "logo", label: "ლოგო", value: "logo" },
+          { id: "colors", label: "ბრენდის ფერები", value: "colors" },
+          { id: "fonts", label: "ფონტები", value: "fonts" },
+          { id: "guidelines", label: "ბრენდის სახელმძღვანელო", value: "guidelines" },
+          { id: "photos", label: "ფოტოები", value: "photos" },
+          { id: "videos", label: "ვიდეოები", value: "videos" },
+          { id: "texts", label: "ტექსტური კონტენტი", value: "texts" },
+          { id: "none", label: "ჯერ არაფერი", value: "none" },
+        ],
+      },
+      7: {
+        question: "ვებსაიტის კონტენტი მზად გაქვთ?",
+        options: [
+          { id: "ready", label: "ყველაფერი მზად არის", value: "ready" },
+          { id: "partial", label: "მასალების ნაწილი მზად მაქვს", value: "partial" },
+          { id: "text-help", label: "ტექსტურ კონტენტში დახმარება მჭირდება", value: "text-help" },
+          { id: "visual-help", label: "ფოტოებსა და ვიზუალებში დახმარება მჭირდება", value: "visual-help" },
+          { id: "full", label: "BTA LAB-მა ყველაფერი უნდა მოამზადოს", value: "full" },
+        ],
+      },
+      8: {
+        question: "რამდენ ენას უნდა უჭერდეს მხარს ვებსაიტი?",
+        options: [
+          { id: "en-only", label: "მხოლოდ ინგლისური", value: "en-only" },
+          { id: "en-ge", label: "ქართული და ინგლისური", value: "en-ge" },
+          { id: "3plus", label: "სამი ან მეტი ენა", value: "3plus" },
+          { id: "unknown", label: "ჯერ არ ვიცი", value: "unknown" },
+        ],
+        allowCustomInput: true,
+        customInputLabel: "სასურველი ენები",
+        customInputPlaceholder: "მიუთითეთ ენები...",
+      },
+      9: {
+        question: "რა ბიუჯეტი გაქვთ პროექტისთვის?",
+        options: [
+          { id: "500", label: "500$-მდე", value: "500" },
+          { id: "1000", label: "500$ - 1,000$", value: "1000" },
+          { id: "2000", label: "1,000$ - 2,000$", value: "2000" },
+          { id: "5000", label: "2,000$ - 5,000$", value: "5000" },
+          { id: "5000+", label: "5,000$-ზე მეტი", value: "5000+" },
+          { id: "unsure", label: "ჯერ არ არის განსაზღვრული", value: "unsure" },
+        ],
+      },
+      10: {
+        question: "როდის გსურთ პროექტის დასრულება?",
+        options: [
+          { id: "urgent", label: "რაც შეიძლება მალე", value: "urgent" },
+          { id: "1-2w", label: "1-2 კვირაში", value: "1-2w" },
+          { id: "2-4w", label: "2-4 კვირაში", value: "2-4w" },
+          { id: "1-2m", label: "1-2 თვეში", value: "1-2m" },
+          { id: "specific", label: "კონკრეტული ვადა მაქვს", value: "specific", hasInput: true, inputLabel: "სამიზნე თარიღი", inputPlaceholder: "აირჩიეთ თარიღი", inputType: "date" },
+          { id: "undecided", label: "ვადა ჯერ არ მაქვს", value: "undecided" },
+        ],
+      },
+    },
+    summary: {
+      title: "გადაამოწმეთ პროექტის ინფორმაცია",
+      edit: "რედაქტირება",
+      submit: "მოთხოვნის გაგზავნა",
+    },
+    success: {
+      title: "თქვენი მოთხოვნა მიღებულია",
+      message: "გმადლობთ ინტერესისთვის. BTA LAB-ის გუნდი განიხილავს თქვენს მოთხოვნებს და 24 საათის განმავლობაში დაგიკავშირდებათ.",
+      button: "მთავარზე დაბრუნება",
+    },
+    controls: {
+      back: "უკან",
+      continue: "გაგრძელება",
+      skip: "გამოტოვება",
+      step: "ნაბიჯი",
+      of: "დან",
+      required: "სავალდებულო",
+      close: "დახურვა",
+      confirmCloseTitle: "ნამდვილად გსურთ გასვლა?",
+      confirmCloseMessage: "თქვენი პასუხები დაიკარგება.",
+      confirmCloseYes: "დიახ, გასვლა",
+      confirmCloseNo: "გაგრძელება",
+    },
+    validation: {
+      nameRequired: "სახელი აუცილებელია",
+      contactRequired: "ელ-ფოსტა ან ტელეფონი აუცილებელია",
+      submitFailed: "გაგზავნა ვერ მოხერხდა",
+      unknownError: "დაფიქსირდა შეცდომა",
+    },
+    submitting: "იგზავნება...",
+    stepDetails: {
+      currentWebsiteLabel: "არსებული ვებსაიტის მისამართი (არასავალდებულო)",
+      currentWebsitePlaceholder: "https://example.com",
+      colorsLabel: "რა ფერები გსურთ თქვენს ვებსაიტზე?",
+      pickColor: "ფერის არჩევა",
+      examplesLabel: "მიუთითეთ თქვენთვის მოსაწონი ვებსაიტების მაგალითები (არასავალდებულო)",
+      examplesPlaceholder: "https://example.com, https://another-example.com",
+    },
+    contactFields: {
+      name: "სრული სახელი *",
+      namePlaceholder: "თქვენი სახელი",
+      company: "კომპანიის სახელი",
+      companyPlaceholder: "კომპანიის სახელი",
+      phone: "ტელეფონის ნომერი",
+      phonePlaceholder: "+995 555 00 00 00",
+      email: "ელ-ფოსტა *",
+      emailPlaceholder: "თქვენი ელ-ფოსტა",
+      preferredContact: "სასურველი საკონტაქტო არხი",
+      preferredContactPlaceholder: "აირჩიეთ",
+      additionalInfo: "დამატებითი ინფორმაცია",
+      additionalInfoPlaceholder: "ნებისმიერი დამატებითი ინფორმაცია...",
+    },
+    contactOptions: ["ტელეფონი", "ელ-ფოსტა", "Facebook", "Instagram", "WhatsApp"],
   },
 };

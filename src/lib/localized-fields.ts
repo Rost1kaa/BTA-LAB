@@ -1,6 +1,18 @@
+import kaDict from "@/locales/ka.json";
+import enDict from "@/locales/en.json";
+import { getContentDictionaryKey } from "@/lib/content-dictionary-keys";
+
 export type LocaleCode = "ka" | "en";
 
 type LocalizedRecord = Record<string, unknown>;
+type Dictionary = Record<string, string>;
+
+const dictionaries: Record<LocaleCode, Dictionary> = {
+  ka: kaDict as Dictionary,
+  en: enDict as Dictionary,
+};
+
+const GEORGIAN_RE = /[\u10A0-\u10FF]/;
 
 function textValue(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -12,20 +24,61 @@ function arrayValue(value: unknown): string[] {
     : [];
 }
 
+function warnMissingKa(context: string, englishValue: string) {
+  if (process.env.NODE_ENV !== "development" || !englishValue) return;
+  console.warn(
+    `[localization] Missing Georgian translation for ${context}; English value exists.`
+  );
+}
+
+function resolveLocalizedText(
+  localized: string,
+  fallbackSameLanguage: string,
+  englishValue: string,
+  locale: LocaleCode,
+  context: string
+): string {
+  if (locale === "ka") {
+    if (localized) {
+      if (
+        fallbackSameLanguage &&
+        GEORGIAN_RE.test(fallbackSameLanguage) &&
+        !GEORGIAN_RE.test(localized)
+      ) {
+        warnMissingKa(context, englishValue || localized);
+        return fallbackSameLanguage;
+      }
+      return localized;
+    }
+
+    if (fallbackSameLanguage && GEORGIAN_RE.test(fallbackSameLanguage)) {
+      return fallbackSameLanguage;
+    }
+
+    warnMissingKa(context, englishValue || fallbackSameLanguage);
+    return "";
+  }
+
+  return localized || fallbackSameLanguage || englishValue;
+}
+
 export function getLocalizedText(
   record: LocalizedRecord,
   field: string,
   locale: LocaleCode,
   legacyField = field
 ): string {
-  const primary = textValue(record[`${field}_${locale}`]);
-  if (primary) return primary;
+  const localized = textValue(record[`${field}_${locale}`]);
+  const legacy = textValue(record[legacyField]);
+  const englishValue = textValue(record[`${field}_en`]) || legacy;
 
-  const fallbackLocale: LocaleCode = locale === "ka" ? "en" : "ka";
-  const fallback = textValue(record[`${field}_${fallbackLocale}`]);
-  if (fallback) return fallback;
-
-  return textValue(record[legacyField]);
+  return resolveLocalizedText(
+    localized,
+    legacy,
+    englishValue,
+    locale,
+    `${field}_${locale}`
+  );
 }
 
 export function getLocalizedArray(
@@ -37,11 +90,18 @@ export function getLocalizedArray(
   const primary = arrayValue(record[`${field}_${locale}`]);
   if (primary.length > 0) return primary;
 
-  const fallbackLocale: LocaleCode = locale === "ka" ? "en" : "ka";
-  const fallback = arrayValue(record[`${field}_${fallbackLocale}`]);
-  if (fallback.length > 0) return fallback;
+  const legacy = arrayValue(record[legacyField]);
+  const englishValue = arrayValue(record[`${field}_en`]);
 
-  return arrayValue(record[legacyField]);
+  if (locale === "ka") {
+    if (legacy.some((item) => GEORGIAN_RE.test(item))) return legacy;
+    if (legacy.length > 0 || englishValue.length > 0) {
+      warnMissingKa(`${field}_${locale}`, (englishValue[0] || legacy[0]) ?? "");
+    }
+    return [];
+  }
+
+  return englishValue.length > 0 ? englishValue : legacy;
 }
 
 export function localizeContentRows(
@@ -56,9 +116,22 @@ export function localizeContentRows(
     if (!section || !key) continue;
 
     if (!grouped[section]) grouped[section] = {};
-    const valueKa = textValue(item.value_ka);
-    const valueEn = textValue(item.value_en) || textValue(item.content_value);
-    grouped[section][key] = locale === "ka" ? valueKa : valueEn;
+    const page = textValue(item.page);
+    const dictionaryKey = getContentDictionaryKey(page, section, key);
+    const dictionaryValue = textValue(dictionaries[locale][dictionaryKey]);
+    const valueKa = textValue(item.content_value_ka);
+    const valueEn = textValue(item.content_value_en);
+
+    grouped[section][key] =
+      locale === "ka"
+        ? resolveLocalizedText(
+            valueKa,
+            dictionaryValue,
+            valueEn,
+            locale,
+            `${page}.${section}.${key}`
+          )
+        : valueEn || dictionaryValue;
   }
 
   return grouped;

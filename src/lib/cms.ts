@@ -53,7 +53,8 @@ export interface ContentEntry {
   page: string;
   section: string;
   content_key: string;
-  content_value: string;
+  content_value_ka: string;
+  content_value_en: string;
   content_type: "text" | "textarea" | "number" | "url" | "image" | "rich_text" | "boolean" | "json";
 }
 

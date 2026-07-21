@@ -15,7 +15,7 @@ export default async function AdminLoginPage({
 
   const initialError =
     params.error === "unauthorized"
-      ? "Unable to sign in. Check your credentials and try again."
+      ? "This Supabase user is not linked to an admin profile. Run npm run admin:sync."
       : null;
 
   return (

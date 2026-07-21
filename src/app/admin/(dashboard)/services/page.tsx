@@ -229,9 +229,6 @@ export default function ServicesAdminPage() {
         toast.error(result.error);
       } else {
         toast.success(editingId ? "Package updated!" : "Package created!");
-        if ("warning" in result && result.warning) {
-          toast(result.warning);
-        }
         resetForm();
         loadPackages();
       }

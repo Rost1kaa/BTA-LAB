@@ -5,7 +5,6 @@
   "hero.primaryCta": "ნახეთ ჩვენი ნამუშევრები",
   "hero.secondaryCta": "გაიცანით გუნდი",
   "hero.scroll": "გადახვიეთ",
-
   "home.servicesBadge": "სერვისები",
   "home.servicesHeading": "ჩვენი სერვისები",
   "home.servicesDescription": "ვებგვერდებიდან სოციალური მედიის მენეჯმენტამდე — სრული ციფრული გადაწყვეტილებები თქვენი ბიზნესისთვის.",
@@ -20,7 +19,6 @@
   "home.ctaDescription": "მოდით განვიხილოთ თქვენი იდეები და გადავაქციოთ ისინი შთამბეჭდავ ციფრულ გამოცდილებად.",
   "home.ctaButton": "პროექტის დაწყება",
   "home.ctaLearnMore": "გაიგეთ მეტი",
-
   "about.badge": "ჩვენს შესახებ",
   "about.heading": "ჩვენ ვართ BTA LAB",
   "about.description": "ციფრული ინოვაციების ლაბორატორია, სადაც სტუდენტები თანამშრომლობენ რეალური ციფრული პროდუქტების, ვებგვერდებისა და პროგრამული გადაწყვეტილებების შესაქმნელად — განათლებისა და ინდუსტრიის დაკავშირება.",
@@ -45,7 +43,6 @@
   "about.cta.description": "მზად ხართ თანამშრომლობისთვის? გჭირდებათ ვებგვერდი, ბრენდინგი თუ ციფრული პროდუქტი — ჩვენ აქ ვართ დასახმარებლად.",
   "about.cta.getInTouch": "დაგვიკავშირდით",
   "about.cta.exploreServices": "სერვისების ნახვა",
-
   "services.badge": "სერვისები",
   "services.heading": "რას გთავაზობთ",
   "services.description": "ყოვლისმომცველი ციფრული სერვისები, შექმნილი თქვენი ბიზნესის ონლაინ ზრდისა და წარმატებისთვის.",
@@ -54,7 +51,6 @@
   "services.cta.heading": "არ ხართ დარწმუნებული საიდან დაიწყოთ?",
   "services.cta.description": "დაგვიკავშირდით და ჩვენ დაგეხმარებით თქვენი საჭიროებებისთვის შესაფერისი პაკეტის არჩევაში.",
   "services.cta.button": "დაგვიკავშირდით",
-
   "portfolio.badge": "პორტფოლიო",
   "portfolio.heading": "ჩვენი ნამუშევრები",
   "portfolio.description": "ჩვენი გუნდის მიერ შექმნილი პროექტების გალერეა — ვებგვერდებიდან ელექტრონულ კომერციამდე, ბრენდინგიდან მარკეტინგამდე.",
@@ -78,20 +74,18 @@
   "portfolio.detail.related": "მსგავსი",
   "portfolio.detail.moreProjects": "მეტი პროექტი",
   "portfolio.detail.viewDetails": "დეტალების ნახვა",
-
   "team.badge": "ჩვენი გუნდი",
   "team.heading": "გაიცანით გუნდი",
   "team.description": "ნიჭიერი სტუდენტების, დიზაინერების, დეველოპერებისა და მარკეტოლოგების მრავალფეროვანი ჯგუფი, რომლებიც ერთად მუშაობენ იდეების რეალობად ქცევისთვის.",
   "team.join.heading": "შემოგვიერთდით",
   "team.join.description": "ჩვენ მუდმივად ვეძებთ მოტივირებულ სტუდენტებს BTA LAB-ში გასაწევრიანებლად. თუ გსურთ სწავლა და რეალურ პროექტებზე მუშაობა, მოგესალმებით.",
-
   "contact.badge": "კონტაქტი",
-  "contact.heading": "დაგვიკავშირდით",
-  "contact.description": "გაქვთ პროექტი ან უბრალოდ გსურთ მოგვმართოთ? მოხარული ვიქნებით თქვენგან მოსმენით.",
-  "contact.form.name": "სრული სახელი",
+  "contact.heading": "შევქმნათ რაღაც ერთად",
+  "contact.description": "გაქვთ იდეა ან პროექტი? მოგვწერეთ და დაგეხმარებით მის განხორციელებაში.",
+  "contact.form.name": "სახელი",
   "contact.form.namePlaceholder": "თქვენი სახელი",
   "contact.form.email": "ელ-ფოსტა",
-  "contact.form.emailPlaceholder": "your@email.com",
+  "contact.form.emailPlaceholder": "თქვენი ელ-ფოსტა",
   "contact.form.phone": "ტელეფონი",
   "contact.form.phonePlaceholder": "+995 555 00 00 00",
   "contact.form.company": "კომპანია",
@@ -105,7 +99,7 @@
   "contact.form.budgetOptions.large": "5,000₾ – 15,000₾",
   "contact.form.budgetOptions.enterprise": "15,000₾+",
   "contact.form.message": "შეტყობინება",
-  "contact.form.messagePlaceholder": "გვიამბეთ თქვენი პროექტის შესახებ...",
+  "contact.form.messagePlaceholder": "აღწერეთ თქვენი პროექტი",
   "contact.form.submit": "შეტყობინების გაგზავნა",
   "contact.form.successTitle": "შეტყობინება გაიგზავნა!",
   "contact.form.successDescription": "გმადლობთ მოწერისთვის. დაგიკავშირდებით 24 საათის განმავლობაში.",
@@ -113,7 +107,6 @@
   "contact.info.email": "ელ-ფოსტა",
   "contact.info.phone": "ტელეფონი",
   "contact.info.address": "მისამართი",
-
   "footer.brandDescription": "ციფრული ინოვაციების ლაბორატორია, სადაც სტუდენტები თანამშრომლობენ რეალური გადაწყვეტილებების შესაქმნელად — განათლებისა და ინდუსტრიის დაკავშირება.",
   "footer.company.title": "კომპანია",
   "footer.company.about": "ჩვენს შესახებ",
@@ -134,16 +127,13 @@
   "footer.contact.location": "თბილისი, საქართველო",
   "footer.contact.availability": "ვმუშაობთ ონლაინ",
   "footer.copyright": "© %year% BTA LAB. ყველა უფლება დაცულია.",
-
   "stats.teamMembers": "გუნდის წევრები",
   "stats.completedProjects": "დასრულებული პროექტები",
   "stats.services": "სერვისები",
   "stats.technologies": "ტექნოლოგიები",
-
   "notFound.title": "გვერდი ვერ მოიძებნა",
   "notFound.description": "გვერდი, რომელსაც ეძებთ, არ არსებობს ან გადატანილია. მოდით დაგიბრუნოთ მთავარ გვერდზე.",
   "notFound.button": "მთავარზე დაბრუნება",
-
   "data.about.timeline.0.title": "დასაწყისი",
   "data.about.timeline.0.description": "BTA LAB დაარსდა ხედვით, რომ გადაედგა ნაბიჯი აკადემიურ სწავლასა და რეალურ ინდუსტრიულ გამოცდილებას შორის.",
   "data.about.timeline.1.title": "პირველი პროექტები",
@@ -154,7 +144,6 @@
   "data.about.timeline.3.description": "48+ დასრულებული პროექტი, მტკიცე რეპუტაცია და ინდუსტრიის აღიარების მიღება.",
   "data.about.timeline.4.title": "მომავლისკენ",
   "data.about.timeline.4.description": "ჩვენ ვაგრძელებთ ზრდას, ინოვაციებსა და ციფრული პროფესიონალების ახალი თაობის გაძლიერებას.",
-
   "language.ka": "ქართული",
   "language.en": "English",
   "language.current": "ენა",
@@ -179,5 +168,14 @@
   "portfolio.detail.impactOutcomes": "გავლენა და შედეგები",
   "portfolio.previewLabel": "გადასახვევი პრევიუ: %alt%. გამოიყენეთ ისრები ან გადახვევა სანახავად.",
   "team.socialLabel": "%name% პლატფორმაზე %platform%",
-  "team.imageAlt": "%name%-ის პორტრეტი"
+  "team.imageAlt": "%name%-ის პორტრეტი",
+  "contact.form.errorGeneric": "შეტყობინების გაგზავნა ვერ მოხერხდა. სცადეთ ხელახლა.",
+  "contact.mapTitle": "BTA LAB-ის მდებარეობა",
+  "api.errors.invalidRequest": "არასწორი მოთხოვნა.",
+  "api.errors.originRejected": "მოთხოვნა ვერ მიიღება.",
+  "api.errors.rateLimited": "გთხოვთ, ცოტა ხანში სცადოთ ხელახლა.",
+  "api.errors.formInvalid": "შეამოწმეთ ფორმის ველები და სცადეთ ხელახლა.",
+  "api.errors.captchaFailed": "მოთხოვნის გადამოწმება ვერ მოხერხდა.",
+  "api.errors.contactRequired": "ელ-ფოსტა ან ტელეფონი აუცილებელია.",
+  "api.success.submissionReceived": "მოთხოვნა წარმატებით მივიღეთ."
 }

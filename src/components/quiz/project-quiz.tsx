@@ -4,10 +4,10 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { quizContent } from "@/data/quiz";
+import { quizContentByLocale } from "@/data/quiz";
 import { useTranslation } from "@/lib/use-dictionary";
 import { scrollToPageTop } from "@/lib/public-scroll";
-import type { QuizOption } from "@/data/quiz";
+import type { QuizOption, QuizTranslations } from "@/data/quiz";
 import {
   X,
   Check,
@@ -37,7 +37,6 @@ interface QuizAnswers {
 }
 
 const TOTAL_STEPS = 10;
-const content = quizContent;
 
 const projectTypeIcons: Record<string, LucideIcon> = {
   landing: Globe,
@@ -55,6 +54,7 @@ const projectTypeIcons: Record<string, LucideIcon> = {
 export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
   const router = useRouter();
   const { locale } = useTranslation();
+  const content = quizContentByLocale[locale];
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
@@ -220,10 +220,10 @@ export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
   const handleSubmit = async () => {
     const errors: Record<string, string> = {};
     if (!contactInfo.name?.trim()) {
-      errors.name = "Name is required";
+      errors.name = content.validation.nameRequired;
     }
     if (!contactInfo.email?.trim() && !contactInfo.phone?.trim()) {
-      errors.email = "Email or phone is required";
+      errors.email = content.validation.contactRequired;
     }
     if (Object.keys(errors).length > 0) {
       setContactErrors(errors);
@@ -253,12 +253,12 @@ export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Submission failed");
+        throw new Error(errData.error || content.validation.submitFailed);
       }
 
       setIsSubmitted(true);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "An error occurred");
+      setSubmitError(err instanceof Error ? err.message : content.validation.unknownError);
     } finally {
       setIsSubmitting(false);
     }
@@ -429,6 +429,7 @@ export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
                   colorPresets={colorPresets}
                   exampleUrls={exampleUrls}
                   onExampleUrlsChange={setExampleUrls}
+                  labels={content.stepDetails}
                 />
               ) : (
                 <ContactStep
@@ -496,7 +497,7 @@ export function ProjectQuiz({ isOpen, onClose }: ProjectQuizProps) {
                     {isSubmitting ? (
                       <>
                         <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        Submitting...
+                        {content.submitting}
                       </>
                     ) : (
                       content.summary.submit
@@ -575,6 +576,7 @@ function StepContent({
   colorPresets,
   exampleUrls,
   onExampleUrlsChange,
+  labels,
 }: {
   stepId: number;
   content: { question: string; description?: string; options: QuizOption[]; allowCustomInput?: boolean; customInputLabel?: string; customInputPlaceholder?: string };
@@ -589,6 +591,7 @@ function StepContent({
   colorPresets: string[];
   exampleUrls: string;
   onExampleUrlsChange: (v: string) => void;
+  labels: QuizTranslations["stepDetails"];
 }) {
   const selectedOptions: string[] = Array.isArray(selectedAnswer)
     ? selectedAnswer
@@ -678,13 +681,13 @@ function StepContent({
           {showExistingUrl && (
             <div className="mt-4 pl-8">
               <label className="block text-xs font-medium text-[var(--color-fg-tertiary)]/70 mb-1.5">
-                Current website URL (optional)
+                {labels.currentWebsiteLabel}
               </label>
               <input
                 type="url"
                 value={existingUrl}
                 onChange={(e) => onExistingUrlChange(e.target.value)}
-                placeholder="https://example.com"
+                placeholder={labels.currentWebsitePlaceholder}
                 className="w-full h-10 px-4 rounded-xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all"
               />
             </div>
@@ -744,7 +747,7 @@ function StepContent({
           {/* Colors */}
           <div>
             <p className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 mb-3">
-              What colors would you like on your website?
+              {labels.colorsLabel}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               {colorPresets.map((color) => (
@@ -770,7 +773,7 @@ function StepContent({
                   value={colorValue}
                   onChange={(e) => onColorChange(e.target.value)}
                   className="w-0 h-0 opacity-0 absolute"
-                  aria-label="Pick a color"
+                  aria-label={labels.pickColor}
                 />
                 <Palette size={14} className="text-[var(--color-fg-tertiary)]/50" />
               </label>
@@ -780,13 +783,13 @@ function StepContent({
           {/* Example websites */}
           <div>
             <label className="block text-xs font-medium text-[var(--color-fg-tertiary)]/70 mb-1.5">
-              Provide example websites you like (optional)
+              {labels.examplesLabel}
             </label>
             <input
               type="text"
               value={exampleUrls}
               onChange={(e) => onExampleUrlsChange(e.target.value)}
-              placeholder="https://example.com, https://another-example.com"
+              placeholder={labels.examplesPlaceholder}
               className="w-full h-10 px-4 rounded-xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all"
             />
           </div>
@@ -808,7 +811,7 @@ function ContactStep({
   stepStates,
   onEditStep,
 }: {
-  content: typeof quizContent;
+  content: QuizTranslations;
   contactInfo: Record<string, string>;
   contactErrors: Record<string, string>;
   submitError: string | null;
@@ -817,8 +820,6 @@ function ContactStep({
   stepStates: number[];
   onEditStep: (step: number) => void;
 }) {
-  const CONTACT_OPTIONS = ["Phone", "Email", "Facebook", "Instagram", "WhatsApp"];
-
   return (
     <div className="space-y-8">
       {/* Summary */}
@@ -869,53 +870,53 @@ function ContactStep({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputField
             id="contact-name"
-            label="Full Name *"
+            label={content.contactFields.name}
             value={contactInfo.name || ""}
             onChange={(v) => onContactChange("name", v)}
             error={contactErrors.name}
-            placeholder="Your name"
+            placeholder={content.contactFields.namePlaceholder}
           />
           <InputField
             id="contact-company"
-            label="Company Name"
+            label={content.contactFields.company}
             value={contactInfo.company || ""}
             onChange={(v) => onContactChange("company", v)}
-            placeholder="Company name"
+            placeholder={content.contactFields.companyPlaceholder}
           />
           <InputField
             id="contact-phone"
-            label="Phone Number"
+            label={content.contactFields.phone}
             value={contactInfo.phone || ""}
             onChange={(v) => onContactChange("phone", v)}
             type="tel"
-            placeholder="+1 (555) 000-0000"
+            placeholder={content.contactFields.phonePlaceholder}
           />
           <InputField
             id="contact-email"
-            label="Email *"
+            label={content.contactFields.email}
             value={contactInfo.email || ""}
             onChange={(v) => onContactChange("email", v)}
             error={contactErrors.email}
             type="email"
-            placeholder="your@email.com"
+            placeholder={content.contactFields.emailPlaceholder}
           />
         </div>
 
         <SelectField
           id="contact-preferred"
-          label="Preferred Contact Method"
+          label={content.contactFields.preferredContact}
           value={contactInfo.preferredContact || ""}
           onChange={(v) => onContactChange("preferredContact", v)}
-          options={CONTACT_OPTIONS}
-          placeholder="Select"
+          options={content.contactOptions}
+          placeholder={content.contactFields.preferredContactPlaceholder}
         />
 
         <TextareaField
           id="contact-additional"
-          label="Additional Information"
+          label={content.contactFields.additionalInfo}
           value={contactInfo.additionalInfo || ""}
           onChange={(v) => onContactChange("additionalInfo", v)}
-          placeholder="Any additional information..."
+          placeholder={content.contactFields.additionalInfoPlaceholder}
         />
 
         {submitError && (

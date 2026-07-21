@@ -1,7 +1,7 @@
 /**
  * BTA LAB CMS — Database Seed Script
  *
- * Seeds initial CMS content into Supabase for a fresh project setup.
+ * Seeds initial CMS content into a clean Supabase project.
  * Safe to run multiple times — uses upserts with stable conflict keys.
  *
  * Usage:
@@ -18,12 +18,17 @@
  */
 
 import { config } from "dotenv";
-import { createClient } from "@supabase/supabase-js";
 import { createHash } from "node:crypto";
-import type { Database } from "../src/types/supabase";
 import kaDict from "../src/locales/ka.json";
 import enDict from "../src/locales/en.json";
 import { getServicePackageKaLocalization } from "../src/data/service-package-localizations";
+import { getContentDictionaryKey } from "../src/lib/content-dictionary-keys";
+import { getTeamMemberKaLocalization } from "../src/data/team-localizations";
+import {
+  createSupabaseAdminClient,
+  getAdminCredentialsFromEnv,
+  syncAdminAccount,
+} from "./admin-bootstrap";
 
 // ── Load .env from project root ────────────────────────────────────────
 
@@ -49,6 +54,7 @@ const errors: string[] = [];
 if (!SUPABASE_URL) errors.push("Missing NEXT_PUBLIC_SUPABASE_URL");
 if (!SERVICE_ROLE_KEY) errors.push("Missing SUPABASE_SERVICE_ROLE_KEY");
 if (!ADMIN_EMAIL) errors.push("Missing ADMIN_EMAIL");
+if (!ADMIN_PASSWORD) errors.push("Missing ADMIN_PASSWORD");
 if (!ADMIN_DISPLAY_NAME) errors.push("Missing ADMIN_DISPLAY_NAME");
 
 if (errors.length > 0) {
@@ -61,11 +67,6 @@ if (errors.length > 0) {
   );
   process.exit(1);
 }
-
-// ── Normalize admin credentials ────────────────────────────────────────
-
-const normalizedEmail = ADMIN_EMAIL!.trim().toLowerCase();
-const adminDisplayName = ADMIN_DISPLAY_NAME!.trim();
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -83,16 +84,28 @@ function deterministicId(seed: string): string {
 
 const KA_DICT = kaDict as Record<string, string>;
 const EN_DICT = enDict as Record<string, string>;
+const GEORGIAN_RE = /[\u10A0-\u10FF]/;
 
-const COMMON_PASSWORDS = new Set([
-  "password",
-  "password123",
-  "admin123",
-  "admin123456",
-  "btalab123",
-  "qwerty123",
-  "letmein123",
+const languageNeutralContentKeys = new Set([
+  "contact.form.phonePlaceholder",
+  "contact.form.budgetOptions.medium",
+  "contact.form.budgetOptions.large",
+  "contact.form.budgetOptions.enterprise",
 ]);
+
+const languageNeutralLabels = new Set(["UI/UX"]);
+
+const requiredTables = [
+  "admin_profiles",
+  "site_content",
+  "site_settings",
+  "service_packages",
+  "portfolio_categories",
+  "portfolio_projects",
+  "team_members",
+  "contact_messages",
+  "service_requests",
+] as const;
 
 const categoryLabelsKa: Record<string, string> = {
   Web: "ვებ",
@@ -104,41 +117,20 @@ const categoryLabelsKa: Record<string, string> = {
 
 const settingsKa: Record<string, string> = {
   site_tagline: "ჩვენ ვეხმარებით მცირე ბიზნესს ზრდაში.",
+  site_description: "ციფრული ლაბორატორია, სადაც ბიზნესის ზრდისთვის ვქმნით თანამედროვე ვებგვერდებს, ონლაინ მაღაზიებს და ციფრულ გადაწყვეტებს.",
+  contact_address: "თბილისი, საქართველო",
   contact_location: "თბილისი, საქართველო",
   contact_availability: "ვმუშაობთ ონლაინ",
   copyright_text: "© 2024 BTA LAB. ყველა უფლება დაცულია.",
-};
-
-const contentKeyOverrides: Record<string, string> = {
-  "home.hero.eyebrow": "hero.eyebrow",
-  "home.hero.heading": "hero.heading",
-  "home.hero.description": "hero.description",
-  "home.hero.primaryCta": "hero.primaryCta",
-  "home.hero.secondaryCta": "hero.secondaryCta",
-  "home.featured.sectionTitle": "home.projectsHeading",
-  "home.featured.sectionDescription": "home.projectsDescription",
-  "home.cta.buttonLabel": "home.ctaButton",
-  "home.cta.learnMoreLabel": "home.ctaLearnMore",
-  "contact.form.budgetOptions_small": "contact.form.budgetOptions.small",
-  "contact.form.budgetOptions_medium": "contact.form.budgetOptions.medium",
-  "contact.form.budgetOptions_large": "contact.form.budgetOptions.large",
-  "contact.form.budgetOptions_enterprise": "contact.form.budgetOptions.enterprise",
-  "footer.brand.description": "footer.brandDescription",
-  "footer.copyright.text": "footer.copyright",
+  seo_title: "BTA LAB — ციფრული ინოვაციების ლაბორატორია",
+  seo_description: "თანამედროვე ვებგვერდები, ონლაინ მაღაზიები და ციფრული გადაწყვეტები მცირე ბიზნესის ზრდისთვის.",
 };
 
 function contentDictionaryKey(entry: SiteContentSeed): string {
-  const compound = `${entry.page}.${entry.section}.${entry.content_key}`;
-  return contentKeyOverrides[compound] || compound;
+  return getContentDictionaryKey(entry.page, entry.section, entry.content_key);
 }
 
-async function tableHasColumn(table: keyof Database["public"]["Tables"], column: string): Promise<boolean> {
-  const { error } = await supabase.from(table).select(column).limit(1);
-  return !error;
-}
-
-function withBilingualSetting(setting: SiteSettingSeed, enabled: boolean) {
-  if (!enabled) return setting;
+function withBilingualSetting(setting: SiteSettingSeed) {
   return {
     ...setting,
     value_ka: settingsKa[setting.setting_key] || setting.setting_value,
@@ -146,21 +138,44 @@ function withBilingualSetting(setting: SiteSettingSeed, enabled: boolean) {
   };
 }
 
-function withBilingualContent(entry: SiteContentSeed, enabled: boolean) {
-  if (!enabled) return entry;
+function withBilingualContent(entry: SiteContentSeed) {
   const key = contentDictionaryKey(entry);
+  const kaValue = KA_DICT[key]?.trim();
+  const enValue = (EN_DICT[key] || entry.content_value_en).trim();
+  const isNeutral = languageNeutralContentKeys.has(key);
+
+  if (!kaValue) {
+    throw new Error(`Missing Georgian CMS seed value for ${key}`);
+  }
+
+  if (!isNeutral && kaValue === enValue) {
+    throw new Error(`Georgian CMS seed value matches English for ${key}`);
+  }
+
+  if (!isNeutral && /[A-Za-z]{3,}/.test(kaValue) && !GEORGIAN_RE.test(kaValue)) {
+    throw new Error(`Georgian CMS seed value is not translated for ${key}`);
+  }
+
   return {
-    ...entry,
-    value_ka: KA_DICT[key] || entry.content_value,
-    value_en: EN_DICT[key] || entry.content_value,
+    page: entry.page,
+    section: entry.section,
+    content_key: entry.content_key,
+    content_value_ka: kaValue,
+    content_value_en: enValue,
+    content_type: entry.content_type,
+    sort_order: entry.sort_order,
   };
 }
 
-function withBilingualCategory(category: PortfolioCategorySeed, enabled: boolean) {
-  if (!enabled) return category;
+function withBilingualCategory(category: PortfolioCategorySeed) {
+  const nameKa = categoryLabelsKa[category.name];
+  if (!nameKa && !languageNeutralLabels.has(category.name)) {
+    throw new Error(`Missing Georgian portfolio category label for ${category.name}`);
+  }
+
   return {
     ...category,
-    name_ka: categoryLabelsKa[category.name] || category.name,
+    name_ka: nameKa || category.name,
     name_en: category.name,
   };
 }
@@ -171,37 +186,39 @@ function inferPriceSuffixKa(price: string | undefined) {
   return "";
 }
 
-function validateAdminPassword(password: string): string | null {
-  const normalized = password.toLowerCase();
-  const hasLowercase = /[a-z]/.test(password);
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+async function assertSchemaReady(): Promise<void> {
+  const missingTables: string[] = [];
 
-  if (password.length < 12) {
-    return "ADMIN_PASSWORD must be at least 12 characters.";
+  for (const table of requiredTables) {
+    const { error } = await supabase
+      .from(table)
+      .select("id")
+      .limit(1);
+
+    if (error?.message.includes("Could not find the table")) {
+      missingTables.push(table);
+    } else if (error) {
+      throw new Error(`Schema check failed for ${table}: ${error.message}`);
+    }
   }
 
-  if (COMMON_PASSWORDS.has(normalized)) {
-    return "ADMIN_PASSWORD is too common.";
+  if (missingTables.length > 0) {
+    throw new Error(
+      "Supabase schema is not ready. Missing tables: " +
+        missingTables.join(", ") +
+        ". Apply supabase/migrations/001_clean_initial_schema.sql to the project, then run npm run seed again."
+    );
   }
-
-  if ([hasLowercase, hasUppercase, hasNumber, hasSymbol].filter(Boolean).length < 3) {
-    return "ADMIN_PASSWORD must include at least three of: lowercase, uppercase, number, symbol.";
-  }
-
-  return null;
 }
 
-function withBilingualProject(project: PortfolioProjectSeed, enabled: boolean) {
-  if (!enabled) return project;
+function withBilingualProject(project: PortfolioProjectSeed) {
   const qeyKa = project.slug === "qey-ge"
     ? {
         title_ka: "qey.ge",
-        description_ka: "თანამედროვე ელ-კომერციის პლატფორმა საქართველოს ბაზრისთვის, სწრაფი გადახდითა და მარაგების რეალურ დროში მართვით.",
-        full_description_ka: "qey.ge არის სრული ელ-კომერციის გადაწყვეტა საქართველოს ბაზრისთვის. პლატფორმა აერთიანებს თანამედროვე ადაპტირებულ დიზაინს, მობილურ შოპინგზე აქცენტს, სწრაფ ჩატვირთვას და მარტივ გადახდის პროცესს.",
-        problem_ka: "ბაზარზე არ იყო საკმარისად სწრაფი, თანამედროვე და მომხმარებელზე ორიენტირებული ელ-კომერციის პლატფორმა, რომელიც ადგილობრივ საჭიროებებს მოერგებოდა.",
-        solution_ka: "ავაშენეთ პერსონალური ელ-კომერციის პლატფორმა წარმადობაზე, მობილურ გამოცდილებასა და ადგილობრივ მოთხოვნებზე ფოკუსით.",
+        description_ka: "თანამედროვე ონლაინ მაღაზიის პლატფორმა საქართველოს ბაზრისთვის, სწრაფი გადახდითა და მარაგების რეალურ დროში მართვით.",
+        full_description_ka: "qey.ge არის სრული ონლაინ მაღაზიის გადაწყვეტა საქართველოს ბაზრისთვის. პლატფორმა აერთიანებს თანამედროვე ადაპტირებულ დიზაინს, მობილურ შოპინგზე აქცენტს, სწრაფ ჩატვირთვას და მარტივ გადახდის პროცესს.",
+        problem_ka: "ბაზარზე არ იყო საკმარისად სწრაფი, თანამედროვე და მომხმარებელზე ორიენტირებული ონლაინ მაღაზიის პლატფორმა, რომელიც ადგილობრივ საჭიროებებს მოერგებოდა.",
+        solution_ka: "ავაშენეთ პერსონალური ონლაინ მაღაზიის პლატფორმა წარმადობაზე, მობილურ გამოცდილებასა და ადგილობრივ მოთხოვნებზე ფოკუსით.",
         results_ka: [
           "გვერდები იტვირთება 60%-ით სწრაფად",
           "კალათის მიტოვება შემცირდა 35%-ით",
@@ -209,39 +226,46 @@ function withBilingualProject(project: PortfolioProjectSeed, enabled: boolean) {
           "მომხმარებელთა საშუალო შეფასება 4.8/5",
         ],
         alt_text_ka: "qey.ge ვებგვერდის სრული პრევიუ",
-        seo_title_ka: "qey.ge ელ-კომერციის პლატფორმა",
-        seo_description_ka: "თანამედროვე ელ-კომერციის პლატფორმა საქართველოს ბაზრისთვის.",
+        seo_title_ka: "qey.ge ონლაინ მაღაზიის პლატფორმა",
+        seo_description_ka: "თანამედროვე ონლაინ მაღაზიის პლატფორმა საქართველოს ბაზრისთვის.",
       }
     : {};
 
+  if (!qeyKa.title_ka) {
+    throw new Error(`Missing Georgian portfolio project localization for ${project.slug}`);
+  }
+
   return {
     ...project,
-    title_ka: qeyKa.title_ka || project.title,
+    title_ka: qeyKa.title_ka,
     title_en: project.title,
     category_label_ka: categoryLabelsKa[project.category] || project.category,
     category_label_en: project.category,
-    description_ka: qeyKa.description_ka || project.description,
+    description_ka: qeyKa.description_ka,
     description_en: project.description,
-    full_description_ka: qeyKa.full_description_ka || project.full_description,
+    full_description_ka: qeyKa.full_description_ka,
     full_description_en: project.full_description,
-    problem_ka: qeyKa.problem_ka || project.problem,
+    problem_ka: qeyKa.problem_ka,
     problem_en: project.problem,
-    solution_ka: qeyKa.solution_ka || project.solution,
+    solution_ka: qeyKa.solution_ka,
     solution_en: project.solution,
-    results_ka: qeyKa.results_ka || project.results,
+    results_ka: qeyKa.results_ka,
     results_en: project.results,
-    alt_text_ka: qeyKa.alt_text_ka || project.alt_text,
+    alt_text_ka: qeyKa.alt_text_ka,
     alt_text_en: project.alt_text,
-    seo_title_ka: qeyKa.seo_title_ka || project.seo_title,
+    seo_title_ka: qeyKa.seo_title_ka,
     seo_title_en: project.seo_title,
-    seo_description_ka: qeyKa.seo_description_ka || project.seo_description,
+    seo_description_ka: qeyKa.seo_description_ka,
     seo_description_en: project.seo_description,
   };
 }
 
-function withBilingualServicePackage(pkg: ServicePackageSeed, enabled: boolean) {
-  if (!enabled) return pkg;
+function withBilingualServicePackage(pkg: ServicePackageSeed) {
   const ka = getServicePackageKaLocalization(pkg.section, pkg.name);
+  if (!ka) {
+    throw new Error(`Missing Georgian service package localization for ${pkg.section}/${pkg.name}`);
+  }
+
   const ctaKa: Record<string, string> = {
     "Choose Package": "პაკეტის არჩევა",
     "Choose Service": "სერვისის არჩევა",
@@ -251,177 +275,57 @@ function withBilingualServicePackage(pkg: ServicePackageSeed, enabled: boolean) 
   };
   return {
     ...pkg,
-    name_ka: ka?.name || pkg.name,
+    category: pkg.section,
+    name_ka: ka.name,
     name_en: pkg.name,
-    price_suffix_ka: ka?.priceSuffix || inferPriceSuffixKa(ka?.price),
+    price_suffix_ka: ka.priceSuffix || inferPriceSuffixKa(ka.price),
     price_suffix_en: "",
-    custom_price_label_ka: pkg.custom_price ? ka?.customPriceLabel || ka?.price || "ინდივიდუალური" : "",
+    custom_price_label_ka: pkg.custom_price ? ka.customPriceLabel || ka.price || "ინდივიდუალური" : "",
     custom_price_label_en: pkg.custom_price ? "Custom" : "",
-    billing_label_ka: ka?.billingLabel ?? pkg.billing_label ?? "",
+    billing_label_ka: ka.billingLabel ?? "",
     billing_label_en: pkg.billing_label || "",
-    description_ka: ka?.description ?? pkg.description ?? "",
+    description_ka: ka.description ?? "",
     description_en: pkg.description || "",
-    ideal_for_ka: ka?.idealFor ?? pkg.ideal_for ?? "",
+    ideal_for_ka: ka.idealFor ?? "",
     ideal_for_en: pkg.ideal_for || "",
-    features_ka: ka?.features ?? pkg.features,
+    features_ka: ka.features,
     features_en: pkg.features,
-    delivery_time_ka: ka?.deliveryTime ?? pkg.delivery_time ?? "",
+    delivery_time_ka: ka.deliveryTime ?? "",
     delivery_time_en: pkg.delivery_time || "",
-    cta_ka: ka?.cta || ctaKa[pkg.cta] || pkg.cta,
+    cta_ka: ka.cta || ctaKa[pkg.cta] || "",
     cta_en: pkg.cta,
-    cta_label_ka: ka?.cta || ctaKa[pkg.cta] || pkg.cta,
+    cta_label_ka: ka.cta || ctaKa[pkg.cta] || "",
     cta_label_en: pkg.cta,
-    price_explanation_ka: ka?.priceExplanation ?? pkg.price_explanation ?? "",
+    price_explanation_ka: ka.priceExplanation ?? "",
     price_explanation_en: pkg.price_explanation || "",
+    active: pkg.published,
   };
 }
 
-function withBilingualTeamMember(member: TeamMemberSeed, enabled: boolean) {
-  if (!enabled) return member;
+function withBilingualTeamMember(member: TeamMemberSeed) {
+  const ka = getTeamMemberKaLocalization(member.name);
+  if (!ka) {
+    throw new Error(`Missing Georgian team member localization for ${member.name}`);
+  }
+
   return {
     ...member,
     name_ka: member.name,
     name_en: member.name,
-    role_ka: member.role,
+    role_ka: ka.role,
     role_en: member.role,
-    bio_ka: member.bio,
+    bio_ka: ka.bio,
     bio_en: member.bio,
-    skills_ka: member.skills,
+    skills_ka: ka.skills,
     skills_en: member.skills,
     image_alt_ka: `${member.name} პორტრეტი`,
     image_alt_en: `${member.name} portrait`,
   };
 }
 
-// ── Admin user resolution ──────────────────────────────────────────────
-
-interface ResolvedAdmin {
-  id: string;
-  email: string;
-}
-
-async function resolveAdminUser(): Promise<ResolvedAdmin> {
-  // Paginate through Auth users to find the configured admin email
-  const pageSize = 50;
-  let page = 1;
-
-  while (true) {
-    const {
-      data: users,
-      error: listError,
-    } = await supabase.auth.admin.listUsers({
-      page,
-      perPage: pageSize,
-    });
-
-    if (listError) {
-      throw new Error(`Auth user lookup failed: ${listError.message}`);
-    }
-
-    if (!users || users.users.length === 0) {
-      break; // End of pagination
-    }
-
-    for (const user of users.users) {
-      if (user.email?.toLowerCase().trim() === normalizedEmail) {
-        console.log(`  ✓  Existing admin user found: ${normalizedEmail}`);
-        return { id: user.id, email: normalizedEmail };
-      }
-    }
-
-    if (users.users.length < pageSize) {
-      break; // Last page
-    }
-
-    page++;
-  }
-
-  // User not found — create one
-  console.log("  ℹ  Admin user not found");
-
-  if (!ADMIN_PASSWORD) {
-    throw new Error(
-      "ADMIN_PASSWORD is required because no existing Auth user was found. " +
-      "Provide a password of at least 12 characters."
-    );
-  }
-
-  const passwordError = validateAdminPassword(ADMIN_PASSWORD);
-  if (passwordError) {
-    throw new Error(passwordError);
-  }
-
-  console.log("  ℹ  Creating administrator account");
-
-  const {
-    data: newUser,
-    error: createError,
-  } = await supabase.auth.admin.createUser({
-    email: normalizedEmail,
-    password: ADMIN_PASSWORD,
-    email_confirm: true,
-    user_metadata: {
-      display_name: adminDisplayName,
-    },
-  });
-
-  if (createError) {
-    // Handle duplicate-email race condition
-    const msg = createError.message.toLowerCase();
-    if (
-      msg.includes("already exists") ||
-      msg.includes("duplicate") ||
-      msg.includes("already registered")
-    ) {
-      console.log(
-        "  ℹ  Duplicate-email race detected — retrying lookup"
-      );
-
-      // Retry lookup — the user was created by another process
-      const retryResult = await supabase.auth.admin.listUsers({
-        page: 1,
-        perPage: 1000,
-      });
-
-      if (retryResult.error) {
-        throw new Error(
-          `Failed to resolve user after duplicate-email race: ${retryResult.error.message}`
-        );
-      }
-
-      for (const user of retryResult.data?.users ?? []) {
-        if (user.email?.toLowerCase().trim() === normalizedEmail) {
-          console.log(`  ✓  Existing admin user found after retry: ${normalizedEmail}`);
-          return { id: user.id, email: normalizedEmail };
-        }
-      }
-
-      throw new Error(
-        `Could not resolve user by email after duplicate-email race: ${normalizedEmail}`
-      );
-    }
-
-    throw new Error(
-      `Failed to create administrator account: ${createError.message}`
-    );
-  }
-
-  if (!newUser?.user) {
-    throw new Error("Administrator account creation returned no user data.");
-  }
-
-  console.log("  ✓  Administrator account created");
-  return { id: newUser.user.id, email: normalizedEmail };
-}
-
 // ── Supabase client (service role — never expose to client) ─────────────
 
-const supabase = createClient<Database>(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+const supabase = createSupabaseAdminClient();
 
 // ── Seed data ───────────────────────────────────────────────────────────
 
@@ -435,6 +339,15 @@ interface SiteSettingSeed {
 
 const siteSettings: SiteSettingSeed[] = [
   { setting_key: "site_name", setting_value: "BTA LAB", setting_type: "text" },
+  { setting_key: "logo", setting_value: "BTA LAB", setting_type: "text" },
+  { setting_key: "default_language", setting_value: "ka", setting_type: "text" },
+  { setting_key: "theme", setting_value: "light", setting_type: "text" },
+  {
+    setting_key: "site_description",
+    setting_value:
+      "A digital lab where we create modern websites, online stores, and digital solutions for business growth.",
+    setting_type: "textarea",
+  },
   {
     setting_key: "site_tagline",
     setting_value: "We help small businesses grow.",
@@ -452,6 +365,11 @@ const siteSettings: SiteSettingSeed[] = [
   },
   {
     setting_key: "contact_location",
+    setting_value: "Tbilisi, Georgia",
+    setting_type: "text",
+  },
+  {
+    setting_key: "contact_address",
     setting_value: "Tbilisi, Georgia",
     setting_type: "text",
   },
@@ -476,6 +394,17 @@ const siteSettings: SiteSettingSeed[] = [
     setting_type: "text",
   },
   {
+    setting_key: "seo_title",
+    setting_value: "BTA LAB — Digital Innovation Lab",
+    setting_type: "text",
+  },
+  {
+    setting_key: "seo_description",
+    setting_value:
+      "Modern websites, online stores, and digital solutions for small business growth.",
+    setting_type: "textarea",
+  },
+  {
     setting_key: "stat_completed_projects",
     setting_value: "48",
     setting_type: "text",
@@ -493,7 +422,7 @@ interface SiteContentSeed {
   page: string;
   section: string;
   content_key: string;
-  content_value: string;
+  content_value_en: string;
   content_type:
     | "text"
     | "textarea"
@@ -512,7 +441,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "hero",
     content_key: "eyebrow",
-    content_value: "BTA LAB — Digital Innovation Lab",
+    content_value_en: "BTA LAB — Digital Innovation Lab",
     content_type: "text",
     sort_order: 0,
   },
@@ -520,7 +449,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "hero",
     content_key: "heading",
-    content_value: "We help small businesses grow.",
+    content_value_en: "We help small businesses grow.",
     content_type: "text",
     sort_order: 1,
   },
@@ -528,7 +457,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "We create modern websites, online stores, and digital experiences that help businesses achieve real results.",
     content_type: "textarea",
     sort_order: 2,
@@ -537,7 +466,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "hero",
     content_key: "primaryCta",
-    content_value: "View Our Work",
+    content_value_en: "View Our Work",
     content_type: "text",
     sort_order: 3,
   },
@@ -545,7 +474,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "hero",
     content_key: "secondaryCta",
-    content_value: "Meet the Team",
+    content_value_en: "Meet the Team",
     content_type: "text",
     sort_order: 4,
   },
@@ -555,7 +484,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "featured",
     content_key: "sectionTitle",
-    content_value: "Featured Projects",
+    content_value_en: "Featured Projects",
     content_type: "text",
     sort_order: 0,
   },
@@ -563,7 +492,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "featured",
     content_key: "sectionDescription",
-    content_value:
+    content_value_en:
       "Real projects built by real students — see what we've created.",
     content_type: "textarea",
     sort_order: 1,
@@ -574,7 +503,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "cta",
     content_key: "heading",
-    content_value: "Ready to Start Your Project?",
+    content_value_en: "Ready to Start Your Project?",
     content_type: "text",
     sort_order: 0,
   },
@@ -582,7 +511,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "cta",
     content_key: "description",
-    content_value:
+    content_value_en:
       "Let's discuss your ideas and turn them into a stunning digital experience.",
     content_type: "textarea",
     sort_order: 1,
@@ -591,7 +520,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "cta",
     content_key: "buttonLabel",
-    content_value: "Start a Project",
+    content_value_en: "Start a Project",
     content_type: "text",
     sort_order: 2,
   },
@@ -599,7 +528,7 @@ const siteContent: SiteContentSeed[] = [
     page: "home",
     section: "cta",
     content_key: "learnMoreLabel",
-    content_value: "Learn More",
+    content_value_en: "Learn More",
     content_type: "text",
     sort_order: 3,
   },
@@ -609,7 +538,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "hero",
     content_key: "badge",
-    content_value: "About Us",
+    content_value_en: "About Us",
     content_type: "text",
     sort_order: 0,
   },
@@ -617,7 +546,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "hero",
     content_key: "heading",
-    content_value: "We're Building the Future of Digital Innovation",
+    content_value_en: "We're Building the Future of Digital Innovation",
     content_type: "text",
     sort_order: 1,
   },
@@ -625,7 +554,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "BTA LAB is a digital innovation lab and student-powered agency. We create real-world digital products while empowering the next generation of designers, developers, and marketers with hands-on experience.",
     content_type: "textarea",
     sort_order: 2,
@@ -636,7 +565,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "mission",
     content_key: "title",
-    content_value: "Our Mission",
+    content_value_en: "Our Mission",
     content_type: "text",
     sort_order: 0,
   },
@@ -644,7 +573,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "mission",
     content_key: "description",
-    content_value:
+    content_value_en:
       "To provide students with real-world experience through hands-on client projects, bridging the gap between academic knowledge and professional practice while delivering exceptional digital solutions.",
     content_type: "textarea",
     sort_order: 1,
@@ -655,7 +584,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "vision",
     content_key: "title",
-    content_value: "Our Vision",
+    content_value_en: "Our Vision",
     content_type: "text",
     sort_order: 0,
   },
@@ -663,7 +592,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "vision",
     content_key: "description",
-    content_value:
+    content_value_en:
       "To become a leading digital innovation lab that sets the standard for student-powered agencies, creating a future where education and industry work seamlessly together.",
     content_type: "textarea",
     sort_order: 1,
@@ -674,7 +603,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "cta",
     content_key: "heading",
-    content_value: "Want to Be Part of Our Story?",
+    content_value_en: "Want to Be Part of Our Story?",
     content_type: "text",
     sort_order: 0,
   },
@@ -682,7 +611,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "cta",
     content_key: "description",
-    content_value:
+    content_value_en:
       "Whether you're a potential client or a student looking to join the team, we'd love to connect.",
     content_type: "textarea",
     sort_order: 1,
@@ -691,7 +620,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "cta",
     content_key: "getInTouch",
-    content_value: "Get in Touch",
+    content_value_en: "Get in Touch",
     content_type: "text",
     sort_order: 2,
   },
@@ -699,7 +628,7 @@ const siteContent: SiteContentSeed[] = [
     page: "about",
     section: "cta",
     content_key: "exploreServices",
-    content_value: "Explore Services",
+    content_value_en: "Explore Services",
     content_type: "text",
     sort_order: 3,
   },
@@ -709,7 +638,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "hero",
     content_key: "badge",
-    content_value: "What We Do",
+    content_value_en: "What We Do",
     content_type: "text",
     sort_order: 0,
   },
@@ -717,7 +646,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "hero",
     content_key: "heading",
-    content_value: "Comprehensive Digital Services",
+    content_value_en: "Comprehensive Digital Services",
     content_type: "text",
     sort_order: 1,
   },
@@ -725,7 +654,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "From strategy to execution, we offer end-to-end digital services that help businesses establish their presence, engage their audience, and achieve measurable results.",
     content_type: "textarea",
     sort_order: 2,
@@ -736,7 +665,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "cta",
     content_key: "heading",
-    content_value: "Not Sure Which Service You Need?",
+    content_value_en: "Not Sure Which Service You Need?",
     content_type: "text",
     sort_order: 0,
   },
@@ -744,7 +673,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "cta",
     content_key: "description",
-    content_value:
+    content_value_en:
       "We'll help you figure it out. Schedule a free consultation and we'll guide you toward the right solution.",
     content_type: "textarea",
     sort_order: 1,
@@ -753,7 +682,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "cta",
     content_key: "button",
-    content_value: "Book a Consultation",
+    content_value_en: "Book a Consultation",
     content_type: "text",
     sort_order: 2,
   },
@@ -763,7 +692,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "addons",
     content_key: "title",
-    content_value: "Additional Services",
+    content_value_en: "Additional Services",
     content_type: "text",
     sort_order: 0,
   },
@@ -771,7 +700,7 @@ const siteContent: SiteContentSeed[] = [
     page: "services",
     section: "addons",
     content_key: "description",
-    content_value:
+    content_value_en:
       "Services to help you rank better on Google and start working with a technically sound setup.",
     content_type: "textarea",
     sort_order: 1,
@@ -782,7 +711,7 @@ const siteContent: SiteContentSeed[] = [
     page: "portfolio",
     section: "hero",
     content_key: "badge",
-    content_value: "Our Work",
+    content_value_en: "Our Work",
     content_type: "text",
     sort_order: 0,
   },
@@ -790,7 +719,7 @@ const siteContent: SiteContentSeed[] = [
     page: "portfolio",
     section: "hero",
     content_key: "heading",
-    content_value: "Selected Projects",
+    content_value_en: "Selected Projects",
     content_type: "text",
     sort_order: 1,
   },
@@ -798,7 +727,7 @@ const siteContent: SiteContentSeed[] = [
     page: "portfolio",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "A curated selection of projects that showcase our expertise across web development, e-commerce, branding, marketing, and UI/UX design.",
     content_type: "textarea",
     sort_order: 2,
@@ -809,7 +738,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "hero",
     content_key: "badge",
-    content_value: "Our Team",
+    content_value_en: "Our Team",
     content_type: "text",
     sort_order: 0,
   },
@@ -817,7 +746,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "hero",
     content_key: "heading",
-    content_value: "Meet the People Behind the Work",
+    content_value_en: "Meet the People Behind the Work",
     content_type: "text",
     sort_order: 1,
   },
@@ -825,7 +754,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "A diverse team of passionate creators, engineers, and strategists dedicated to turning bold ideas into exceptional digital experiences.",
     content_type: "textarea",
     sort_order: 2,
@@ -836,7 +765,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "join",
     content_key: "heading",
-    content_value: "Want to Join the Team?",
+    content_value_en: "Want to Join the Team?",
     content_type: "text",
     sort_order: 0,
   },
@@ -844,7 +773,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "join",
     content_key: "description",
-    content_value:
+    content_value_en:
       "We're always looking for talented individuals who are passionate about digital creation. If that sounds like you, we'd love to hear from you.",
     content_type: "textarea",
     sort_order: 1,
@@ -855,7 +784,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "hero",
     content_key: "badge",
-    content_value: "Get in Touch",
+    content_value_en: "Contact",
     content_type: "text",
     sort_order: 0,
   },
@@ -863,7 +792,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "hero",
     content_key: "heading",
-    content_value: "Let's Create Something Together",
+    content_value_en: "Let's Create Something Together",
     content_type: "text",
     sort_order: 1,
   },
@@ -871,10 +800,188 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "hero",
     content_key: "description",
-    content_value:
+    content_value_en:
       "Have a project in mind? We'd love to hear about it. Tell us about your vision and we'll get back to you within 24 hours.",
     content_type: "textarea",
     sort_order: 2,
+  },
+
+  // ── Contact / Form ──
+  {
+    page: "contact",
+    section: "form",
+    content_key: "name",
+    content_value_en: "Full Name",
+    content_type: "text",
+    sort_order: 0,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "namePlaceholder",
+    content_value_en: "Your name",
+    content_type: "text",
+    sort_order: 1,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "email",
+    content_value_en: "Email",
+    content_type: "text",
+    sort_order: 2,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "emailPlaceholder",
+    content_value_en: "your@email.com",
+    content_type: "text",
+    sort_order: 3,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "phone",
+    content_value_en: "Phone",
+    content_type: "text",
+    sort_order: 4,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "phonePlaceholder",
+    content_value_en: "+1 (555) 000-0000",
+    content_type: "text",
+    sort_order: 5,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "company",
+    content_value_en: "Company",
+    content_type: "text",
+    sort_order: 6,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "companyPlaceholder",
+    content_value_en: "Company name",
+    content_type: "text",
+    sort_order: 7,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "service",
+    content_value_en: "Service",
+    content_type: "text",
+    sort_order: 8,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "servicePlaceholder",
+    content_value_en: "Select a service",
+    content_type: "text",
+    sort_order: 9,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budget",
+    content_value_en: "Budget",
+    content_type: "text",
+    sort_order: 10,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budgetPlaceholder",
+    content_value_en: "Select budget range",
+    content_type: "text",
+    sort_order: 11,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budgetOptions_small",
+    content_value_en: "Under $1,000",
+    content_type: "text",
+    sort_order: 12,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budgetOptions_medium",
+    content_value_en: "$1,000 - $5,000",
+    content_type: "text",
+    sort_order: 13,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budgetOptions_large",
+    content_value_en: "$5,000 - $15,000",
+    content_type: "text",
+    sort_order: 14,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "budgetOptions_enterprise",
+    content_value_en: "$15,000+",
+    content_type: "text",
+    sort_order: 15,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "message",
+    content_value_en: "Message",
+    content_type: "text",
+    sort_order: 16,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "messagePlaceholder",
+    content_value_en: "Tell us about your project...",
+    content_type: "text",
+    sort_order: 17,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "submit",
+    content_value_en: "Send Message",
+    content_type: "text",
+    sort_order: 18,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "successTitle",
+    content_value_en: "Message Sent!",
+    content_type: "text",
+    sort_order: 19,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "successDescription",
+    content_value_en: "Thank you for reaching out. We'll get back to you within 24 hours.",
+    content_type: "textarea",
+    sort_order: 20,
+  },
+  {
+    page: "contact",
+    section: "form",
+    content_key: "sendAnother",
+    content_value_en: "Send Another Message",
+    content_type: "text",
+    sort_order: 21,
   },
 
   // ── Contact / Info ──
@@ -882,7 +989,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "info",
     content_key: "email",
-    content_value: "hello@bta-lab.com",
+    content_value_en: "hello@bta-lab.com",
     content_type: "text",
     sort_order: 0,
   },
@@ -890,7 +997,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "info",
     content_key: "phone",
-    content_value: "+1 (555) 123-4567",
+    content_value_en: "+1 (555) 123-4567",
     content_type: "text",
     sort_order: 1,
   },
@@ -900,7 +1007,7 @@ const siteContent: SiteContentSeed[] = [
     page: "footer",
     section: "brand",
     content_key: "description",
-    content_value:
+    content_value_en:
       "A digital lab where we create modern websites, online stores, and digital solutions for business growth.",
     content_type: "textarea",
     sort_order: 0,
@@ -911,7 +1018,7 @@ const siteContent: SiteContentSeed[] = [
     page: "footer",
     section: "copyright",
     content_key: "text",
-    content_value: "© 2024 BTA LAB. All rights reserved.",
+    content_value_en: "© 2024 BTA LAB. All rights reserved.",
     content_type: "text",
     sort_order: 0,
   },
@@ -1528,69 +1635,39 @@ async function seed(): Promise<void> {
 
   const counts: SeedCounts = {};
   let hasError = false;
-  const supportsBilingualCms = await Promise.all([
-    tableHasColumn("site_content", "value_ka"),
-    tableHasColumn("portfolio_projects", "title_ka"),
-    tableHasColumn("service_packages", "name_ka"),
-    tableHasColumn("service_packages", "cta_label_en"),
-    tableHasColumn("team_members", "name_ka"),
-    tableHasColumn("site_settings", "value_ka"),
-  ]).then((checks) => checks.every(Boolean));
-
-  if (supportsBilingualCms) {
-    console.log("  ℹ  Bilingual CMS columns detected");
-  } else {
-    console.log("  ℹ  Bilingual CMS columns not detected; seeding legacy columns only");
-  }
-
-  // ── 1. Resolve Admin Auth User ───────────────────────────────────
-
-  console.log("  ── Checking Supabase Auth user ───────────────");
-
-  let adminUserId: string;
+  console.log("  ℹ  Target schema: clean bilingual Supabase setup");
 
   try {
-    const resolved = await resolveAdminUser();
-    adminUserId = resolved.id;
+    await assertSchemaReady();
+    console.log("  ✓  Required Supabase tables are available");
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`  ✗  ${message}`);
     process.exit(1);
   }
 
-  // ── 2. Upsert Admin Profile ───────────────────────────────────────
+  // 1. Sync Admin Auth User and Profile
 
-  console.log("");
-  console.log("  ── Admin Profile ──────────────────────────");
+  console.log("  -- Syncing Supabase admin account --");
+
+  const adminCredentials = getAdminCredentialsFromEnv();
 
   try {
-    const { error: profileError } = await supabase
-      .from("admin_profiles")
-      .upsert(
-        {
-          id: adminUserId,
-          email: normalizedEmail,
-          display_name: adminDisplayName,
-        } as never,
-        { onConflict: "id" }
-      );
-
-    if (profileError) {
-      console.error(`  ✗  Admin profile upsert failed: ${profileError.message}`);
-      hasError = true;
-    } else {
-      console.log("  ✓  Admin profile upserted");
-      counts["Admin profiles"] = 1;
-    }
+    const result = await syncAdminAccount({
+      supabase,
+      credentials: adminCredentials,
+      log: (message) => console.log(`  OK  ${message}`),
+    });
+    counts["Admin profiles"] = result.profileSynced ? 1 : 0;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`  ✗  Admin profile upsert failed: ${message}`);
-    hasError = true;
+    console.error(`  ERROR  ${message}`);
+    process.exit(1);
   }
 
   console.log("");
 
-  // ── 3. Site Settings ──────────────────────────────────────────────
+  // 2. Site Settings
 
   console.log("  ── Site Settings ───────────────────────────");
 
@@ -1598,7 +1675,7 @@ async function seed(): Promise<void> {
     try {
       const { error } = await supabase
         .from("site_settings")
-        .upsert(withBilingualSetting(setting, supportsBilingualCms) as never, { onConflict: "setting_key" });
+        .upsert(withBilingualSetting(setting) as never, { onConflict: "setting_key" });
 
       if (error) {
         console.error(`  ✗  ${setting.setting_key}: ${error.message}`);
@@ -1620,11 +1697,26 @@ async function seed(): Promise<void> {
   console.log("");
   console.log("  ── Site Content ────────────────────────────");
 
+  try {
+    const pages = ["home", "about", "services", "portfolio", "team", "contact", "footer"];
+    const { error } = await supabase.from("site_content").delete().in("page", pages);
+    if (error) {
+      console.error(`  ✗  Existing site content cleanup failed: ${error.message}`);
+      hasError = true;
+    } else {
+      console.log("  ✓  Existing public site content cleared");
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`  ✗  Existing site content cleanup failed: ${message}`);
+    hasError = true;
+  }
+
   for (const entry of siteContent) {
     try {
       const { error } = await supabase
         .from("site_content")
-        .upsert(withBilingualContent(entry, supportsBilingualCms) as never, { onConflict: "page, section, content_key" });
+        .upsert(withBilingualContent(entry) as never, { onConflict: "page, section, content_key" });
 
       if (error) {
         console.error(
@@ -1654,7 +1746,7 @@ async function seed(): Promise<void> {
     try {
       const { error } = await supabase
         .from("portfolio_categories")
-        .upsert(withBilingualCategory(cat, supportsBilingualCms) as never, { onConflict: "slug" });
+        .upsert(withBilingualCategory(cat) as never, { onConflict: "slug" });
 
       if (error) {
         console.error(`  ✗  ${cat.name}: ${error.message}`);
@@ -1685,7 +1777,7 @@ async function seed(): Promise<void> {
         .from("portfolio_projects")
         .upsert(
           {
-            ...withBilingualProject(project, supportsBilingualCms),
+            ...withBilingualProject(project),
             results: project.results,
             technologies: project.technologies,
             gallery: project.gallery,
@@ -1722,7 +1814,7 @@ async function seed(): Promise<void> {
       const { error } = await supabase.from("service_packages").upsert(
           {
             id,
-          ...withBilingualServicePackage(pkg, supportsBilingualCms),
+          ...withBilingualServicePackage(pkg),
           features: pkg.features,
         } as never,
         { onConflict: "id" }
@@ -1756,7 +1848,7 @@ async function seed(): Promise<void> {
       const { error } = await supabase.from("team_members").upsert(
           {
           id,
-          ...withBilingualTeamMember(member, supportsBilingualCms),
+          ...withBilingualTeamMember(member),
           skills: member.skills,
           socials: member.socials,
         } as never,

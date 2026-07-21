@@ -73,18 +73,6 @@ export async function createServicePackage(input: ServicePackageInput) {
     .select()
     .single();
 
-  if (error && isMissingSchemaError(error.message)) {
-    const retry = await admin.supabase
-      .from("service_packages")
-      .insert(toLegacyDatabasePayload(parsed.data, admin.user.id) as never)
-      .select()
-      .single();
-
-    if (retry.error) return actionError("create", retry.error.message);
-    revalidateServices();
-    return { data: retry.data, warning: bilingualMigrationWarning };
-  }
-
   if (error) return actionError("create", error.message);
   revalidateServices();
   return { data };
@@ -108,19 +96,6 @@ export async function updateServicePackage(id: string, input: ServicePackageInpu
     .select()
     .single();
 
-  if (error && isMissingSchemaError(error.message)) {
-    const retry = await admin.supabase
-      .from("service_packages")
-      .update(toLegacyDatabasePayload(parsed.data, admin.user.id) as never)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (retry.error) return actionError("update", retry.error.message);
-    revalidateServices();
-    return { data: retry.data, warning: bilingualMigrationWarning };
-  }
-
   if (error) return actionError("update", error.message);
   revalidateServices();
   return { data };
@@ -141,6 +116,7 @@ export async function deleteServicePackage(id: string) {
 function toDatabasePayload(input: ServicePackageInput, userId: string) {
   return {
     ...input,
+    category: input.section,
     name: input.name_en || input.name_ka || input.name,
     name_ka: input.name_ka,
     name_en: input.name_en,
@@ -172,46 +148,13 @@ function toDatabasePayload(input: ServicePackageInput, userId: string) {
     price_explanation_ka: input.price_explanation_ka,
     price_explanation_en: input.price_explanation_en,
     icon_name: input.icon_name || null,
+    active: input.published,
     updated_by: userId,
   };
-}
-
-function toLegacyDatabasePayload(input: ServicePackageInput, userId: string) {
-  return {
-    section: input.section,
-    name: input.name_en || input.name,
-    price: input.price,
-    billing_label: input.billing_label_en || input.billing_label || null,
-    description: input.description_en || input.description || null,
-    ideal_for: input.ideal_for_en || input.ideal_for || null,
-    features: input.features_en.length ? input.features_en : input.features,
-    delivery_time: input.delivery_time_en || input.delivery_time || null,
-    cta: input.cta_label_en || input.cta,
-    highlighted: input.highlighted,
-    custom_price: input.custom_price,
-    price_explanation: input.price_explanation_en || input.price_explanation || null,
-    icon_name: input.icon_name || null,
-    display_order: input.display_order,
-    published: input.published,
-    updated_by: userId,
-  };
-}
-
-const bilingualMigrationWarning =
-  "Saved to legacy service fields only. Apply the latest Supabase migrations to enable Georgian and English package fields.";
-
-function isMissingSchemaError(message: string) {
-  return message.includes("schema cache") || message.includes("Could not find");
 }
 
 function actionError(operation: string, message: string) {
   console.error(`Service package ${operation} failed:`, message);
-  if (isMissingSchemaError(message)) {
-    return {
-      error:
-        "Package schema is missing bilingual fields. Apply the latest Supabase migrations, then try again.",
-    };
-  }
   return { error: `Package could not be ${operation}d. Please try again.` };
 }
 

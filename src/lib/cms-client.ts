@@ -7,6 +7,7 @@ import { projects as hardcodedProjects } from "@/data/projects";
 import { teamMembers as hardcodedTeam } from "@/data/team";
 import { pricingData } from "@/data/pricing";
 import type { PortfolioProject, TeamMember, ServicePackage } from "@/types/supabase";
+import type { LocaleCode } from "@/lib/localized-fields";
 
 const fallbackProjects: PortfolioProject[] = hardcodedProjects.map((project, index) => ({
   id: project.id,
@@ -128,7 +129,7 @@ function normalizeTeamMember(member: TeamMember): TeamMember {
 
 // ── Content map hook (section-grouped) ──
 // Returns { section: { key: value } }
-export function useContentMap(page: string) {
+export function useContentMap(page: string, locale: LocaleCode = "ka") {
   const [content, setContent] = useState<Record<string, Record<string, string>>>({});
   const [loaded, setLoaded] = useState(false);
 
@@ -140,15 +141,16 @@ export function useContentMap(page: string) {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("site_content")
-          .select("section, content_key, content_value")
+          .select("section, content_key, content_value_ka, content_value_en")
           .eq("page", page);
 
         if (error) throw error;
         if (mounted && data) {
           const grouped: Record<string, Record<string, string>> = {};
-          data.forEach((item: { section: string; content_key: string; content_value: string }) => {
+          data.forEach((item: { section: string; content_key: string; content_value_ka?: string; content_value_en?: string }) => {
             if (!grouped[item.section]) grouped[item.section] = {};
-            grouped[item.section][item.content_key] = item.content_value;
+            grouped[item.section][item.content_key] =
+              locale === "ka" ? item.content_value_ka || "" : item.content_value_en || "";
           });
           setContent(grouped);
         }
@@ -161,7 +163,7 @@ export function useContentMap(page: string) {
 
     fetchContent();
     return () => { mounted = false; };
-  }, [page]);
+  }, [page, locale]);
 
   return { content, loaded };
 }

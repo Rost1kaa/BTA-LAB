@@ -10,9 +10,8 @@ const contentUpdateSchema = z.object({
   page: z.string().min(1),
   section: z.string().min(1),
   content_key: z.string().min(1),
-  content_value: z.string().optional().default(""),
-  value_ka: z.string().optional().default(""),
-  value_en: z.string().optional().default(""),
+  content_value_ka: z.string().optional().default(""),
+  content_value_en: z.string().optional().default(""),
   content_type: z.enum(["text", "textarea", "number", "url", "image", "rich_text", "boolean", "json"]).default("text"),
 });
 
@@ -34,9 +33,8 @@ export async function upsertContent(input: ContentUpdateInput) {
         page: parsed.data.page,
         section: parsed.data.section,
         content_key: parsed.data.content_key,
-        content_value: (parsed.data.value_en || parsed.data.content_value).trim(),
-        value_ka: parsed.data.value_ka.trim(),
-        value_en: (parsed.data.value_en || parsed.data.content_value).trim(),
+        content_value_ka: parsed.data.content_value_ka.trim(),
+        content_value_en: parsed.data.content_value_en.trim(),
         content_type: parsed.data.content_type,
         updated_by: admin.user.id,
       } as never,
@@ -64,10 +62,12 @@ export async function upsertContentBatch(entries: ContentUpdateInput[]) {
   }
 
   const payload = parsed.data.map((entry) => ({
-    ...entry,
-    content_value: (entry.value_en || entry.content_value).trim(),
-    value_ka: entry.value_ka.trim(),
-    value_en: (entry.value_en || entry.content_value).trim(),
+    page: entry.page,
+    section: entry.section,
+    content_key: entry.content_key,
+    content_value_ka: entry.content_value_ka.trim(),
+    content_value_en: entry.content_value_en.trim(),
+    content_type: entry.content_type,
     updated_by: admin.user.id,
   }));
 
@@ -137,14 +137,14 @@ export async function getContentValue(page: string, section: string, key: string
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("site_content")
-    .select("content_value, value_ka, value_en")
+    .select("content_value_ka, content_value_en")
     .eq("page", page)
     .eq("section", section)
     .eq("content_key", key)
     .single();
 
-  const row = data as { content_value?: string; value_ka?: string; value_en?: string } | null;
-  return row?.value_ka || row?.value_en || row?.content_value || "";
+  const row = data as { content_value_ka?: string; content_value_en?: string } | null;
+  return row?.content_value_ka || row?.content_value_en || "";
 }
 
 export async function getContentMap(page: string, section?: string): Promise<Record<string, string>> {
@@ -152,7 +152,7 @@ export async function getContentMap(page: string, section?: string): Promise<Rec
 
   let query = supabase
     .from("site_content")
-    .select("content_key, content_value, value_ka, value_en")
+    .select("content_key, content_value_ka, content_value_en")
     .eq("page", page);
 
   if (section) {
@@ -160,11 +160,11 @@ export async function getContentMap(page: string, section?: string): Promise<Rec
   }
 
   const { data } = await query;
-  const items = (data || []) as Array<{ content_key: string; content_value: string; value_ka?: string; value_en?: string }>;
+  const items = (data || []) as Array<{ content_key: string; content_value_ka?: string; content_value_en?: string }>;
 
   const map: Record<string, string> = {};
   items.forEach((item) => {
-    map[item.content_key] = item.value_ka || item.value_en || item.content_value;
+    map[item.content_key] = item.content_value_ka || item.content_value_en || "";
   });
 
   return map;

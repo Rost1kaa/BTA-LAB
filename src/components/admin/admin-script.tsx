@@ -16,6 +16,8 @@ import {
   Menu,
   X,
   Package,
+  MessageSquare,
+  ClipboardList,
 } from "lucide-react";
 
 const navItems = [
@@ -24,6 +26,8 @@ const navItems = [
   { label: "Portfolio", href: "/admin/portfolio", icon: FolderKanban },
   { label: "Team", href: "/admin/team", icon: Users },
   { label: "Services", href: "/admin/services", icon: Package },
+  { label: "Messages", href: "/admin/messages", icon: MessageSquare },
+  { label: "Service Requests", href: "/admin/service-requests", icon: ClipboardList },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
