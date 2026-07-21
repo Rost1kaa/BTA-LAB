@@ -24,15 +24,9 @@ const memberSchema = z.object({
   name: z.string().min(1, "Name is required.").transform((v) => v.trim()),
   name_ka: z.string().default(""),
   name_en: z.string().default(""),
-  role: z.string().default(""),
-  role_ka: z.string().default(""),
-  role_en: z.string().default(""),
   bio: z.string().default(""),
   bio_ka: z.string().default(""),
   bio_en: z.string().default(""),
-  skills: z.array(z.string()).default([]),
-  skills_ka: z.array(z.string()).default([]),
-  skills_en: z.array(z.string()).default([]),
   image: imageLocation.default(""),
   image_alt_ka: z.string().default(""),
   image_alt_en: z.string().default(""),
@@ -116,17 +110,11 @@ function toMemberPayload(input: Partial<MemberInput>) {
   return {
     ...input,
     name: input.name_en || input.name_ka || input.name || "",
-    role: input.role_en || input.role || "",
     bio: input.bio_en || input.bio || "",
-    skills: input.skills_en?.length ? input.skills_en : input.skills || [],
     name_ka: input.name_ka || "",
     name_en: input.name_en || input.name || "",
-    role_ka: input.role_ka || "",
-    role_en: input.role_en || input.role || "",
     bio_ka: input.bio_ka || "",
     bio_en: input.bio_en || input.bio || "",
-    skills_ka: input.skills_ka || [],
-    skills_en: input.skills_en?.length ? input.skills_en : input.skills || [],
   };
 }
 

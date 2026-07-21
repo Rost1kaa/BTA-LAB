@@ -56,9 +56,7 @@ function localizeTeamMember(member: TeamMember, locale: LocaleCode): TeamMember 
   const localized = {
     ...member,
     name: getLocalizedText(record, "name", locale),
-    role: getLocalizedText(record, "role", locale),
     bio: getLocalizedText(record, "bio", locale),
-    skills: getLocalizedArray(record, "skills", locale),
     image_alt: getLocalizedText(record, "image_alt", locale, "name"),
   };
 
@@ -69,12 +67,7 @@ function localizeTeamMember(member: TeamMember, locale: LocaleCode): TeamMember 
 
   return {
     ...localized,
-    role: localized.role && /[\u10A0-\u10FF]/.test(localized.role) ? localized.role : ka.role,
     bio: localized.bio && /[\u10A0-\u10FF]/.test(localized.bio) ? localized.bio : ka.bio,
-    skills:
-      localized.skills?.some((skill) => /[\u10A0-\u10FF]/.test(skill))
-        ? localized.skills
-        : ka.skills,
   };
 }
 

@@ -109,22 +109,9 @@ function TeamPageContent({
                     <h3 className="text-lg font-semibold text-[var(--color-fg-primary)] group-hover:text-[var(--color-fg-primary)]/90 transition-colors">
                       {member.name}
                     </h3>
-                    <p className="text-sm text-[var(--color-fg-tertiary)]">{member.role}</p>
                     <p className="mt-3 text-xs text-[var(--color-fg-tertiary)]/60 leading-relaxed line-clamp-3">
                       {member.bio}
                     </p>
-                  </div>
-
-                  {/* Skills */}
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {(member.skills || []).slice(0, 4).map((skill) => (
-                      <span
-                        key={skill}
-                        className="text-xs px-2 py-1 rounded-md bg-[var(--color-overlay)] text-[var(--color-fg-tertiary)]/60"
-                      >
-                        {skill}
-                      </span>
-                    ))}
                   </div>
 
                   {/* Social Links */}

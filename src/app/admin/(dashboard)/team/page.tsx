@@ -20,12 +20,8 @@ export default function TeamAdminPage() {
   const [form, setForm] = useState({
     name_ka: "",
     name_en: "",
-    role_ka: "",
-    role_en: "",
     bio_ka: "",
     bio_en: "",
-    skills_ka: "",
-    skills_en: "",
     image: "",
     linkedin: "",
     twitter: "",
@@ -62,12 +58,8 @@ export default function TeamAdminPage() {
     setForm({
       name_ka: "",
       name_en: "",
-      role_ka: "",
-      role_en: "",
       bio_ka: "",
       bio_en: "",
-      skills_ka: "",
-      skills_en: "",
       image: "",
       linkedin: "",
       twitter: "",
@@ -84,12 +76,8 @@ export default function TeamAdminPage() {
     setForm({
       name_ka: member.name_ka || member.name,
       name_en: member.name_en || member.name,
-      role_ka: member.role_ka || member.role,
-      role_en: member.role_en || member.role,
       bio_ka: member.bio_ka || member.bio,
       bio_en: member.bio_en || member.bio,
-      skills_ka: (member.skills_ka || member.skills || []).join(", "),
-      skills_en: (member.skills_en || member.skills || []).join(", "),
       image: member.image,
       linkedin: (member.socials as Record<string, string>)?.linkedin || "",
       twitter: (member.socials as Record<string, string>)?.twitter || "",
@@ -122,15 +110,9 @@ export default function TeamAdminPage() {
       name: form.name_en.trim() || form.name_ka.trim(),
       name_ka: form.name_ka.trim(),
       name_en: form.name_en.trim(),
-      role: form.role_en.trim(),
-      role_ka: form.role_ka.trim(),
-      role_en: form.role_en.trim(),
       bio: form.bio_en.trim(),
       bio_ka: form.bio_ka.trim(),
       bio_en: form.bio_en.trim(),
-      skills: form.skills_en.split(",").map((s) => s.trim()).filter(Boolean),
-      skills_ka: form.skills_ka.split(",").map((s) => s.trim()).filter(Boolean),
-      skills_en: form.skills_en.split(",").map((s) => s.trim()).filter(Boolean),
       image_alt_ka: form.name_ka.trim(),
       image_alt_en: form.name_en.trim(),
       image: form.image,
@@ -226,18 +208,7 @@ export default function TeamAdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="team-role-ka" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Role (Georgian)</label>
-            <input id="team-role-ka" name="role_ka" type="text" value={form.role_ka} onChange={(e) => setForm((p) => ({ ...p, role_ka: e.target.value }))}
-              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all" />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="team-role-en" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Role (English)</label>
-            <input id="team-role-en" name="role_en" type="text" value={form.role_en} onChange={(e) => setForm((p) => ({ ...p, role_en: e.target.value }))}
-              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all" />
-          </div>
-        </div>
+
 
         <div className="space-y-2">
           <label className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Bio</label>
@@ -249,17 +220,7 @@ export default function TeamAdminPage() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Skills (comma separated)</label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input id="team-skills-ka" name="skills_ka" type="text" value={form.skills_ka} onChange={(e) => setForm((p) => ({ ...p, skills_ka: e.target.value }))}
-              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all font-mono"
-              placeholder="Georgian" />
-            <input id="team-skills-en" name="skills_en" type="text" value={form.skills_en} onChange={(e) => setForm((p) => ({ ...p, skills_en: e.target.value }))}
-              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all font-mono"
-              placeholder="React, Node.js, TypeScript" />
-          </div>
-        </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2 md:col-span-2">
@@ -306,7 +267,7 @@ export default function TeamAdminPage() {
             <thead>
               <tr className="border-b border-[var(--color-border-primary)] bg-[var(--color-overlay)]">
                 <th className="text-left px-4 py-3 text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider hidden md:table-cell">Role</th>
+
                 <th className="text-center px-4 py-3 text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider hidden sm:table-cell">Status</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Actions</th>
               </tr>
@@ -317,9 +278,7 @@ export default function TeamAdminPage() {
                   <td className="px-4 py-3">
                     <p className="font-medium text-[var(--color-fg-primary)]">{member.name}</p>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <span className="text-xs text-[var(--color-fg-tertiary)]/70">{member.role}</span>
-                  </td>
+
                   <td className="px-4 py-3 text-center hidden sm:table-cell">
                     {member.published ? (
                       <span className="inline-flex items-center gap-1 text-xs text-green-500"><Eye size={12} /> Visible</span>

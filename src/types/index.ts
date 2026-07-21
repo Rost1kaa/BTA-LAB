@@ -59,9 +59,7 @@ export interface Project {
 export interface TeamMember {
   id: string;
   name: string;
-  role: string;
   bio: string;
-  skills: string[];
   image: string;
   socials: {
     linkedin?: string;
