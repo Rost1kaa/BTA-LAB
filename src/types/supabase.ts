@@ -310,8 +310,20 @@ export type ServiceRequest = {
   status: ContactStatus;
   created_at: string;
   updated_at: string;
+  // New columns for the professional service request system
+  service_name?: string;
+  client_name?: string;
+  email?: string;
+  phone?: string;
+  business_type?: string;
+  business_description?: string;
+  has_existing_website?: boolean;
+  website_url?: string;
+  deadline?: string;
+  budget?: string;
 };
 export type ContactStatus = "new" | "read" | "in_progress" | "closed" | "spam";
+export type ServiceRequestStatus = "new" | "contacted" | "in_progress" | "completed" | "cancelled";
 export type ServiceRequestType = "website_creation" | "social_media" | "advertising" | "seo_services";
 
 export interface PortfolioProject {

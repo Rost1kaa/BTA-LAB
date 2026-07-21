@@ -3,7 +3,6 @@
 import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { FadeIn } from "@/components/animations/fade-in";
@@ -12,7 +11,6 @@ import { TextReveal } from "@/components/animations/text-reveal";
 import { Button } from "@/components/ui/button";
 
 import { useTranslation } from "@/lib/use-dictionary";
-import type { ServicePackage } from "@/types/supabase";
 
 type SiteConfigShape = {
   email: string;
@@ -29,27 +27,19 @@ type SiteConfigShape = {
 
 function ContactFormContent({
   siteConfig,
-  packages,
   content,
 }: {
   siteConfig: SiteConfigShape;
-  packages: ServicePackage[];
   content: Record<string, Record<string, string>>;
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { locale, t } = useTranslation();
-  const searchParams = useSearchParams();
-  const preselectedPackage = searchParams.get("package") || "";
-  const [selectedPackage, setSelectedPackage] = useState(preselectedPackage);
 
   const email = siteConfig.email;
   const phone = siteConfig.phone;
   const address = siteConfig.address;
-  const allPricingPackages = packages
-    .filter((item) => item.section !== "addons")
-    .map((item) => ({ id: item.id, name: item.name }));
   const formContent = content.form || {};
   const formText = (key: string) => formContent[key] || t(`contact.form.${key}`);
 
@@ -148,42 +138,6 @@ function ContactFormContent({
                       placeholder={formText("companyPlaceholder")}
                       className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/30 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all"
                     />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label htmlFor="service" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {formText("service")}
-                    </label>
-                    <select
-                      id="service"
-                      name="service"
-                      value={selectedPackage}
-                      onChange={(e) => setSelectedPackage(e.target.value)}
-                      className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
-                    >
-                      <option value="">{formText("servicePlaceholder")}</option>
-                      {allPricingPackages.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="budget" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">
-                      {formText("budget")}
-                    </label>
-                    <select
-                      id="budget"
-                      name="budget"
-                      className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-tertiary)]/80 focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 focus:bg-[var(--color-overlay)] transition-all appearance-none"
-                    >
-                      <option value="">{formText("budgetPlaceholder")}</option>
-                      <option value="small">{formContent.budgetOptions_small || t("contact.form.budgetOptions.small")}</option>
-                      <option value="medium">{formContent.budgetOptions_medium || t("contact.form.budgetOptions.medium")}</option>
-                      <option value="large">{formContent.budgetOptions_large || t("contact.form.budgetOptions.large")}</option>
-                      <option value="enterprise">{formContent.budgetOptions_enterprise || t("contact.form.budgetOptions.enterprise")}</option>
-                    </select>
                   </div>
                 </div>
 
@@ -292,11 +246,9 @@ function ContactFormContent({
 function ContactPageContent({
   content,
   siteConfig,
-  packages,
 }: {
   content: Record<string, Record<string, string>>;
   siteConfig: SiteConfigShape;
-  packages: ServicePackage[];
 }) {
   const { t } = useTranslation();
   const heroContent = content.hero || {};
@@ -332,7 +284,7 @@ function ContactPageContent({
       <Section className="py-16 md:py-20">
         <Container>
           <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-[var(--color-overlay)]" />}>
-            <ContactFormContent siteConfig={siteConfig} packages={packages} content={content} />
+            <ContactFormContent siteConfig={siteConfig} content={content} />
           </Suspense>
         </Container>
       </Section>
@@ -343,17 +295,14 @@ function ContactPageContent({
 export function ContactPageClient({
   content,
   siteConfig,
-  packages,
 }: {
   content: Record<string, Record<string, string>>;
   siteConfig: SiteConfigShape;
-  packages: ServicePackage[];
 }) {
   return (
     <ContactPageContent
       content={content}
       siteConfig={siteConfig}
-      packages={packages}
     />
   );
 }

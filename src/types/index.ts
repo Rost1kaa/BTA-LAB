@@ -6,6 +6,7 @@ export interface PricingPackage {
   description?: string;
   idealFor?: string;
   features: string[];
+  visibleItemCount?: number;
   deliveryTime?: string;
   cta: string;
   highlighted?: boolean;

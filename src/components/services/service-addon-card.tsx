@@ -2,6 +2,7 @@
 
 import { type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
+import { REVEAL_INITIAL } from "@/lib/reveal-constants";
 import type { ServiceAddon } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +43,8 @@ export function ServiceAddonCard({
   return (
     <div
       data-reveal-direction="up"
-      data-reveal-state="visible"
+      data-reveal-armed={REVEAL_INITIAL.armed}
+      data-reveal-state={REVEAL_INITIAL.state}
       style={{
         "--reveal-delay": `${index * 0.06}s`,
         "--reveal-duration": "0.4s",

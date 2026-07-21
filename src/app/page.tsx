@@ -7,6 +7,8 @@ import {
 import { getServerLocale } from "@/lib/locale";
 import { HomePageClient } from "./home-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const locale = await getServerLocale();
   const [content, featuredProjects, servicePackages, stats] = await Promise.all([

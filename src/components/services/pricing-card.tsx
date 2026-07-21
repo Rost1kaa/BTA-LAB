@@ -1,8 +1,10 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { REVEAL_INITIAL } from "@/lib/reveal-constants";
 import type { PricingPackage } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,36 +32,59 @@ const iconMap: Record<string, React.ReactNode> = {
 interface PricingCardProps {
   pkg: PricingPackage;
   index?: number;
-  onPlanProject?: () => void;
+  onPlanProject?: (pkgId: string, pkgName: string, pkgPrice: string, isCustomPrice: boolean) => void;
+  /** If set, cards with more features than this will truncate with a toggle to show/hide the rest */
+  maxVisibleFeatures?: number;
+  onExpandedChange?: (pkgId: string, expanded: boolean) => void;
+  /** Fixed height in px to apply when collapsed (matching the reference card's natural height) */
+  fixedHeight?: number;
+  /** Callback to report the card's natural rendered height (used by the reference card) */
+  onMeasure?: (height: number) => void;
 }
 
-const SOCIAL_FULL_INITIAL = 8;
-
-/** Only social-full is allowed to be collapsible */
-function isCollapsible(id: string): boolean {
-  return id === "social-full";
-}
-
-export function PricingCard({ pkg, index = 0, onPlanProject }: PricingCardProps) {
+export function PricingCard({
+  pkg,
+  index = 0,
+  onPlanProject,
+  maxVisibleFeatures,
+  onExpandedChange,
+  fixedHeight,
+  onMeasure,
+}: PricingCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const collapsible = isCollapsible(pkg.id);
-
-  // social-full: show first 8 features, collapse rest
-  // all other packages: show all features permanently
-  const hasManyFeatures = collapsible && pkg.features.length > SOCIAL_FULL_INITIAL;
-  const visibleFeatures = hasManyFeatures
-    ? (showAll ? pkg.features : pkg.features.slice(0, SOCIAL_FULL_INITIAL))
+  const isCollapsed = maxVisibleFeatures !== undefined && !expanded;
+  const hasManyFeatures = maxVisibleFeatures !== undefined && pkg.features.length > maxVisibleFeatures;
+  const visibleFeatures = isCollapsed
+    ? pkg.features.slice(0, maxVisibleFeatures)
     : pkg.features;
 
   const featureListId = `features-${pkg.id}`;
-  const hiddenCount = hasManyFeatures ? pkg.features.length - SOCIAL_FULL_INITIAL : 0;
+  const usesFeatureLimit = maxVisibleFeatures !== undefined;
+
+  // Measure this card's natural height and report it to the parent (for the reference card only)
+  useEffect(() => {
+    if (onMeasure && cardRef.current) {
+      onMeasure(cardRef.current.getBoundingClientRect().height);
+    }
+  }, [onMeasure]);
+
+  // Build inline style: CSS variables for reveal animation + fixed height when collapsed
+  const cardStyle = {
+    "--reveal-delay": `${index * 0.08}s`,
+    "--reveal-duration": "0.5s",
+    "--reveal-distance": "24px",
+    ...(fixedHeight !== undefined && !expanded
+      ? { height: fixedHeight, overflow: "hidden" as const }
+      : {}),
+  } as CSSProperties;
 
   const handleCta = () => {
-    if (pkg.customPrice && onPlanProject) {
-      onPlanProject();
+    if (onPlanProject) {
+      onPlanProject(pkg.id, pkg.name, pkg.price, !!pkg.customPrice);
     } else {
       scrollToPageTop();
       router.push(`/contact?package=${pkg.id}`, { scroll: false });
@@ -68,18 +93,19 @@ export function PricingCard({ pkg, index = 0, onPlanProject }: PricingCardProps)
 
   return (
     <div
+      ref={cardRef}
       data-reveal-direction="up"
-      data-reveal-state="visible"
-      style={{
-        "--reveal-delay": `${index * 0.08}s`,
-        "--reveal-duration": "0.5s",
-        "--reveal-distance": "24px",
-      } as CSSProperties}
+      data-reveal-armed={REVEAL_INITIAL.armed}
+      data-reveal-state={REVEAL_INITIAL.state}
+      style={cardStyle}
       className={cn(
         "relative flex flex-col rounded-2xl border transition-all duration-500",
         "overflow-hidden",
         pkg.highlighted
-          ? "border-[var(--color-accent)] bg-[var(--color-bg-surface)] shadow-lg shadow-[var(--color-overlay)] md:scale-105 z-10"
+          ? cn(
+              "border-[var(--color-accent)] bg-[var(--color-bg-surface)] shadow-lg shadow-[var(--color-overlay)] z-10",
+              !usesFeatureLimit && "md:scale-105"
+            )
           : "border-[var(--color-border-primary)] bg-[var(--color-bg-surface)] hover:border-[var(--color-fg-tertiary)] hover:bg-[var(--color-bg-surface-hover)]"
       )}
     >
@@ -145,8 +171,16 @@ export function PricingCard({ pkg, index = 0, onPlanProject }: PricingCardProps)
           <div className="mt-5 mb-4 border-t border-[var(--color-border-primary)]" />
         </div>
 
-        {/* Features — flex-1 to fill available space */}
-        <ul id={featureListId} className="flex-1 space-y-2 min-h-0">
+        {/* Features — flex-1 only when NOT using a fixed height (Website section needs it; Social Media cards with fixed height don't to avoid empty gaps) */}
+        <motion.ul
+          layout
+          id={featureListId}
+          className={cn(
+            "space-y-2 min-h-0",
+            fixedHeight === undefined && "flex-1"
+          )}
+          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+        >
           {visibleFeatures.map((feature, i) => (
             <li
               key={i}
@@ -156,38 +190,41 @@ export function PricingCard({ pkg, index = 0, onPlanProject }: PricingCardProps)
               {feature}
             </li>
           ))}
-        </ul>
+        </motion.ul>
 
-        {/* Bottom section — pushed to bottom via mt-auto */}
+        {/* Expand / Collapse toggle — directly after feature list in normal document flow (NOT inside mt-auto) so it always appears right below the last visible feature, never overlapping it */}
+        {hasManyFeatures && (
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => {
+                const nextExpanded = !expanded;
+                setExpanded(nextExpanded);
+                onExpandedChange?.(pkg.id, nextExpanded);
+              }}
+              className="flex items-center gap-1 text-xs text-[var(--color-fg-tertiary)]/60 hover:text-[var(--color-fg-secondary)] transition-colors cursor-pointer"
+              aria-expanded={expanded}
+              aria-controls={featureListId}
+            >
+              <ChevronDown
+                size={14}
+                className={cn(
+                  "transition-transform duration-300 flex-shrink-0",
+                  expanded && "rotate-180"
+                )}
+              />
+                <span
+                  key={expanded ? "hide" : "show"}
+                  className="inline-block dropdown-pop"
+                >
+                  {expanded
+                    ? t("pricing.hideFeatures")                      : t("pricing.showAllFeatures")}
+                </span>
+            </button>
+          </div>
+        )}
+
+        {/* Bottom section — just delivery time + CTA, pushed to bottom via mt-auto */}
         <div className="mt-auto pt-8">
-          {/* Expand / Collapse — only for social-full */}
-          {hasManyFeatures && (
-            <div className="mb-4 flex justify-center">
-              <button
-                onClick={() => setShowAll(!showAll)}
-                className="flex items-center gap-1 text-xs text-[var(--color-fg-tertiary)]/60 hover:text-[var(--color-fg-secondary)] transition-colors cursor-pointer"
-                aria-expanded={showAll}
-                aria-controls={featureListId}
-              >
-                <ChevronDown
-                  size={14}
-                  className={cn(
-                    "transition-transform duration-300 flex-shrink-0",
-                    showAll && "rotate-180"
-                  )}
-                />
-                  <span
-                    key={showAll ? "hide" : "show"}
-                    className="inline-block dropdown-pop"
-                  >
-                    {showAll
-                      ? t("pricing.hideFeatures")
-                      : t("pricing.showAllFeatures").replace("%count%", String(hiddenCount))}
-                  </span>
-              </button>
-            </div>
-          )}
-
           {/* Delivery time — centered above CTA */}
           {pkg.deliveryTime && (
             <div className="mb-5 text-center">

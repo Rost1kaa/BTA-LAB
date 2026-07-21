@@ -1,4 +1,5 @@
 import { type CSSProperties, type ReactNode } from "react";
+import { REVEAL_INITIAL } from "@/lib/reveal-constants";
 
 interface FadeInProps {
   children: ReactNode;
@@ -23,7 +24,8 @@ export function FadeIn({
     <div
       data-reveal-direction={direction}
       data-reveal-once={once ? "true" : "false"}
-      data-reveal-state="visible"
+      data-reveal-armed={REVEAL_INITIAL.armed}
+      data-reveal-state={REVEAL_INITIAL.state}
       style={{
         "--reveal-delay": `${delay}s`,
         "--reveal-duration": `${duration}s`,

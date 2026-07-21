@@ -210,6 +210,7 @@ export const pricingData: PricingData = {
           "Weekly ad optimization",
           "Monthly analytics report",
         ],
+        visibleItemCount: 8,
         cta: "Choose Package",
       },
       {
@@ -242,6 +243,7 @@ export const pricingData: PricingData = {
           "Community Management",
           "Monthly detailed report and analytics",
         ],
+        visibleItemCount: 1,
         cta: "Get Consultation",
       },
     ],

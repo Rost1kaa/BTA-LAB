@@ -132,8 +132,80 @@
   input[type="tel"],
   input[type="text"],
   input[type="url"],
-  textarea {
+  input[type="date"],
+  textarea,
+  select {
     cursor: text;
+    background-color: var(--color-overlay);
+    color: var(--color-fg-primary);
+    border-color: var(--color-border-primary);
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-fg-tertiary);
+    opacity: 0.5;
+  }
+
+  /* Dark mode overrides for native form controls - ensures consistent styling */
+  .dark input,
+  .dark select,
+  .dark textarea {
+    color-scheme: dark;
+    background-color: #111111;
+    color: #f5f5f5;
+    border-color: #27272a;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #63636e;
+    opacity: 0.6;
+  }
+
+  .dark select option {
+    background-color: #111111;
+    color: #f5f5f5;
+  }
+
+  .dark select:focus option:hover,
+  .dark select option:checked {
+    background-color: #27272a;
+  }
+
+  /* Focus states */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--color-fg-tertiary);
+  }
+
+  .dark input:focus,
+  .dark select:focus,
+  .dark textarea:focus {
+    border-color: #63636e;
+    background-color: #1a1a1a;
+  }
+
+  /* Consistent autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-fg-primary);
+    -webkit-box-shadow: 0 0 0px 1000px var(--color-bg-surface) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f5f5f5;
+    -webkit-box-shadow: 0 0 0px 1000px #111111 inset;
   }
 }
 

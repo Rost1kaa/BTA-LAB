@@ -14,8 +14,6 @@ const contactSchema = z.object({
   email: z.string().trim().email().max(180),
   phone: z.string().trim().max(60).optional().default(""),
   company: z.string().trim().max(160).optional().default(""),
-  service: z.string().trim().max(120).optional().default(""),
-  budget: z.string().trim().max(80).optional().default(""),
   message: z.string().trim().min(1).max(3000),
   website: z.string().max(0).optional().default(""),
   turnstileToken: z.string().optional().default(""),
@@ -102,8 +100,7 @@ export async function POST(request: Request) {
       emailDomain: parsed.data.email.split("@")[1],
       hasPhone: Boolean(parsed.data.phone),
       hasCompany: Boolean(parsed.data.company),
-      service: parsed.data.service || undefined,
-      budget: parsed.data.budget || undefined,
+
     })
   );
 
@@ -115,8 +112,7 @@ export async function POST(request: Request) {
       email: parsed.data.email,
       phone: parsed.data.phone,
       company: parsed.data.company,
-      service: parsed.data.service,
-      budget: parsed.data.budget,
+
       message: parsed.data.message,
       status: "new",
     } as never);
