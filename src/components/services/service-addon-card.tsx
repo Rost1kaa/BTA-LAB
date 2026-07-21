@@ -75,13 +75,13 @@ export function ServiceAddonCard({
         </div>
 
         {/* Description */}
-        <p className="mt-3 text-sm text-[var(--color-fg-secondary)] leading-relaxed flex-1">
+        <p className="mt-3 text-base text-[var(--color-fg-secondary)] leading-relaxed flex-1">
           {addon.description}
         </p>
 
         {/* Example */}
         {addon.example && (
-          <p className="mt-3 text-xs text-[var(--color-fg-muted)] font-mono">
+          <p className="mt-3 text-sm text-[var(--color-fg-muted)] font-mono">
             {addon.example}
           </p>
         )}

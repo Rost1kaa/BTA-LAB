@@ -20,8 +20,10 @@ interface ProjectFormProps {
 export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const detailCoverInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingDetail, setUploadingDetail] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [slugTouched, setSlugTouched] = useState(Boolean(project?.slug));
 
@@ -44,6 +46,7 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
     results_en: project?.results_en?.join("\n") || project?.results?.join("\n") || "",
     technologies: project?.technologies?.join(", ") || "",
     cover_image: project?.cover_image || "",
+    detail_cover_image_url: project?.detail_cover_image_url || "",
     link: project?.link || "",
     featured: project?.featured || false,
     published: project?.published || false,
@@ -68,24 +71,31 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
     }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "cover_image" | "detail_cover_image_url"
+  ) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
+    const isDetailField = field === "detail_cover_image_url";
+    const setUploadingField = isDetailField ? setUploadingDetail : setUploading;
+
+    setUploadingField(true);
     try {
       const result = await uploadProjectImage(file);
       if (result.error) {
         toast.error(result.error);
       } else if (result.url) {
-        updateField("cover_image", result.url);
+        updateField(field, result.url);
         toast.success("Image uploaded!");
       }
     } catch {
       toast.error("Failed to upload image.");
     } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadingField(false);
+      const ref = isDetailField ? detailCoverInputRef : fileInputRef;
+      if (ref.current) ref.current.value = "";
     }
   }
 
@@ -132,6 +142,7 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
       results_en: form.results_en.split("\n").filter((r) => r.trim()).map((r) => r.trim()),
       technologies: form.technologies.split(",").filter((t) => t.trim()).map((t) => t.trim()),
       cover_image: form.cover_image,
+      detail_cover_image_url: form.detail_cover_image_url,
       gallery: project?.gallery || [],
       link: form.link.trim(),
       featured: form.featured,
@@ -388,9 +399,10 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
         </div>
       </div>
 
-      {/* Cover Image */}
+      {/* Cover Image — Listing Card Thumbnail */}
       <div className="rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-[var(--color-fg-primary)]">Cover Image</h2>
+        <h2 className="text-sm font-semibold text-[var(--color-fg-primary)]">Listing Card Image</h2>
+        <p className="text-xs text-[var(--color-fg-tertiary)]/70">Shown on the /portfolio grid. Replacing this image will delete the old one from storage.</p>
 
         <div className="space-y-4">
           {/* Upload area */}
@@ -437,7 +449,7 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
             ref={fileInputRef}
             type="file"
             accept="image/webp,image/png,image/jpeg"
-            onChange={handleFileUpload}
+            onChange={(e) => handleFileUpload(e, "cover_image")}
             disabled={uploading}
             className="hidden"
           />
@@ -449,6 +461,65 @@ export function ProjectForm({ project, categories = CATEGORIES }: ProjectFormPro
             enValue={form.alt_text_en}
             onKaChange={(value) => updateField("alt_text_ka", value)}
             onEnChange={(value) => updateField("alt_text_en", value)}
+          />
+        </div>
+      </div>
+
+      {/* Detail Cover Image — Hero Image */}
+      <div className="rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] p-6 space-y-5">
+        <h2 className="text-sm font-semibold text-[var(--color-fg-primary)]">Detail Page Cover Image</h2>
+        <p className="text-xs text-[var(--color-fg-tertiary)]/70">
+          Shown as the hero image on the project detail page. If not set, the listing card image will be used as fallback.
+        </p>
+
+        <div className="space-y-4">
+          {/* Upload area */}
+          <div className="relative flex items-center justify-center h-48 rounded-xl border-2 border-dashed border-[var(--color-border-primary)] bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 transition-colors overflow-hidden focus-within:ring-2 focus-within:ring-[var(--color-fg-tertiary)]/30">
+            <label htmlFor="project-detail-cover-upload" className="absolute inset-0 cursor-pointer">
+              {form.detail_cover_image_url ? (
+                <Image
+                  src={form.detail_cover_image_url}
+                  alt="Detail cover preview"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <span className="h-full flex items-center justify-center text-center">
+                  {uploadingDetail ? (
+                    <span className="flex flex-col items-center gap-2">
+                      <span className="animate-spin h-8 w-8 border-2 border-[var(--color-fg-tertiary)] border-t-transparent rounded-full" />
+                      <span className="text-xs text-[var(--color-fg-tertiary)]/70">Uploading…</span>
+                    </span>
+                  ) : (
+                    <span>
+                      <Upload size={24} aria-hidden="true" className="mx-auto mb-2 text-[var(--color-fg-tertiary)]/50" />
+                      <span className="block text-sm text-[var(--color-fg-tertiary)]/70">Choose an Image</span>
+                      <span className="block text-xs text-[var(--color-fg-tertiary)]/50 mt-1">WebP, PNG, or JPEG up to 5 MB</span>
+                    </span>
+                  )}
+                </span>
+              )}
+            </label>
+            {form.detail_cover_image_url && (
+              <button
+                type="button"
+                onClick={() => updateField("detail_cover_image_url", "")}
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Remove detail cover image"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+
+          <input
+            id="project-detail-cover-upload"
+            ref={detailCoverInputRef}
+            type="file"
+            accept="image/webp,image/png,image/jpeg"
+            onChange={(e) => handleFileUpload(e, "detail_cover_image_url")}
+            disabled={uploadingDetail}
+            className="hidden"
           />
         </div>
       </div>

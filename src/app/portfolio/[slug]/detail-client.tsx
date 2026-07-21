@@ -99,9 +99,11 @@ function ProjectDetailContent({
           <FadeIn direction="up">
             <div className="overflow-hidden rounded-2xl border border-[var(--color-border-primary)]">
               <ProjectPreview
-                imageSrc={project.cover_image || "/images/qey_ge.webp"}
+                imageSrc={project.detail_cover_image_url || project.cover_image || "/images/qey_ge.webp"}
                 altText={project.alt_text || `${project.title} full website preview`}
                 previewHeight="h-[420px] md:h-[620px]"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) calc(100vw - 48px), min(1280px, calc(100vw - 96px))"
+                quality={85}
                 eager
               />
             </div>

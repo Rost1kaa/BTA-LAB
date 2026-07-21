@@ -53,6 +53,7 @@ const projectSchema = z.object({
   results_en: z.array(z.string()).default([]),
   technologies: z.array(z.string()).default([]),
   cover_image: imageLocation.default(""),
+  detail_cover_image_url: imageLocation.default(""),
   gallery: z.array(imageLocation).max(30).default([]),
   link: httpUrl.or(z.literal("")).default(""),
   featured: z.boolean().default(false),
@@ -226,7 +227,7 @@ export async function updateProject(id: string, input: Partial<ProjectInput>) {
 
   const { data: previous } = await admin.supabase
     .from("portfolio_projects")
-    .select("cover_image, slug")
+    .select("cover_image, detail_cover_image_url, slug")
     .eq("id", id)
     .maybeSingle();
 
@@ -243,7 +244,7 @@ export async function updateProject(id: string, input: Partial<ProjectInput>) {
 
   if (error) return { error: error.message };
 
-  const previousProject = previous as { cover_image: string; slug: string } | null;
+  const previousProject = previous as { cover_image: string; detail_cover_image_url: string; slug: string } | null;
   if (
     previousProject?.cover_image &&
     payload.cover_image !== undefined &&
@@ -256,6 +257,23 @@ export async function updateProject(id: string, input: Partial<ProjectInput>) {
         .remove([oldPath]);
       if (cleanupError) {
         console.error("Replaced portfolio image cleanup failed:", cleanupError.message);
+      }
+    }
+  }
+
+  // Clean up replaced detail cover image
+  if (
+    previousProject?.detail_cover_image_url &&
+    payload.detail_cover_image_url !== undefined &&
+    payload.detail_cover_image_url !== previousProject.detail_cover_image_url
+  ) {
+    const oldPath = extractStoragePath(previousProject.detail_cover_image_url);
+    if (oldPath) {
+      const { error: cleanupError } = await admin.supabase.storage
+        .from("portfolio-images")
+        .remove([oldPath]);
+      if (cleanupError) {
+        console.error("Replaced detail cover image cleanup failed:", cleanupError.message);
       }
     }
   }
@@ -276,7 +294,7 @@ export async function deleteProject(id: string) {
 
   const { data: project } = await admin.supabase
     .from("portfolio_projects")
-    .select("cover_image")
+    .select("cover_image, detail_cover_image_url")
     .eq("id", id)
     .maybeSingle();
 
@@ -284,12 +302,19 @@ export async function deleteProject(id: string) {
 
   if (error) return { error: error.message };
 
-  const storedProject = project as { cover_image?: string } | null;
+  const storedProject = project as { cover_image?: string; detail_cover_image_url?: string } | null;
   if (storedProject?.cover_image) {
     const path = extractStoragePath(storedProject.cover_image);
     if (path) {
       const { error: cleanupError } = await admin.supabase.storage.from("portfolio-images").remove([path]);
       if (cleanupError) console.error("Deleted project image cleanup failed:", cleanupError.message);
+    }
+  }
+  if (storedProject?.detail_cover_image_url) {
+    const path = extractStoragePath(storedProject.detail_cover_image_url);
+    if (path) {
+      const { error: cleanupError } = await admin.supabase.storage.from("portfolio-images").remove([path]);
+      if (cleanupError) console.error("Deleted detail cover image cleanup failed:", cleanupError.message);
     }
   }
 

@@ -103,7 +103,7 @@ export function Hero({ content = {} }: HeroProps) {
         <div ref={contentRef} className="flex flex-col items-center text-center hero-content-motion">
           {/* Badge */}
           <div className="mb-8 hero-fade-in hero-delay-1">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--color-border-primary)] bg-[var(--color-overlay)] text-xs font-medium text-[var(--color-fg-tertiary)] tracking-wide">
+            <span className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-[var(--color-border-primary)] bg-[var(--color-overlay)] text-base font-medium text-[var(--color-fg-tertiary)] tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-fg-tertiary)]/50 animate-pulse-soft" />
               {eyebrow}
             </span>

@@ -22,6 +22,7 @@ const fallbackProjects: PortfolioProject[] = hardcodedProjects.map((project, ind
   results: project.results,
   technologies: project.technologies,
   cover_image: project.coverImage,
+  detail_cover_image_url: "",
   gallery: project.gallery,
   link: project.link || null,
   featured: project.featured,

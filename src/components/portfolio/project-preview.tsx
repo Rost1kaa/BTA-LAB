@@ -13,6 +13,17 @@ interface ProjectPreviewProps {
   previewHeight?: string;
   /** Mark the preview as an above-the-fold image. */
   eager?: boolean;
+  /**
+   * Override the default sizes attribute for the Next.js Image component.
+   * The default is optimised for card layouts (~390 px rendered width).
+   * Pass larger sizes for full-width hero/detail images.
+   */
+  sizes?: string;
+  /**
+   * Override the default quality (1–100). Default is 70 for card thumbnails.
+   * Pass a higher value (e.g. 85) for hero images that need more detail.
+   */
+  quality?: number;
 }
 
 export function ProjectPreview({
@@ -20,6 +31,8 @@ export function ProjectPreview({
   altText,
   previewHeight = "h-[310px] md:h-[340px]",
   eager = false,
+  sizes,
+  quality,
 }: ProjectPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -219,11 +232,11 @@ export function ProjectPreview({
           alt={altText}
           width={1920}
           height={6000}
-          sizes="(max-width: 480px) 372px, (max-width: 768px) calc(100vw - 48px), (max-width: 1024px) calc((100vw - 72px) / 2), 390px"
+          sizes={sizes ?? "(max-width: 480px) 372px, (max-width: 768px) calc(100vw - 48px), (max-width: 1024px) calc((100vw - 72px) / 2), 390px"}
           className="h-auto w-full"
           loading={eager ? "eager" : "lazy"}
           fetchPriority={eager ? "high" : undefined}
-          quality={70}
+          quality={quality ?? 70}
         />
 
         {/* ── Scroll indicator ── */}

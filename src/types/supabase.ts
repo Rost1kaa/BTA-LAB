@@ -135,6 +135,7 @@ export type Database = {
           results_en?: string[];
           technologies?: string[];
           cover_image?: string;
+          detail_cover_image_url?: string;
           gallery?: string[];
           link?: string | null;
           featured?: boolean;
@@ -354,6 +355,7 @@ export interface PortfolioProject {
   results_en?: string[];
   technologies: string[];
   cover_image: string;
+  detail_cover_image_url: string;
   gallery: string[];
   link: string | null;
   featured: boolean;

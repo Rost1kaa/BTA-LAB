@@ -138,7 +138,7 @@ export function PricingCard({
 
           {/* Description */}
           {pkg.description && (
-            <p className="mt-3 text-sm text-[var(--color-fg-secondary)] leading-relaxed">
+            <p className="mt-3 text-base text-[var(--color-fg-secondary)] leading-relaxed">
               {pkg.description}
             </p>
           )}
@@ -156,12 +156,12 @@ export function PricingCard({
               )}
             </div>
             {pkg.priceExplanation && (
-              <p className="mt-1 text-xs text-[var(--color-fg-tertiary)] leading-relaxed">
+              <p className="mt-1 text-sm text-[var(--color-fg-tertiary)] leading-relaxed">
                 {pkg.priceExplanation}
               </p>
             )}
             {pkg.idealFor && (
-              <p className="mt-3 text-xs text-[var(--color-fg-secondary)] leading-relaxed">
+              <p className="mt-3 text-sm text-[var(--color-fg-secondary)] leading-relaxed">
                 {pkg.idealFor}
               </p>
             )}
@@ -184,7 +184,7 @@ export function PricingCard({
           {visibleFeatures.map((feature, i) => (
             <li
               key={i}
-              className="service-feature-text flex items-start gap-2 text-sm text-[var(--color-fg-secondary)] leading-relaxed"
+              className="service-feature-text flex items-start gap-2 text-base text-[var(--color-fg-secondary)] leading-relaxed"
             >
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-fg-muted)] flex-shrink-0" />
               {feature}
@@ -201,7 +201,7 @@ export function PricingCard({
                 setExpanded(nextExpanded);
                 onExpandedChange?.(pkg.id, nextExpanded);
               }}
-              className="flex items-center gap-1 text-xs text-[var(--color-fg-tertiary)]/60 hover:text-[var(--color-fg-secondary)] transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-sm text-[var(--color-fg-tertiary)]/60 hover:text-[var(--color-fg-secondary)] transition-colors cursor-pointer"
               aria-expanded={expanded}
               aria-controls={featureListId}
             >
