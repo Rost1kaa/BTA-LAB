@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     "student agency",
     "ციფრული ინოვაცია",
   ],
+  authors: [{ name: "BTA LAB", url: SITE_URL }],
+  creator: "BTA LAB",
+  publisher: "BTA LAB",
   icons: {
     icon: "/bta.ico",
     shortcut: "/bta.ico",
@@ -52,12 +55,21 @@ export const metadata: Metadata = {
     siteName: "BTA LAB",
     locale: "ka_GE",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BTA LAB — ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "BTA LAB | ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",
     description:
       "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ინოვაციური ციფრული გადაწყვეტილებები, ვებ დეველოპმენტი და ტექნოლოგიური პროექტები.",
+    images: ["/opengraph-image.png"],
   },
   robots: {
     index: true,
@@ -93,7 +105,6 @@ export default async function RootLayout({
               url: SITE_URL,
               description:
                 "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ვებგვერდების დამზადება, ციფრული ინოვაციები და ტექნოლოგიური გადაწყვეტილებები მცირე და საშუალო ბიზნესისთვის.",
-              email: siteConfig.email,
               address: {
                 "@type": "PostalAddress",
                 addressLocality: "Tbilisi",

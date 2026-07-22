@@ -6,18 +6,83 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 import { ThemeToggle } from "@/components/providers/theme-toggle";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { useTranslation } from "@/lib/use-dictionary";
 
 interface NavigationProps {
   siteConfig: {
-    email: string;
     socials: {
       facebook: string;
       instagram: string;
     };
     [key: string]: unknown;
   };
+}
+
+function MobileServicesSection({ onNavigate }: { onNavigate: () => void }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const items = [
+    { label: t("pricing.website.title"), section: "web-development" },
+    { label: t("pricing.social.title"), section: "social-media" },
+    { label: t("services.addons.title"), section: "additional-services" },
+  ];
+
+  function scrollToSection(section: string) {
+    onNavigate();
+    if (pathname === "/services") {
+      const el = document.getElementById(section);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      router.push(`/services#${section}`);
+    }
+    setOpen(false);
+  }
+
+  const isActive = pathname === "/services";
+
+  return (
+    <div className="mobile-menu-item flex flex-col items-center" style={{ "--menu-index": 2 } as CSSProperties}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "flex items-center gap-2 text-3xl font-light tracking-tight transition-colors duration-300",
+          isActive
+            ? "text-[var(--color-fg-primary)]"
+            : "text-[var(--color-fg-tertiary)]/50 hover:text-[var(--color-fg-tertiary)]/80"
+        )}
+      >
+        {t("nav.services")}
+        <ChevronDown
+          size={20}
+          className={cn(
+            "transition-transform duration-200",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="mt-6 flex flex-col items-center gap-3">
+          {items.map((item) => (
+            <button
+              key={item.section}
+              onClick={() => scrollToSection(item.section)}
+              className="text-base font-semibold text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-primary)] transition-colors duration-200"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function GeorgianFlag({ className }: { className?: string }) {
@@ -50,6 +115,203 @@ function EnglishFlag({ className }: { className?: string }) {
       <path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10" />
       <path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6" />
     </svg>
+  );
+}
+
+function ServicesNavDropdown() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const areaRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const items = [
+    { label: t("pricing.website.title"), section: "web-development" },
+    { label: t("pricing.social.title"), section: "social-media" },
+    { label: t("services.addons.title"), section: "additional-services" },
+  ];
+
+  const cancelClose = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => setOpen(false), 250);
+  }, [cancelClose]);
+
+  const handleAreaEnter = useCallback(() => {
+    cancelClose();
+    setOpen(true);
+  }, [cancelClose]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => cancelClose();
+  }, [cancelClose]);
+
+  // Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, cancelClose]);
+
+  // Click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (areaRef.current && !areaRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  function scrollToSection(section: string) {
+    if (pathname === "/services") {
+      const el = document.getElementById(section);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      router.push(`/services#${section}`);
+    }
+    setOpen(false);
+  }
+
+  const isActive = pathname === "/services";
+
+  return (
+    <div
+      ref={areaRef}
+      className="relative"
+      onMouseEnter={handleAreaEnter}
+      onMouseLeave={scheduleClose}
+    >
+      <div
+        className={cn(
+          "relative flex items-center rounded-lg",
+          "focus-within:ring-2 focus-within:ring-[var(--color-border-subtle)]",
+        )}
+      >
+        {/* Services link — click navigates to /services */}
+        <button
+          onClick={() => { cancelClose(); router.push("/services"); }}
+          onMouseEnter={cancelClose}
+          aria-current={isActive ? "page" : undefined}
+          className={cn(
+            "px-4 py-2 text-base font-medium transition-colors duration-300",
+            "focus:outline-none",
+            isActive
+              ? "text-[var(--color-fg-primary)]"
+              : "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]"
+          )}
+        >
+          {t("nav.services")}
+        </button>
+
+        {/* Chevron — click toggles dropdown */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+          onMouseEnter={cancelClose}
+          onFocus={() => setOpen(true)}
+          aria-label={open ? "Close services menu" : "Open services menu"}
+          aria-expanded={open}
+          aria-haspopup="menu"
+          className={cn(
+            "relative pr-3 py-2 flex items-center transition-colors duration-200",
+            "focus:outline-none",
+            isActive
+              ? "text-[var(--color-fg-primary)]"
+              : "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]"
+          )}
+        >
+          <ChevronDown
+            size={14}
+            className={cn(
+              "transition-transform duration-300",
+              open && "rotate-180"
+            )}
+          />
+        </button>
+
+        {isActive && (
+          <span className="absolute inset-0 bg-[var(--color-overlay)] rounded-lg -z-10 pointer-events-none" />
+        )}
+      </div>
+
+      {/* Dropdown panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            role="menu"
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className={cn(
+              "absolute left-0 top-full mt-2 w-[380px] z-50",
+              "rounded-2xl border border-[var(--color-border-primary)]",
+              "bg-[var(--color-bg-surface)]/95 backdrop-blur-2xl",
+              "shadow-xl shadow-black/10",
+              "overflow-hidden",
+            )}
+          >
+          <div className="p-2 space-y-1">
+            {items.map((item, i) => (
+              <button
+                key={item.section}
+                role="menuitem"
+                onClick={() => scrollToSection(item.section)}
+                className={cn(
+                  "group relative w-full text-left rounded-lg px-4 py-2.5",
+                  "transition-all duration-200",
+                  "hover:bg-[var(--color-overlay)]",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]"
+                )}
+              >
+                {/* Accent indicator on hover */}
+                <span
+                  className={cn(
+                    "absolute left-0 top-2 bottom-2 w-[2px] rounded-full",
+                    "bg-[var(--color-accent)]/0 group-hover:bg-[var(--color-accent)]/60",
+                    "transition-colors duration-200"
+                  )}
+                />
+
+                {/* Content */}
+                <div className="pl-3 flex items-center gap-2">
+                  <span className="text-sm font-semibold text-[var(--color-fg-primary)] group-hover:text-[var(--color-accent)] transition-colors duration-200">
+                    {item.label}
+                  </span>
+                  {/* Arrow on hover */}
+                  <span
+                    className={cn(
+                      "text-[var(--color-accent)] opacity-0 -translate-x-2",
+                      "group-hover:opacity-100 group-hover:translate-x-0",
+                      "transition-all duration-200"
+                    )}
+                  >
+                    →
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -102,8 +364,8 @@ function LanguageSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex items-center gap-1.5 px-3 py-2 rounded-xl text-[15px] font-medium",
-          "text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)]",
+          "flex items-center gap-1.5 px-3 py-2 rounded-xl text-base font-medium",
+          "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]",
           "hover:bg-[var(--color-overlay)] transition-all duration-300",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]"
         )}
@@ -146,7 +408,7 @@ function LanguageSwitcher() {
               disabled={isPending}
               onClick={() => switchLocale("ka")}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 text-[15px] text-left transition-colors",
+                "w-full flex items-center gap-3 px-3 py-2.5 text-base text-left transition-colors",
                 locale === "ka"
                   ? "bg-[var(--color-overlay)] text-[var(--color-fg-primary)]"
                   : "text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)]"
@@ -161,7 +423,7 @@ function LanguageSwitcher() {
               disabled={isPending}
               onClick={() => switchLocale("en")}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 text-[15px] text-left transition-colors",
+                "w-full flex items-center gap-3 px-3 py-2.5 text-base text-left transition-colors",
                 locale === "en"
                   ? "bg-[var(--color-overlay)] text-[var(--color-fg-primary)]"
                   : "text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)]"
@@ -218,7 +480,7 @@ export function Navigation({ siteConfig }: NavigationProps) {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "bg-[var(--color-bg-primary)]/80 backdrop-blur-xl border-b border-[var(--color-border-primary)]"
+            ? "bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border-primary)]"
             : "bg-transparent"
         )}
       >
@@ -241,6 +503,9 @@ export function Navigation({ siteConfig }: NavigationProps) {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
               {navLinkKeys.map((link) => {
+                if (link.key === "nav.services") {
+                  return <ServicesNavDropdown key="services" />;
+                }
                 const isActive = pathname === link.href;
                 return (
                   <Link
@@ -248,11 +513,11 @@ export function Navigation({ siteConfig }: NavigationProps) {
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "relative px-4 py-2 text-[15px] font-medium transition-colors duration-300 rounded-lg",
+                      "relative px-4 py-2 text-base font-medium transition-colors duration-300 rounded-lg",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
                       isActive
                         ? "text-[var(--color-fg-primary)]"
-                        : "text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-secondary)]"
+                        : "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]"
                     )}
                   >
                     {t(link.key)}
@@ -272,7 +537,7 @@ export function Navigation({ siteConfig }: NavigationProps) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="relative z-10 flex md:hidden items-center justify-center w-10 h-10 rounded-xl text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]"
+                className="relative z-10 flex md:hidden items-center justify-center w-10 h-10 rounded-xl text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]"
                 aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
               >
                 {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -287,6 +552,9 @@ export function Navigation({ siteConfig }: NavigationProps) {
           <div className="fixed inset-0 z-40 bg-[var(--color-bg-primary)]/95 backdrop-blur-2xl md:hidden mobile-menu-fade">
             <nav className="flex flex-col items-center justify-center h-full gap-6">
               {navLinkKeys.map((link, index) => {
+                if (link.key === "nav.services") {
+                  return <MobileServicesSection key="services" onNavigate={closeMobile} />;
+                }
                 const isActive = pathname === link.href;
                 return (
                   <div
@@ -316,16 +584,6 @@ export function Navigation({ siteConfig }: NavigationProps) {
               >
                 <LanguageSwitcher />
                 <ThemeToggle />
-              </div>
-              <div
-                className="absolute bottom-16 flex flex-col items-center gap-4 text-sm text-[var(--color-fg-tertiary)]"
-              >
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="hover:text-[var(--color-fg-secondary)] transition-colors"
-                >
-                  {siteConfig.email}
-                </a>
               </div>
             </nav>
           </div>

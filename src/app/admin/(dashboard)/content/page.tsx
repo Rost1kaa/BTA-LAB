@@ -108,7 +108,6 @@ const PAGE_DEFINITIONS: PageSection[] = [
   ]},
   { page: "footer", section: "contact", label: "Footer Contact", fields: [
     { key: "location", label: "Location", type: "text" },
-    { key: "availability", label: "Availability", type: "text" },
   ]},
   { page: "footer", section: "copyright", label: "Footer Copyright", fields: [
     { key: "text", label: "Copyright Text", type: "text" },

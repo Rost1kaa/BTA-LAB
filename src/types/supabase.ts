@@ -242,6 +242,26 @@ export type Database = {
           updated_at?: string;
         }
       >;
+      service_feature_tooltips: Table<
+        {
+          id: string;
+          name_ka: string;
+          name_en: string;
+          description_ka: string;
+          description_en: string;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          name_ka?: string;
+          name_en?: string;
+          description_ka?: string;
+          description_en?: string;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
       service_requests: Table<
         ServiceRequest,
         {

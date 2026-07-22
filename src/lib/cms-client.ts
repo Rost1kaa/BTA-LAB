@@ -2,116 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { siteConfig, stats as hardcodedStats } from "@/data/site";
-import { projects as hardcodedProjects } from "@/data/projects";
-import { teamMembers as hardcodedTeam } from "@/data/team";
-import { pricingData } from "@/data/pricing";
 import type { PortfolioProject, TeamMember, ServicePackage } from "@/types/supabase";
 import type { LocaleCode } from "@/lib/localized-fields";
-
-const fallbackProjects: PortfolioProject[] = hardcodedProjects.map((project, index) => ({
-  id: project.id,
-  title: project.title,
-  slug: project.slug,
-  category_id: null,
-  category: project.category,
-  description: project.description,
-  full_description: project.fullDescription,
-  problem: project.problem,
-  solution: project.solution,
-  results: project.results,
-  technologies: project.technologies,
-  cover_image: project.coverImage,
-  detail_cover_image_url: "",
-  gallery: project.gallery,
-  link: project.link || null,
-  featured: project.featured,
-  published: true,
-  display_order: index,
-  alt_text: `${project.title} full website preview`,
-  seo_title: null,
-  seo_description: null,
-  created_at: "",
-  updated_at: "",
-  created_by: null,
-  updated_by: null,
-}));
-
-const fallbackTeam: TeamMember[] = hardcodedTeam.map((member, index) => ({
-  ...member,
-  image: "",
-  display_order: index,
-  published: true,
-  created_at: "",
-  updated_at: "",
-  updated_by: null,
-}));
-
-const fallbackServices: ServicePackage[] = [
-  ...pricingData.website.packages.map((item, index) => ({
-    id: item.id,
-    section: "website",
-    name: item.name,
-    price: item.price,
-    billing_label: item.billingLabel || null,
-    description: item.description || null,
-    ideal_for: item.idealFor || null,
-    features: item.features,
-    delivery_time: item.deliveryTime || null,
-    cta: item.cta,
-    highlighted: item.highlighted || false,
-    custom_price: item.customPrice || false,
-    price_explanation: item.priceExplanation || null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-  ...pricingData.socialMedia.packages.map((item, index) => ({
-    id: item.id,
-    section: "social-media",
-    name: item.name,
-    price: item.price,
-    billing_label: item.billingLabel || null,
-    description: item.description || null,
-    ideal_for: item.idealFor || null,
-    features: item.features,
-    delivery_time: item.deliveryTime || null,
-    cta: item.cta,
-    highlighted: item.highlighted || false,
-    custom_price: item.customPrice || false,
-    price_explanation: item.priceExplanation || null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-  ...pricingData.addons.map((item, index) => ({
-    id: item.id,
-    section: "addons",
-    name: item.name,
-    price: item.price,
-    billing_label: null,
-    description: item.description,
-    ideal_for: item.example || null,
-    features: [],
-    delivery_time: null,
-    cta: "Choose Add-on",
-    highlighted: false,
-    custom_price: false,
-    price_explanation: null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-];
 
 const LEGACY_QEY_COVER = "/images/projects/qey-cover.jpg";
 const QEY_COVER = "/images/qey_ge.webp";
@@ -156,7 +48,7 @@ export function useContentMap(page: string, locale: LocaleCode = "ka") {
           setContent(grouped);
         }
       } catch {
-        // Silently fail — fallback to translations
+        // Silently fail
       } finally {
         if (mounted) setLoaded(true);
       }
@@ -229,9 +121,7 @@ export function usePortfolioProjects(publishedOnly = true) {
           setProjects((data || []).map(normalizeProject));
         }
       } catch {
-        if (mounted) {
-          setProjects(publishedOnly ? fallbackProjects.filter((project) => project.published) : fallbackProjects);
-        }
+        // Silently fail — use empty array
       } finally {
         if (mounted) setLoading(false);
       }
@@ -246,7 +136,7 @@ export function usePortfolioProjects(publishedOnly = true) {
 
 // ── Featured projects hook ──
 export function useFeaturedProjects() {
-  const [projects, setProjects] = useState<PortfolioProject[]>(fallbackProjects.filter((project) => project.featured));
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -266,7 +156,7 @@ export function useFeaturedProjects() {
         if (error) throw error;
         if (mounted) setProjects((data || []).map(normalizeProject));
       } catch {
-        if (mounted) setProjects(fallbackProjects.filter((project) => project.featured));
+        // Silently fail — use empty array
       } finally {
         if (mounted) setLoading(false);
       }
@@ -281,9 +171,7 @@ export function useFeaturedProjects() {
 
 // ── Single project hook ──
 export function useProject(slug: string) {
-  const [project, setProject] = useState<PortfolioProject | null>(
-    fallbackProjects.find((item) => item.slug === slug) || null
-  );
+  const [project, setProject] = useState<PortfolioProject | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -302,7 +190,7 @@ export function useProject(slug: string) {
         if (error) throw error;
         if (mounted) setProject(data ? normalizeProject(data) : null);
       } catch {
-        if (mounted) setProject(fallbackProjects.find((item) => item.slug === slug) || null);
+        // Silently fail — return null
       } finally {
         if (mounted) setLoading(false);
       }
@@ -317,7 +205,7 @@ export function useProject(slug: string) {
 
 // ── Team members hook ──
 export function useTeamMembers(publishedOnly = true) {
-  const [members, setMembers] = useState<TeamMember[]>(fallbackTeam);
+  const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -340,7 +228,7 @@ export function useTeamMembers(publishedOnly = true) {
 
         if (mounted) setMembers((data || []).map(normalizeTeamMember));
       } catch {
-        if (mounted) setMembers(fallbackTeam);
+        // Silently fail — use empty array
       } finally {
         if (mounted) setLoading(false);
       }
@@ -355,9 +243,7 @@ export function useTeamMembers(publishedOnly = true) {
 
 // ── Service packages hook ──
 export function useServicePackages(section?: string) {
-  const [packages, setPackages] = useState<ServicePackage[]>(() =>
-    section ? fallbackServices.filter((item) => item.section === section) : fallbackServices
-  );
+  const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -381,9 +267,7 @@ export function useServicePackages(section?: string) {
 
         if (mounted) setPackages(data || []);
       } catch {
-        if (mounted) {
-          setPackages(section ? fallbackServices.filter((item) => item.section === section) : fallbackServices);
-        }
+        // Silently fail — use empty array
       } finally {
         if (mounted) setLoading(false);
       }
@@ -398,7 +282,7 @@ export function useServicePackages(section?: string) {
 
 // ── Stats hook ──
 export function useStats() {
-  const [stats, setStats] = useState(hardcodedStats);
+  const [stats, setStats] = useState<Array<{ label: string; value: number; suffix?: string; translationKey?: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -424,13 +308,13 @@ export function useStats() {
 
           setStats([
             { label: "Team Members", value: teamResult.count ?? 0, translationKey: "teamMembers" },
-            { label: "Completed Projects", value: parseInt(map.stat_completed_projects) || 48, suffix: "+", translationKey: "completedProjects" },
+            { label: "Completed Projects", value: parseInt(map.stat_completed_projects) || 0, suffix: "+", translationKey: "completedProjects" },
             { label: "Services", value: servicesResult.count ?? 0, translationKey: "services" },
-            { label: "Technologies", value: parseInt(map.stat_technologies) || 20, suffix: "+", translationKey: "technologies" },
+            { label: "Technologies", value: parseInt(map.stat_technologies) || 0, suffix: "+", translationKey: "technologies" },
           ]);
         }
       } catch {
-        // Use fallback
+        // Use empty stats
       } finally {
         if (mounted) setLoading(false);
       }
@@ -447,20 +331,16 @@ export function useStats() {
 export function useSiteConfig() {
   const { settings, loaded } = useSettings();
 
-  if (!loaded || !settings.contact_email) {
-    return siteConfig;
-  }
-
   return {
-    ...siteConfig,
-    email: settings.contact_email || siteConfig.email,
-    phone: settings.contact_phone || siteConfig.phone,
-    address: settings.contact_address || siteConfig.address,
-    location: settings.contact_location || siteConfig.location,
-    availability: settings.contact_availability || siteConfig.availability,
+    name: settings.site_name || "",
+    tagline: "We help small businesses grow.",
+    description: settings.site_description || "",
+    phone: settings.contact_phone || "",
+    address: settings.contact_address || "",
+    location: settings.contact_location || "",
     socials: {
-      facebook: settings.social_facebook || siteConfig.socials.facebook,
-      instagram: settings.social_instagram || siteConfig.socials.instagram,
+      facebook: settings.social_facebook || "",
+      instagram: settings.social_instagram || "",
     },
   };
 }

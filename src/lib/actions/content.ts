@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireAdminMutation } from "@/lib/auth/admin";
@@ -47,7 +47,7 @@ export async function upsertContent(input: ContentUpdateInput) {
 
   const paths = getRevalidationPaths("content");
   paths.forEach((path) => revalidatePath(path));
-  updateTag("cms-content");
+  revalidateTag("cms-content", { expire: 0 });
 
   return { data };
 }
@@ -84,7 +84,7 @@ export async function upsertContentBatch(entries: ContentUpdateInput[]) {
   }
 
   getRevalidationPaths("content").forEach((path) => revalidatePath(path));
-  updateTag("cms-content");
+  revalidateTag("cms-content", { expire: 0 });
 
   const results = parsed.data.map((entry) => ({
     success: true,

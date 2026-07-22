@@ -32,13 +32,13 @@ export const CONTENT_KEYS = {
   },
   contact: {
     hero: ["badge", "heading", "description"],
-    info: ["email", "phone", "address"],
+    info: ["phone", "address"],
     form: ["name", "namePlaceholder", "email", "emailPlaceholder", "phone", "phonePlaceholder", "company", "companyPlaceholder", "service", "servicePlaceholder", "budget", "budgetPlaceholder", "message", "messagePlaceholder", "submit", "successTitle", "successDescription", "sendAnother", "budgetOptions_small", "budgetOptions_medium", "budgetOptions_large", "budgetOptions_enterprise"],
   },
   footer: {
     brand: ["description"],
     terms: ["about", "terms", "privacy"],
-    contact: ["location", "availability"],
+    contact: ["location"],
     copyright: ["text"],
   },
 } as const;

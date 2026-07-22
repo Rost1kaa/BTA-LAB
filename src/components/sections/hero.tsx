@@ -143,15 +143,6 @@ export function Hero({ content = {} }: HeroProps) {
             </Link>
           </div>
 
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hero-fade-in hero-delay-4">
-            <div className="flex flex-col items-center gap-2 hero-scroll-bounce">
-              <span className="text-xs text-[var(--color-fg-tertiary)]/40 tracking-[0.2em] uppercase">
-                {t("hero.scroll")}
-              </span>
-              <div className="w-px h-8 bg-gradient-to-b from-[var(--color-fg-tertiary)]/30 to-transparent" />
-            </div>
-          </div>
         </div>
       </Container>
     </section>

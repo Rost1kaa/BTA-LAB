@@ -10,8 +10,6 @@ import { TextReveal } from "@/components/animations/text-reveal";
 
 import { useTranslation } from "@/lib/use-dictionary";
 import { PortfolioProjectCard } from "@/components/portfolio/project-card";
-import { projectCategories } from "@/data/projects";
-
 import type { PortfolioProject } from "@/types/supabase";
 
 
@@ -27,16 +25,13 @@ function PortfolioPageContent({
   const { t } = useTranslation();
   const heroContent = content.hero || {};
 
-  // Get unique categories from projects (received from server)
+  // Get unique categories from projects (received from CMS/Supabase)
   const dbCategories = [...new Set(projects.map((p) => p.category))];
 
-  // Always show "All" plus any categories that exist
+  // Build filter options from DB categories only — always show "All" first
   const allCategories = [
     { label: "All", value: "all" },
-    ...dbCategories
-      .filter((c) => !projectCategories.find((pc) => pc.value === c))
-      .map((c) => ({ label: c, value: c })),
-    ...projectCategories.filter((c) => c.value !== "all"),
+    ...dbCategories.map((c) => ({ label: c, value: c })),
   ];
 
   const filteredProjects =

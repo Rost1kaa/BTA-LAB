@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getServicePackageKaLocalization } from "@/data/service-package-localizations";
 import { Save, Trash2, Eye, EyeOff, Languages } from "lucide-react";
 import { createServicePackage, deleteServicePackage, updateServicePackage } from "@/lib/actions/services";
 import toast from "react-hot-toast";
@@ -10,34 +9,6 @@ import type { ServicePackage } from "@/types/supabase";
 
 function textValue(value: string | null | undefined) {
   return typeof value === "string" ? value : "";
-}
-
-function localizedText(
-  value: string | null | undefined,
-  englishValue: string | null | undefined,
-  fallback = ""
-) {
-  const current = textValue(value);
-  if (current && current !== textValue(englishValue)) return current;
-  return fallback || current;
-}
-
-function localizedLines(
-  value: string[] | undefined,
-  englishValue: string[] | undefined,
-  fallback: string[] = []
-) {
-  const current = value || [];
-  const english = englishValue || [];
-  const sameAsEnglish = current.length === english.length && current.every((item, index) => item === english[index]);
-  const lines = current.length > 0 && !sameAsEnglish ? current : fallback.length > 0 ? fallback : current;
-  return lines.join("\n");
-}
-
-function inferPriceSuffix(price: string | undefined) {
-  if (!price) return "";
-  if (price.endsWith("-დან")) return "-დან";
-  return "";
 }
 
 export default function ServicesAdminPage() {
@@ -137,34 +108,31 @@ export default function ServicesAdminPage() {
   }
 
   function editPkg(pkg: ServicePackage) {
-    const englishName = textValue(pkg.name_en) || pkg.name;
-    const ka = getServicePackageKaLocalization(pkg.section, englishName);
-
     setForm({
       section: pkg.section,
-      name_ka: localizedText(pkg.name_ka, englishName, ka?.name),
+      name_ka: textValue(pkg.name_ka),
       name_en: textValue(pkg.name_en) || pkg.name,
       price: pkg.price,
-      price_suffix_ka: textValue(pkg.price_suffix_ka) || ka?.priceSuffix || inferPriceSuffix(ka?.price),
+      price_suffix_ka: textValue(pkg.price_suffix_ka),
       price_suffix_en: textValue(pkg.price_suffix_en),
-      custom_price_label_ka: textValue(pkg.custom_price_label_ka) || ka?.customPriceLabel || (pkg.custom_price ? ka?.price || "ინდივიდუალური" : ""),
+      custom_price_label_ka: textValue(pkg.custom_price_label_ka) || (pkg.custom_price ? "ინდივიდუალური" : ""),
       custom_price_label_en: textValue(pkg.custom_price_label_en) || (pkg.custom_price ? "Custom" : ""),
-      billing_label_ka: localizedText(pkg.billing_label_ka, pkg.billing_label_en || pkg.billing_label, ka?.billingLabel),
+      billing_label_ka: textValue(pkg.billing_label_ka),
       billing_label_en: textValue(pkg.billing_label_en) || textValue(pkg.billing_label),
-      description_ka: localizedText(pkg.description_ka, pkg.description_en || pkg.description, ka?.description),
+      description_ka: textValue(pkg.description_ka),
       description_en: textValue(pkg.description_en) || textValue(pkg.description),
-      ideal_for_ka: localizedText(pkg.ideal_for_ka, pkg.ideal_for_en || pkg.ideal_for, ka?.idealFor),
+      ideal_for_ka: textValue(pkg.ideal_for_ka),
       ideal_for_en: textValue(pkg.ideal_for_en) || textValue(pkg.ideal_for),
-      features_ka: localizedLines(pkg.features_ka, pkg.features_en || pkg.features, ka?.features),
+      features_ka: (pkg.features_ka || []).join("\n"),
       features_en: (pkg.features_en || pkg.features || []).join("\n"),
-      delivery_time_ka: localizedText(pkg.delivery_time_ka, pkg.delivery_time_en || pkg.delivery_time, ka?.deliveryTime),
+      delivery_time_ka: textValue(pkg.delivery_time_ka),
       delivery_time_en: textValue(pkg.delivery_time_en) || textValue(pkg.delivery_time),
-      cta_label_ka: localizedText(pkg.cta_label_ka || pkg.cta_ka, pkg.cta_label_en || pkg.cta_en || pkg.cta, ka?.cta),
+      cta_label_ka: textValue(pkg.cta_label_ka) || textValue(pkg.cta_ka),
       cta_label_en: textValue(pkg.cta_label_en) || textValue(pkg.cta_en) || pkg.cta,
       highlighted: pkg.highlighted,
       custom_price: pkg.custom_price,
       price_explanation: pkg.price_explanation || "",
-      price_explanation_ka: localizedText(pkg.price_explanation_ka, pkg.price_explanation_en || pkg.price_explanation, ka?.priceExplanation),
+      price_explanation_ka: textValue(pkg.price_explanation_ka),
       price_explanation_en: pkg.price_explanation_en || pkg.price_explanation || "",
       published: pkg.published,
       display_order: pkg.display_order,

@@ -1,3 +1,10 @@
+export interface FeatureTooltipData {
+  nameKa: string;
+  nameEn: string;
+  descriptionKa: string;
+  descriptionEn: string;
+}
+
 export interface PricingPackage {
   id: string;
   name: string;
@@ -6,6 +13,7 @@ export interface PricingPackage {
   description?: string;
   idealFor?: string;
   features: string[];
+  featureTooltips?: Record<string, FeatureTooltipData>;
   visibleItemCount?: number;
   deliveryTime?: string;
   cta: string;

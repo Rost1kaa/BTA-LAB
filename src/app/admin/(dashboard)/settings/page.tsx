@@ -17,11 +17,9 @@ type SettingField = {
 const SETTINGS_FIELDS: SettingField[] = [
   { key: "site_name", label: "Site Name", type: "text", section: "General", localized: false },
   { key: "site_description", label: "Site Description", type: "textarea", section: "General", localized: true },
-  { key: "contact_email", label: "Contact Email", type: "text", section: "Contact" },
   { key: "contact_phone", label: "Contact Phone", type: "text", section: "Contact" },
   { key: "contact_address", label: "Contact Address", type: "text", section: "Contact", localized: true },
   { key: "contact_location", label: "Location", type: "text", section: "Contact", localized: true },
-  { key: "contact_availability", label: "Availability Text", type: "text", section: "Contact", localized: true },
   { key: "social_facebook", label: "Facebook URL", type: "url", section: "Social" },
   { key: "social_instagram", label: "Instagram URL", type: "url", section: "Social" },
   { key: "nav_links", label: "Navigation Links (JSON)", type: "textarea", section: "Navigation" },

@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/lib/use-dictionary";
 import { scrollToPageTop } from "@/lib/public-scroll";
+import { FeatureTooltip } from "@/components/ui/feature-tooltip";
+import type { FeatureTooltipData } from "@/types";
 
 const iconMap: Record<string, React.ReactNode> = {
   Rocket: <Rocket size={24} />,
@@ -149,7 +151,7 @@ export function PricingCard({
               <span className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--color-accent)] tracking-tight break-words">
                 {pkg.price}
               </span>
-              {pkg.billingLabel && (
+              {pkg.billingLabel && !pkg.price.includes(pkg.billingLabel) && (
                 <span className="text-xs text-[var(--color-fg-tertiary)] ml-1 break-words">
                   / {pkg.billingLabel}
                 </span>
@@ -181,15 +183,23 @@ export function PricingCard({
           )}
           transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          {visibleFeatures.map((feature, i) => (
-            <li
-              key={i}
-              className="service-feature-text flex items-start gap-2 text-base text-[var(--color-fg-secondary)] leading-relaxed"
-            >
-              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-fg-muted)] flex-shrink-0" />
-              {feature}
-            </li>
-          ))}
+          {visibleFeatures.map((feature, i) => {
+            const tooltipData: FeatureTooltipData | undefined = pkg.featureTooltips?.[feature];
+            return (
+              <li
+                key={i}
+                className="service-feature-text flex items-start gap-2 text-base text-[var(--color-fg-secondary)] leading-relaxed"
+              >
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-fg-muted)] flex-shrink-0" />
+                <span className="flex items-center gap-1.5">
+                  {feature}
+                  {tooltipData && (
+                    <FeatureTooltip tooltip={tooltipData} />
+                  )}
+                </span>
+              </li>
+            );
+          })}
         </motion.ul>
 
         {/* Expand / Collapse toggle — directly after feature list in normal document flow (NOT inside mt-auto) so it always appears right below the last visible feature, never overlapping it */}

@@ -10,6 +10,8 @@ function isAdminPath(pathname: string | null): boolean {
   return pathname?.startsWith("/admin") ?? false;
 }
 
+const LOADER_MIN_DURATION = 350; // ms — guarantees the loading animation is visible
+
 export function PublicPageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
@@ -29,58 +31,71 @@ export function PublicSiteEffects() {
   const router = useRouter();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pathnameRef = useRef(pathname);
-  const loaderFrameRef = useRef(0);
-  const hideLoaderFrameRef = useRef(0);
+  const loaderStartRef = useRef(0);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scrollTopVisible, setScrollTopVisible] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const initializedRef = useRef(false);
   const revealInitializedRef = useRef(false);
   const isAdmin = isAdminPath(pathname);
 
+  // Clean up hide timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current !== null) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // ── Route loading: show immediately, hide after minimum duration ────
+
   useEffect(() => {
     pathnameRef.current = pathname;
-    if (loaderFrameRef.current) {
-      window.cancelAnimationFrame(loaderFrameRef.current);
-      loaderFrameRef.current = 0;
-    }
 
-    if (!isAdmin && !hideLoaderFrameRef.current) {
-      hideLoaderFrameRef.current = window.requestAnimationFrame(() => {
-        hideLoaderFrameRef.current = 0;
+    // When the route changes while the loader is active, ensure the
+    // loading animation stays visible for at least LOADER_MIN_DURATION ms
+    // so fast Vercel Edge CDN responses don't cause instant/janky transitions.
+    if (!isAdmin && routeLoading) {
+      const elapsed = Date.now() - loaderStartRef.current;
+      const remaining = LOADER_MIN_DURATION - elapsed;
+
+      if (remaining > 0) {
+        hideTimerRef.current = setTimeout(() => {
+          hideTimerRef.current = null;
+          setRouteLoading(false);
+        }, remaining);
+      } else {
         setRouteLoading(false);
-      });
+      }
     }
 
     return () => {
-      if (hideLoaderFrameRef.current) {
-        window.cancelAnimationFrame(hideLoaderFrameRef.current);
-        hideLoaderFrameRef.current = 0;
+      if (hideTimerRef.current !== null) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
       }
     };
-  }, [isAdmin, pathname]);
+  }, [isAdmin, pathname, routeLoading]);
 
   useEffect(() => {
     if (isAdmin) return;
 
     const stopLoader = () => {
-      if (loaderFrameRef.current) {
-        window.cancelAnimationFrame(loaderFrameRef.current);
-        loaderFrameRef.current = 0;
+      if (hideTimerRef.current !== null) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
       }
       setRouteLoading(false);
     };
 
     const startLoader = () => {
       scrollToPageTop();
-      if (hideLoaderFrameRef.current) {
-        window.cancelAnimationFrame(hideLoaderFrameRef.current);
-        hideLoaderFrameRef.current = 0;
-      }
-      if (loaderFrameRef.current) return;
-      loaderFrameRef.current = window.requestAnimationFrame(() => {
-        loaderFrameRef.current = 0;
-        setRouteLoading(true);
-      });
+      // Show loading immediately — no rAF delay — so it always appears
+      // even when the route transition completes instantly on Vercel.
+      loaderStartRef.current = Date.now();
+      setRouteLoading(true);
     };
 
     const handleNavigationIntent = (event: MouseEvent) => {
@@ -141,13 +156,9 @@ export function PublicSiteEffects() {
       document.removeEventListener("click", handleNavigationIntent, true);
       window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("pageshow", handlePageShow);
-      if (loaderFrameRef.current) {
-        window.cancelAnimationFrame(loaderFrameRef.current);
-        loaderFrameRef.current = 0;
-      }
-      if (hideLoaderFrameRef.current) {
-        window.cancelAnimationFrame(hideLoaderFrameRef.current);
-        hideLoaderFrameRef.current = 0;
+      if (hideTimerRef.current !== null) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
       }
     };
   }, [isAdmin, router]);

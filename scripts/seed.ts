@@ -105,6 +105,7 @@ const requiredTables = [
   "team_members",
   "contact_messages",
   "service_requests",
+  "service_feature_tooltips",
 ] as const;
 
 const categoryLabelsKa: Record<string, string> = {
@@ -120,7 +121,6 @@ const settingsKa: Record<string, string> = {
   site_description: "ციფრული ლაბორატორია, სადაც ბიზნესის ზრდისთვის ვქმნით თანამედროვე ვებგვერდებს, ონლაინ მაღაზიებს და ციფრულ გადაწყვეტებს.",
   contact_address: "თბილისი, საქართველო",
   contact_location: "თბილისი, საქართველო",
-  contact_availability: "ვმუშაობთ ონლაინ",
   copyright_text: "© 2024 BTA LAB. ყველა უფლება დაცულია.",
   seo_title: "BTA LAB — ციფრული ინოვაციების ლაბორატორია",
   seo_description: "თანამედროვე ვებგვერდები, ონლაინ მაღაზიები და ციფრული გადაწყვეტები მცირე ბიზნესის ზრდისთვის.",
@@ -350,11 +350,6 @@ const siteSettings: SiteSettingSeed[] = [
     setting_type: "text",
   },
   {
-    setting_key: "contact_email",
-    setting_value: "hello@bta-lab.com",
-    setting_type: "text",
-  },
-  {
     setting_key: "contact_phone",
     setting_value: "+1 (555) 123-4567",
     setting_type: "text",
@@ -367,11 +362,6 @@ const siteSettings: SiteSettingSeed[] = [
   {
     setting_key: "contact_address",
     setting_value: "Tbilisi, Georgia",
-    setting_type: "text",
-  },
-  {
-    setting_key: "contact_availability",
-    setting_value: "Working online",
     setting_type: "text",
   },
   {
@@ -984,14 +974,6 @@ const siteContent: SiteContentSeed[] = [
   {
     page: "contact",
     section: "info",
-    content_key: "email",
-    content_value_en: "hello@bta-lab.com",
-    content_type: "text",
-    sort_order: 0,
-  },
-  {
-    page: "contact",
-    section: "info",
     content_key: "phone",
     content_value_en: "+1 (555) 123-4567",
     content_type: "text",
@@ -1355,7 +1337,7 @@ const servicePackages: ServicePackageSeed[] = [
     ],
     delivery_time: null,
     cta: "Choose Package",
-    highlighted: true,
+    highlighted: false,
     custom_price: false,
     price_explanation: null,
     icon_name: null,
@@ -1394,7 +1376,7 @@ const servicePackages: ServicePackageSeed[] = [
     ],
     delivery_time: null,
     cta: "Get Consultation",
-    highlighted: false,
+    highlighted: true,
     custom_price: false,
     price_explanation:
       "Price depends on number of pages, content volume, and project complexity.",
@@ -1490,6 +1472,205 @@ const servicePackages: ServicePackageSeed[] = [
     icon_name: "Globe",
     display_order: 4,
     published: true,
+  },
+];
+
+// ── Feature Tooltips ────────────────────────────────────────────────────
+
+interface FeatureTooltipSeed {
+  name_ka: string;
+  name_en: string;
+  description_ka: string;
+  description_en: string;
+}
+
+const featureTooltips: FeatureTooltipSeed[] = [
+  // ── Website Creation Tooltips ──
+  {
+    name_ka: "SEO ოპტიმიზაცია",
+    name_en: "SEO Optimization",
+    description_ka:
+      "ვებგვერდის გაუმჯობესება Google-ის საძიებო სისტემისთვის, რათა მომხმარებლებმა უფრო მარტივად იპოვონ თქვენი ბიზნესი.",
+    description_en:
+      "Improving your website for Google's search system so customers can find your business more easily.",
+  },
+  {
+    name_ka: "საბაზისო SEO ოპტიმიზაცია",
+    name_en: "Basic SEO Optimization",
+    description_ka:
+      "საწყისი ტექნიკური გამართვა, რომელიც ეხმარება ვებგვერდს სწორად გამოჩნდეს Google-ში.",
+    description_en:
+      "Initial technical setup that helps your website appear correctly in Google search results.",
+  },
+  {
+    name_ka: "ადმინ პანელი - CMS",
+    name_en: "Admin Panel - CMS",
+    description_ka:
+      "მართვის სისტემა, სადაც თქვენ თავად შეძლებთ ტექსტების, ფოტოებისა და ინფორმაციის შეცვლას პროგრამისტის დახმარების გარეშე.",
+    description_en:
+      "A management system where you can edit texts, photos, and information yourself without needing a developer.",
+  },
+  {
+    name_ka: "API ინტეგრაციები",
+    name_en: "API Integrations",
+    description_ka:
+      "სხვადასხვა სისტემების დაკავშირება ერთმანეთთან, მაგალითად გადახდის, CRM-ის ან სხვა ბიზნეს ინსტრუმენტების დაკავშირება.",
+    description_en:
+      "Connecting different systems together, such as payment processors, CRM, or other business tools.",
+  },
+  {
+    name_ka: "Google Analytics-ის გამართვა",
+    name_en: "Google Analytics Setup",
+    description_ka:
+      "სისტემა, რომელიც გაჩვენებთ რამდენი ადამიანი სტუმრობს თქვენს საიტს და როგორ იქცევიან ისინი.",
+    description_en:
+      "A system that shows you how many people visit your website and how they behave on it.",
+  },
+  {
+    name_ka: "Google Maps ინტეგრაცია",
+    name_en: "Google Maps Integration",
+    description_ka:
+      "თქვენი ბიზნესის მდებარეობის დამატება ვებგვერდზე, რათა მომხმარებლებმა მარტივად იპოვონ ადგილი.",
+    description_en:
+      "Adding your business location to the website so customers can easily find where you are.",
+  },
+  {
+    name_ka: "ონლაინ გადახდის ინტეგრაცია",
+    name_en: "Online Payment Integration",
+    description_ka:
+      "საიტზე საბანკო ბარათით ან სხვა მეთოდით ონლაინ გადახდის შესაძლებლობის დამატება.",
+    description_en:
+      "Adding the ability to accept online payments on your website via credit card or other methods.",
+  },
+  {
+    name_ka: "CRM ინტეგრაცია",
+    name_en: "CRM Integration",
+    description_ka:
+      "მომხმარებლებისა და გაყიდვების მართვის სისტემასთან დაკავშირება, რათა კლიენტებთან მუშაობა უფრო მარტივი გახდეს.",
+    description_en:
+      "Connecting with customer and sales management systems to make working with clients easier.",
+  },
+  {
+    name_ka: "AI ინტეგრაცია",
+    name_en: "AI Integration",
+    description_ka:
+      "ხელოვნური ინტელექტის ფუნქციების დამატება ბიზნესის პროცესების გასაუმჯობესებლად.",
+    description_en:
+      "Adding artificial intelligence features to improve your business processes.",
+  },
+  {
+    name_ka: "მომხმარებლის ავტორიზაცია",
+    name_en: "User Authentication",
+    description_ka:
+      "მომხმარებლებისთვის პირადი ანგარიშის შექმნისა და სისტემაში შესვლის შესაძლებლობა.",
+    description_en:
+      "Allowing users to create personal accounts and log in to your system.",
+  },
+  {
+    name_ka: "მრავალენოვანი ვებგვერდი",
+    name_en: "Multilingual Website",
+    description_ka:
+      "ვებგვერდის რამდენიმე ენაზე მუშაობის შესაძლებლობა სხვადასხვა მომხმარებლისთვის.",
+    description_en:
+      "The ability for your website to work in multiple languages for different users.",
+  },
+  {
+    name_ka: "გამოწერის სისტემა",
+    name_en: "Subscription System",
+    description_ka:
+      "სერვისი, სადაც მომხმარებლებს შეუძლიათ პერიოდული გადახდით მიიღონ პროდუქტი ან მომსახურება.",
+    description_en:
+      "A service where users can receive a product or service through recurring payments.",
+  },
+  {
+    name_ka: "ინდივიდუალური ადმინ პანელი",
+    name_en: "Custom Admin Panel",
+    description_ka:
+      "თქვენი ბიზნესისთვის სპეციალურად შექმნილი მართვის სისტემა, სადაც თავად მართავთ ყველა მონაცემს.",
+    description_en:
+      "A management system built specifically for your business where you control all your data.",
+  },
+
+  // ── Social Media Tooltips ──
+  {
+    name_ka: "Reels იდეები და სცენარები",
+    name_en: "Reels Ideas and Scripts",
+    description_ka:
+      "მოკლე ვიდეოების იდეები და მომზადებული გეგმები Instagram-ისა და TikTok-ისთვის.",
+    description_en:
+      "Ideas and prepared scripts for short videos for Instagram and TikTok.",
+  },
+  {
+    name_ka: "კონტენტ გეგმა",
+    name_en: "Content Plan",
+    description_ka:
+      "წინასწარ დაგეგმილი გეგმა, თუ რა კონტენტი უნდა გამოქვეყნდეს და როდის.",
+    description_en:
+      "A pre-planned schedule of what content should be published and when.",
+  },
+  {
+    name_ka: "A/B ტესტირება",
+    name_en: "A/B Testing",
+    description_ka:
+      "სხვადასხვა რეკლამის ან დიზაინის შედარება, რათა გაირკვეს რომელი მუშაობს უკეთ.",
+    description_en:
+      "Comparing different ads or designs to find out which one performs better.",
+  },
+  {
+    name_ka: "რემარკეტინგი",
+    name_en: "Remarketing",
+    description_ka:
+      "რეკლამის ჩვენება იმ ადამიანებისთვის, ვინც უკვე ეწვია თქვენს საიტს ან დაინტერესდა თქვენი ბიზნესით.",
+    description_en:
+      "Showing ads to people who have already visited your website or shown interest in your business.",
+  },
+  {
+    name_ka: "Meta Pixel-ის გამართვა",
+    name_en: "Meta Pixel Setup",
+    description_ka:
+      "ინსტრუმენტი, რომელიც ეხმარება Facebook-სა და Instagram-ს სწორად გაზომოს რეკლამის შედეგები.",
+    description_en:
+      "A tool that helps Facebook and Instagram correctly measure your ad performance.",
+  },
+  {
+    name_ka: "კონვერსიების თვალყურის დევნება",
+    name_en: "Conversion Tracking",
+    description_ka:
+      "გაზომვა იმისა, რამდენმა მომხმარებელმა შეასრულა სასურველი მოქმედება, მაგალითად შეკვეთა ან კონტაქტი.",
+    description_en:
+      "Measuring how many users completed a desired action, such as placing an order or contacting you.",
+  },
+  {
+    name_ka: "სამიზნე აუდიტორიის შერჩევა",
+    name_en: "Target Audience Selection",
+    description_ka:
+      "რეკლამის ჩვენება იმ ადამიანებისთვის, რომლებიც ყველაზე მეტად არიან დაინტერესებული თქვენი პროდუქტით ან მომსახურებით.",
+    description_en:
+      "Showing your ads to people who are most likely interested in your product or service.",
+  },
+  {
+    name_ka: "სარეკლამო კამპანიის შექმნა",
+    name_en: "Ad Campaign Creation",
+    description_ka:
+      "რეკლამის სრული დაგეგმვა, გაშვება და მართვა კონკრეტული მიზნის მისაღწევად.",
+    description_en:
+      "Complete planning, launching, and management of ads to achieve a specific goal.",
+  },
+  {
+    name_ka: "ვიდეო მონტაჟი",
+    name_en: "Video Editing",
+    description_ka:
+      "ვიდეო მასალის დამუშავება, გაფორმება და მომზადება სოციალურ ქსელებში გამოსაქვეყნებლად.",
+    description_en:
+      "Processing, enhancing, and preparing video content for publication on social networks.",
+  },
+  {
+    name_ka: "ანალიტიკის ანგარიში",
+    name_en: "Analytics Report",
+    description_ka:
+      "ანგარიში, რომელიც აჩვენებს რეკლამისა და კონტენტის შედეგებს.",
+    description_en:
+      "A report that shows the results of your ads and content performance.",
   },
 ];
 
@@ -1815,7 +1996,36 @@ async function seed(): Promise<void> {
     `  ✓  ${counts["Service packages"] || 0} packages processed`
   );
 
-  // ── 8. Team Members ───────────────────────────────────────────────
+  // ── 8. Feature Tooltips ──────────────────────────────────────────
+
+  console.log("");
+  console.log("  ── Feature Tooltips ───────────────────────────");
+
+  for (const tooltip of featureTooltips) {
+    try {
+      const id = deterministicId(`tooltip-${tooltip.name_ka}`);
+      const { error } = await supabase
+        .from("service_feature_tooltips")
+        .upsert({ id, ...tooltip } as never, { onConflict: "id" });
+
+      if (error) {
+        console.error(`  ✗  ${tooltip.name_ka}: ${error.message}`);
+        hasError = true;
+      } else {
+        counts["Feature tooltips"] = (counts["Feature tooltips"] || 0) + 1;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`  ✗  ${tooltip.name_ka}: ${message}`);
+      hasError = true;
+    }
+  }
+
+  console.log(
+    `  ✓  ${counts["Feature tooltips"] || 0} tooltips processed`
+  );
+
+  // ── 9. Team Members ───────────────────────────────────────────────
 
   console.log("");
   console.log("  ── Team Members ─────────────────────────────");

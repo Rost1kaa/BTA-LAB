@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdminMutation } from "@/lib/auth/admin";
 import { createServerSupabaseClient, createServiceRoleClient } from "@/lib/supabase/server";
@@ -117,7 +117,7 @@ export async function upsertSettings(entries: SettingInput[]) {
   }
 
   ["/", "/contact", "/admin/settings"].forEach((path) => revalidatePath(path));
-  updateTag("cms-settings");
-  updateTag("cms-stats");
+  revalidateTag("cms-settings", { expire: 0 });
+  revalidateTag("cms-stats", { expire: 0 });
   return { success: true };
 }

@@ -1,14 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "@/lib/use-dictionary";
 
 interface FooterProps {
   siteConfig: {
-    email: string;
     phone: string;
     location: string;
-    availability: string;
     socials: {
       facebook: string;
       instagram: string;
@@ -74,17 +73,17 @@ export function Footer({ siteConfig }: FooterProps) {
     <footer className="public-copy-scope relative border-t border-[var(--color-border-primary)] bg-[var(--color-bg-primary)]">
       <div className="footer-container mx-auto flex w-[90%] max-w-[1440px] flex-col items-start justify-between gap-10 py-12 md:grid md:grid-cols-2 md:gap-x-12 md:gap-y-10 md:py-14 lg:flex lg:flex-row lg:gap-16">
         <div className="footer-brand flex w-full max-w-xl flex-col gap-5 md:col-span-2 lg:col-span-1 lg:max-w-[38%]">
-          <Link href="/" className="group inline-flex w-fit items-center gap-3">
-            <span className="text-2xl font-semibold leading-none tracking-tight text-[var(--color-fg-primary)]">
-              BTA
-            </span>
-            <span className="h-px w-9 bg-[var(--color-fg-tertiary)]/60 transition-colors duration-300 group-hover:bg-[var(--color-fg-primary)]" />
-            <span className="text-sm font-medium uppercase tracking-[0.28em] text-[var(--color-fg-secondary)] transition-colors duration-300 group-hover:text-[var(--color-fg-primary)]">
-              LAB
-            </span>
-          </Link>
+          {/* Logo */}
+          <Image
+            src="/images/logo.png"
+            alt="BTA LAB Logo"
+            width={64}
+            height={64}
+            className="object-contain"
+            priority={false}
+          />
 
-          <p className="max-w-[34rem] text-sm leading-7 text-[var(--color-fg-secondary)]">
+          <p className="max-w-[34rem] text-base leading-7 text-[var(--color-fg-secondary)]">
             {t("footer.brandDescription")}
           </p>
 
@@ -116,7 +115,7 @@ export function Footer({ siteConfig }: FooterProps) {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="inline-flex min-h-7 items-center text-sm leading-6 text-[var(--color-fg-tertiary)] transition-colors duration-200 hover:text-[var(--color-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-primary)]/25"
+                  className="inline-flex min-h-7 items-center text-base leading-6 text-[var(--color-fg-tertiary)] transition-colors duration-200 hover:text-[var(--color-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-primary)]/25"
                 >
                   {link.label}
                 </Link>
@@ -130,19 +129,11 @@ export function Footer({ siteConfig }: FooterProps) {
             {t("footer.contact.title")}
           </h4>
           <address className="not-italic">
-            <ul className="flex flex-col gap-3 text-sm leading-6 text-[var(--color-fg-secondary)]">
+            <ul className="flex flex-col gap-3 text-base leading-6 text-[var(--color-fg-secondary)]">
               <li>
                 <span className="block text-[var(--color-fg-tertiary)]">
                   {siteConfig.location}
                 </span>
-              </li>
-              <li>
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="inline-flex min-h-7 items-center break-all text-[var(--color-fg-secondary)] transition-colors duration-200 hover:text-[var(--color-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-primary)]/25"
-                >
-                  {siteConfig.email}
-                </a>
               </li>
               <li>
                 <a
@@ -151,11 +142,6 @@ export function Footer({ siteConfig }: FooterProps) {
                 >
                   {siteConfig.phone}
                 </a>
-              </li>
-              <li>
-                <span className="block text-[var(--color-fg-tertiary)]">
-                  {siteConfig.availability}
-                </span>
               </li>
             </ul>
           </address>

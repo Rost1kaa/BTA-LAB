@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdminMutation } from "@/lib/auth/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -162,6 +162,6 @@ function revalidateServices() {
   revalidatePath("/");
   revalidatePath("/services");
   revalidatePath("/admin/services");
-  updateTag("cms-services");
-  updateTag("cms-stats");
+  revalidateTag("cms-services", { expire: 0 });
+  revalidateTag("cms-stats", { expire: 0 });
 }

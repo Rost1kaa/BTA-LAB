@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
+import { Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { FadeIn } from "@/components/animations/fade-in";
@@ -13,11 +13,9 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/use-dictionary";
 
 type SiteConfigShape = {
-  email: string;
   phone: string;
   address: string;
   location: string;
-  availability: string;
   socials: {
     facebook: string;
     instagram: string;
@@ -37,7 +35,6 @@ function ContactFormContent({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { locale, t } = useTranslation();
 
-  const email = siteConfig.email;
   const phone = siteConfig.phone;
   const address = siteConfig.address;
   const formContent = content.form || {};
@@ -188,18 +185,6 @@ function ContactFormContent({
       <div className="lg:col-span-2">
         <FadeIn direction="up" delay={0.1}>
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
-              <div className="w-10 h-10 rounded-lg bg-[var(--color-overlay)] flex items-center justify-center text-[var(--color-fg-tertiary)]/70 mb-4">
-                <Mail size={20} />
-              </div>
-              <h3 className="text-sm font-semibold text-[var(--color-fg-tertiary)]/80 uppercase tracking-wider mb-1">
-                {t("contact.info.email")}
-              </h3>
-              <a href={`mailto:${email}`} className="text-base text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-secondary)] transition-colors">
-                {email}
-              </a>
-            </div>
-
             <div className="p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
               <div className="w-10 h-10 rounded-lg bg-[var(--color-overlay)] flex items-center justify-center text-[var(--color-fg-tertiary)]/70 mb-4">
                 <Phone size={20} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { FadeIn } from "@/components/animations/fade-in";
@@ -8,6 +8,8 @@ import { Section } from "@/components/ui/section";
 import { TextReveal } from "@/components/animations/text-reveal";
 
 import { useTranslation } from "@/lib/use-dictionary";
+import { createClient } from "@/lib/supabase/client";
+import type { FeatureTooltipData } from "@/types";
 
 // Mapping from pricing package IDs to questionnaire keys
 const PACKAGE_TO_QUESTIONNAIRE: Record<string, string> = {
@@ -26,31 +28,48 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PricingSectionBlock } from "@/components/services/pricing-section";
+import { SocialMediaTabbedPricing } from "@/components/services/social-media-pricing-tabs";
 import { ServiceAddonCard } from "@/components/services/service-addon-card";
 import { ServiceRequestForm } from "@/components/services/service-request-form";
-import { pricingData } from "@/data/pricing";
-
+import { FeatureTooltipProvider } from "@/components/ui/feature-tooltip";
 import type { ServicePackage } from "@/types/supabase";
 import type { PricingPackage, ServiceAddon } from "@/types";
 
-const PRICING_PACKAGE_CONFIG = new Map(
-  [...pricingData.website.packages, ...pricingData.socialMedia.packages].map((pkg) => [
-    pkg.id,
-    pkg,
-  ])
-);
+// Build a feature name → tooltip lookup map from raw DB rows.
+// Keys by BOTH Georgian and English names so tooltips work regardless
+// of the locale the features are displayed in.
+function buildTooltipMap(
+  rows: Array<{ name_ka: string; name_en: string; description_ka: string; description_en: string }>,
+): Record<string, FeatureTooltipData> {
+  const map: Record<string, FeatureTooltipData> = {};
+  for (const row of rows) {
+    const nameKa = (row.name_ka || "").trim();
+    const nameEn = (row.name_en || "").trim();
+    const data: FeatureTooltipData = {
+      nameKa: row.name_ka || "",
+      nameEn: row.name_en || "",
+      descriptionKa: row.description_ka || "",
+      descriptionEn: row.description_en || "",
+    };
+    if (nameKa) map[nameKa] = data;
+    if (nameEn && nameEn !== nameKa) map[nameEn] = data;
+  }
+  return map;
+}
 
-const PRICING_PACKAGE_CONFIG_BY_SECTION_NAME = new Map<string, PricingPackage>(
-  [
-    ...pricingData.website.packages.map((pkg) => [`website:${pkg.name}`, pkg] as const),
-    ...pricingData.socialMedia.packages.map((pkg) => [`social-media:${pkg.name}`, pkg] as const),
-  ]
-);
+function toPricingPackage(item: ServicePackage, tooltipMap: Record<string, FeatureTooltipData>): PricingPackage {
+  const features = item.features || [];
 
-function toPricingPackage(item: ServicePackage): PricingPackage {
-  const configuredPackage =
-    PRICING_PACKAGE_CONFIG.get(item.id) ??
-    PRICING_PACKAGE_CONFIG_BY_SECTION_NAME.get(`${item.section}:${item.name_en || item.name}`);
+  // Build a per-feature tooltip lookup. For each feature text, check whether
+  // a tooltip was registered by its Georgian or English name.
+  const featureTooltips: Record<string, FeatureTooltipData> = {};
+  for (const feature of features) {
+    const trimmed = feature.trim();
+    if (!trimmed) continue;
+    if (tooltipMap[trimmed]) {
+      featureTooltips[trimmed] = tooltipMap[trimmed];
+    }
+  }
 
   return {
     id: item.id,
@@ -59,14 +78,14 @@ function toPricingPackage(item: ServicePackage): PricingPackage {
     billingLabel: item.billing_label || undefined,
     description: item.description || undefined,
     idealFor: item.ideal_for || undefined,
-    features: item.features || [],
+    features,
+    featureTooltips: Object.keys(featureTooltips).length > 0 ? featureTooltips : undefined,
     deliveryTime: item.delivery_time || undefined,
     cta: item.cta,
     highlighted: item.highlighted,
     customPrice: item.custom_price,
     priceExplanation: item.price_explanation || undefined,
     iconName: item.icon_name || undefined,
-    visibleItemCount: configuredPackage?.visibleItemCount,
   };
 }
 
@@ -80,6 +99,35 @@ function ServicesPageContent({
   const { t } = useTranslation();
   const heroContent = content.hero || {};
   const ctaContent = content.cta || {};
+
+  // Ensure page always opens at the top, even when the global navigation
+  // interception (public-site-effects) disables Next.js scroll restoration
+  // via router.push(url, { scroll: false }). This corrects any scroll drift
+  // that can occur during hydration or layout shifts.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Fetch feature tooltips from Supabase on mount
+  const [tooltipMap, setTooltipMap] = useState<Record<string, FeatureTooltipData>>({});
+  useEffect(() => {
+    let mounted = true;
+    async function fetchTooltips() {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("service_feature_tooltips")
+          .select("name_ka, name_en, description_ka, description_en");
+        if (mounted && data) {
+          setTooltipMap(buildTooltipMap(data as Array<{ name_ka: string; name_en: string; description_ka: string; description_en: string }>));
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+    fetchTooltips();
+    return () => { mounted = false; };
+  }, []);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedService, setSelectedService] = useState({ id: "", name: "", price: "", isCustomPrice: false });
@@ -98,21 +146,21 @@ function ServicesPageContent({
   }, []);
 
   const websiteSection = {
-    ...pricingData.website,
+    id: "website",
     title: t("pricing.website.title"),
     description: t("pricing.website.description"),
     packages: packages
       .filter((item) => item.section === "website")
-      .map(toPricingPackage),
+      .map((item) => toPricingPackage(item, tooltipMap)),
   };
   const socialSection = {
-    ...pricingData.socialMedia,
+    id: "social-media",
     title: t("pricing.social.title"),
     description: t("pricing.social.description"),
     note: t("pricing.social.note"),
     packages: packages
       .filter((item) => item.section === "social-media")
-      .map(toPricingPackage),
+      .map((item) => toPricingPackage(item, tooltipMap)),
   };
   const addons: ServiceAddon[] = packages
     .filter((item) => item.section === "addons")
@@ -153,34 +201,64 @@ function ServicesPageContent({
       </Section>
 
       {/* Website Development Pricing */}
-      <Section className="py-16 md:py-20 bg-[var(--color-bg-secondary)]">
+      <Section id="web-development" className="py-16 md:py-20 bg-[var(--color-bg-secondary)] scroll-mt-24">
         <Container>
           <PricingSectionBlock
             section={websiteSection}
             onPlanProject={openForm}
           />
+
+          {/* Can't decide? — CTA callout after the last website package */}
+          <FadeIn direction="up" delay={0.2}>
+            <div className="mt-12 mx-auto max-w-4xl">
+              <div className="rounded-xl border border-[var(--color-border-secondary)] bg-[var(--color-overlay)] px-5 py-5 md:px-7 md:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                  <div className="w-0.5 self-stretch shrink-0 rounded-full bg-[var(--color-accent)]/40" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base md:text-lg font-semibold text-[var(--color-fg-primary)] tracking-tight">
+                      {t("services.cta_choose.heading")}
+                    </h3>
+                    <p className="mt-1.5 text-sm md:text-base text-[var(--color-fg-tertiary)] leading-relaxed">
+                      {t("services.cta_choose.description")}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    <Link href="/contact">
+                      <Button variant="primary" size="md" className="gap-2 group whitespace-nowrap">
+                        {t("services.cta.button")}
+                        <ArrowRight
+                          size={16}
+                          className="group-hover:translate-x-1 transition-transform"
+                        />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
         </Container>
       </Section>
 
-      {/* Social Media Pricing */}
-      <Section className="py-16 md:py-20">
-        <Container>
-          <PricingSectionBlock
-            section={socialSection}
-            onPlanProject={openForm}
-            maxVisibleFeatures={9}
-          />
-        </Container>
-      </Section>
+      {/* Social Media Pricing — premium tabbed layout */}
+      <div id="social-media" className="scroll-mt-24">
+        <SocialMediaTabbedPricing
+          section={socialSection}
+          onPlanProject={openForm}
+          maxVisibleFeatures={9}
+        />
+      </div>
 
       {/* Add-ons */}
-      <Section className="py-16 md:py-20 bg-[var(--color-bg-secondary)]">
+      <Section id="additional-services" className="py-16 md:py-20 bg-[var(--color-bg-secondary)] scroll-mt-24">
         <Container>
           <FadeIn direction="up">
-            <Badge variant="outline">{content.addons?.title || t("services.addons.title")}</Badge>
-            <h2 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight text-gradient">
-              {content.addons?.description || t("services.addons.description")}
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gradient">
+              {content.addons?.title || t("services.addons.title")}
             </h2>
+            <p className="mt-4 max-w-2xl text-base md:text-lg text-[var(--color-fg-tertiary)] leading-relaxed">
+              {content.addons?.description || t("services.addons.description")}
+            </p>
           </FadeIn>
 
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -240,5 +318,9 @@ export function ServicesPageClient({
   content: Record<string, Record<string, string>>;
   packages: ServicePackage[];
 }) {
-  return <ServicesPageContent content={content} packages={packages} />;
+  return (
+    <FeatureTooltipProvider>
+      <ServicesPageContent content={content} packages={packages} />
+    </FeatureTooltipProvider>
+  );
 }

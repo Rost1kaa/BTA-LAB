@@ -30,7 +30,6 @@ const contentKeyOverrides: Record<string, string> = {
   "contact.hero.badge": "contact.badge",
   "contact.hero.heading": "contact.heading",
   "contact.hero.description": "contact.description",
-  "contact.info.email": "contact.info.email",
   "contact.info.phone": "contact.info.phone",
   "contact.info.address": "contact.info.address",
   "contact.form.budgetOptions_small": "contact.form.budgetOptions.small",
@@ -43,7 +42,6 @@ const contentKeyOverrides: Record<string, string> = {
   "footer.terms.terms": "footer.info.terms",
   "footer.terms.privacy": "footer.info.privacy",
   "footer.contact.location": "footer.contact.location",
-  "footer.contact.availability": "footer.contact.availability",
   "footer.copyright.text": "footer.copyright",
 };
 

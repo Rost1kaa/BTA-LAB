@@ -371,11 +371,6 @@
   }
 }
 
-@keyframes scroll-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
-}
-
 @keyframes soft-line {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.6; }
@@ -554,14 +549,6 @@
 
 .hero-delay-3 {
   animation-delay: 0.18s;
-}
-
-.hero-delay-4 {
-  animation-delay: 0.24s;
-}
-
-.hero-scroll-bounce {
-  animation: scroll-bounce 2s ease-in-out infinite;
 }
 
 .hero-content-motion + *,

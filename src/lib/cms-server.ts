@@ -3,12 +3,6 @@ import "server-only";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { siteConfig, stats as hardcodedStats } from "@/data/site";
-import { projects as hardcodedProjects } from "@/data/projects";
-import { teamMembers as hardcodedTeam } from "@/data/team";
-import { pricingData } from "@/data/pricing";
-import { getServicePackageKaLocalization } from "@/data/service-package-localizations";
-import { getTeamMemberKaLocalization } from "@/data/team-localizations";
 import type { PortfolioProject, TeamMember, ServicePackage } from "@/types/supabase";
 import {
   getLocalizedArray,
@@ -53,21 +47,11 @@ function localizeProject(project: PortfolioProject, locale: LocaleCode): Portfol
 
 function localizeTeamMember(member: TeamMember, locale: LocaleCode): TeamMember {
   const record = member as unknown as Record<string, unknown>;
-  const localized = {
+  return {
     ...member,
     name: getLocalizedText(record, "name", locale),
     bio: getLocalizedText(record, "bio", locale),
     image_alt: getLocalizedText(record, "image_alt", locale, "name"),
-  };
-
-  if (locale !== "ka") return localized;
-
-  const ka = getTeamMemberKaLocalization(member.name_en || member.name);
-  if (!ka) return localized;
-
-  return {
-    ...localized,
-    bio: localized.bio && /[\u10A0-\u10FF]/.test(localized.bio) ? localized.bio : ka.bio,
   };
 }
 
@@ -106,7 +90,7 @@ function localizeServicePrice(pkg: ServicePackage, record: Record<string, unknow
 
 function localizeServicePackage(pkg: ServicePackage, locale: LocaleCode): ServicePackage {
   const record = pkg as unknown as Record<string, unknown>;
-  const localized = {
+  return {
     ...pkg,
     name: getLocalizedText(record, "name", locale),
     price: localizeServicePrice(pkg, record, locale),
@@ -118,135 +102,7 @@ function localizeServicePackage(pkg: ServicePackage, locale: LocaleCode): Servic
     cta: getLocalizedText(record, "cta_label", locale, "cta") || getLocalizedText(record, "cta", locale),
     price_explanation: getLocalizedText(record, "price_explanation", locale) || null,
   };
-
-  if (locale !== "ka") return localized;
-
-  const englishName = pkg.name_en || pkg.name;
-  const ka = getServicePackageKaLocalization(pkg.section, englishName);
-
-  if (!ka) return localized;
-
-  return {
-    ...localized,
-    name: hasLocalizedServiceText(record, "name", "ka") ? localized.name : ka.name,
-    price: hasLocalizedServiceText(record, "price_suffix", "ka") || hasLocalizedServiceText(record, "custom_price_label", "ka")
-      ? localized.price
-      : ka.price || localized.price,
-    billing_label: hasLocalizedServiceText(record, "billing_label", "ka") ? localized.billing_label : ka.billingLabel ?? localized.billing_label,
-    description: hasLocalizedServiceText(record, "description", "ka") ? localized.description : ka.description ?? localized.description,
-    ideal_for: hasLocalizedServiceText(record, "ideal_for", "ka") ? localized.ideal_for : ka.idealFor ?? localized.ideal_for,
-    features: hasLocalizedServiceArray(record, "features", "ka") ? localized.features : ka.features ?? localized.features,
-    delivery_time: hasLocalizedServiceText(record, "delivery_time", "ka") ? localized.delivery_time : ka.deliveryTime ?? localized.delivery_time,
-    cta: hasLocalizedServiceText(record, "cta_label", "ka") ? localized.cta : ka.cta ?? localized.cta,
-    price_explanation: hasLocalizedServiceText(record, "price_explanation", "ka") ? localized.price_explanation : ka.priceExplanation ?? localized.price_explanation,
-  };
 }
-
-// ── Fallback data ──
-
-const fallbackProjects: PortfolioProject[] = hardcodedProjects.map((project, index) => ({
-  id: project.id,
-  title: project.title,
-  slug: project.slug,
-  category_id: null,
-  category: project.category,
-  description: project.description,
-  full_description: project.fullDescription,
-  problem: project.problem,
-  solution: project.solution,
-  results: project.results,
-  technologies: project.technologies,
-  cover_image: project.coverImage,
-  detail_cover_image_url: "",
-  gallery: project.gallery,
-  link: project.link || null,
-  featured: project.featured,
-  published: true,
-  display_order: index,
-  alt_text: `${project.title} full website preview`,
-  seo_title: null,
-  seo_description: null,
-  created_at: "",
-  updated_at: "",
-  created_by: null,
-  updated_by: null,
-}));
-
-const fallbackTeam: TeamMember[] = hardcodedTeam.map((member, index) => ({
-  ...member,
-  image: member.image || "",
-  display_order: index,
-  published: true,
-  created_at: "",
-  updated_at: "",
-  updated_by: null,
-}));
-
-const fallbackServices: ServicePackage[] = [
-  ...pricingData.website.packages.map((item, index) => ({
-    id: item.id,
-    section: "website",
-    name: item.name,
-    price: item.price,
-    billing_label: item.billingLabel || null,
-    description: item.description || null,
-    ideal_for: item.idealFor || null,
-    features: item.features,
-    delivery_time: item.deliveryTime || null,
-    cta: item.cta,
-    highlighted: item.highlighted || false,
-    custom_price: item.customPrice || false,
-    price_explanation: item.priceExplanation || null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-  ...pricingData.socialMedia.packages.map((item, index) => ({
-    id: item.id,
-    section: "social-media",
-    name: item.name,
-    price: item.price,
-    billing_label: item.billingLabel || null,
-    description: item.description || null,
-    ideal_for: item.idealFor || null,
-    features: item.features,
-    delivery_time: item.deliveryTime || null,
-    cta: item.cta,
-    highlighted: item.highlighted || false,
-    custom_price: item.customPrice || false,
-    price_explanation: item.priceExplanation || null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-  ...pricingData.addons.map((item, index) => ({
-    id: item.id,
-    section: "addons",
-    name: item.name,
-    price: item.price,
-    billing_label: null,
-    description: item.description,
-    ideal_for: item.example || null,
-    features: [],
-    delivery_time: null,
-    cta: "Choose Add-on",
-    highlighted: false,
-    custom_price: false,
-    price_explanation: null,
-    icon_name: item.iconName || null,
-    display_order: index,
-    published: true,
-    created_at: "",
-    updated_at: "",
-    updated_by: null,
-  })),
-];
 
 // ── Server-side Content Map ──
 // Returns { section: { key: value } }
@@ -263,7 +119,7 @@ const getCachedContentRows = unstable_cache(
     return (data || []) as Array<Record<string, unknown>>;
   },
   ["cms-content"],
-  { tags: ["cms-content"], revalidate: 3600 }
+  { tags: ["cms-content"] }
 );
 
 export const getContentMapServer = cache(async (page: string, locale: LocaleCode = "ka") => {
@@ -288,7 +144,7 @@ const getCachedSettingsRows = unstable_cache(
     return (data || []) as Array<Record<string, unknown>>;
   },
   ["cms-settings"],
-  { tags: ["cms-settings"], revalidate: 3600 }
+  { tags: ["cms-settings"] }
 );
 
 export const getSettingsServer = cache(async (locale: LocaleCode = "ka") => {
@@ -298,7 +154,6 @@ export const getSettingsServer = cache(async (locale: LocaleCode = "ka") => {
       "site_description",
       "contact_address",
       "contact_location",
-      "contact_availability",
       "copyright_text",
     ]);
 
@@ -331,7 +186,7 @@ const getCachedPublishedProjects = unstable_cache(
     return ((data || []) as PortfolioProject[]).map(normalizeProject);
   },
   ["cms-projects-published"],
-  { tags: ["cms-projects"], revalidate: 3600 }
+  { tags: ["cms-projects"] }
 );
 
 export const getPublishedProjectsServer = cache(async (locale: LocaleCode = "ka") => {
@@ -339,7 +194,7 @@ export const getPublishedProjectsServer = cache(async (locale: LocaleCode = "ka"
     const data = await getCachedPublishedProjects();
     return data.map((project) => localizeProject(project, locale));
   } catch {
-    return fallbackProjects.filter((p) => p.published).map((project) => localizeProject(project, locale));
+    return [];
   }
 })
 
@@ -360,7 +215,7 @@ const getCachedFeaturedProjects = unstable_cache(
     return ((data || []) as PortfolioProject[]).map(normalizeProject);
   },
   ["cms-projects-featured"],
-  { tags: ["cms-projects"], revalidate: 3600 }
+  { tags: ["cms-projects"] }
 );
 
 export const getFeaturedProjectsServer = cache(async (locale: LocaleCode = "ka") => {
@@ -368,7 +223,7 @@ export const getFeaturedProjectsServer = cache(async (locale: LocaleCode = "ka")
     const data = await getCachedFeaturedProjects();
     return data.map((project) => localizeProject(project, locale));
   } catch {
-    return fallbackProjects.filter((p) => p.featured).map((project) => localizeProject(project, locale));
+    return [];
   }
 })
 
@@ -387,8 +242,7 @@ export const getProjectBySlugServer = cache(async (slug: string, locale: LocaleC
     if (error) throw error;
     return data ? localizeProject(normalizeProject(data as PortfolioProject), locale) : null;
   } catch {
-    const project = fallbackProjects.find((p) => p.slug === slug);
-    return project ? localizeProject(project, locale) : null;
+    return null;
   }
 })
 
@@ -411,7 +265,7 @@ const getCachedTeamMembers = unstable_cache(
     return ((data || []) as TeamMember[]).map(normalizeTeamMember);
   },
   ["cms-team"],
-  { tags: ["cms-team", "cms-stats"], revalidate: 3600 }
+  { tags: ["cms-team", "cms-stats"] }
 );
 
 export const getTeamMembersServer = cache(async (publishedOnly = true, locale: LocaleCode = "ka") => {
@@ -419,7 +273,7 @@ export const getTeamMembersServer = cache(async (publishedOnly = true, locale: L
     const data = await getCachedTeamMembers(publishedOnly);
     return data.map((member) => localizeTeamMember(member, locale));
   } catch {
-    return fallbackTeam.map((member) => localizeTeamMember(member, locale));
+    return [];
   }
 })
 
@@ -443,7 +297,7 @@ const getCachedServicePackages = unstable_cache(
     return (data || []) as ServicePackage[];
   },
   ["cms-services"],
-  { tags: ["cms-services", "cms-stats"], revalidate: 3600 }
+  { tags: ["cms-services", "cms-stats"] }
 );
 
 export const getServicePackagesServer = cache(async (section?: string, locale: LocaleCode = "ka") => {
@@ -451,10 +305,7 @@ export const getServicePackagesServer = cache(async (section?: string, locale: L
     const data = await getCachedServicePackages(section);
     return data.map((pkg) => localizeServicePackage(pkg, locale));
   } catch {
-    if (section) {
-      return fallbackServices.filter((item) => item.section === section).map((pkg) => localizeServicePackage(pkg, locale));
-    }
-    return fallbackServices.map((pkg) => localizeServicePackage(pkg, locale));
+    return [];
   }
 })
 
@@ -486,64 +337,50 @@ const getCachedStatsData = unstable_cache(
     };
   },
   ["cms-stats"],
-  { tags: ["cms-stats", "cms-settings"], revalidate: 3600 }
+  { tags: ["cms-stats", "cms-settings"] }
 );
 
 export const getStatsServer = cache(async () => {
-  let teamMembersCount = 0;
-  let servicesCount = 0;
-
   try {
     const data = await getCachedStatsData();
-    teamMembersCount = data.teamMembersCount;
-    servicesCount = data.servicesCount;
 
-    if (data.settings.length > 0) {
-      const map: Record<string, string> = {};
-      data.settings.forEach(
-        (s) => (map[s.setting_key] = s.setting_value)
-      );
+    const map: Record<string, string> = {};
+    data.settings.forEach(
+      (s) => (map[s.setting_key] = s.setting_value)
+    );
 
-      return [
-        {
-          label: "Team Members",
-          value: teamMembersCount,
-          translationKey: "teamMembers" as const,
-        },
-        {
-          label: "Completed Projects",
-          value: parseInt(map.stat_completed_projects) || 48,
-          suffix: "+",
-          translationKey: "completedProjects" as const,
-        },
-        {
-          label: "Services",
-          value: servicesCount,
-          translationKey: "services" as const,
-        },
-        {
-          label: "Technologies",
-          value: parseInt(map.stat_technologies) || 20,
-          suffix: "+",
-          translationKey: "technologies" as const,
-        },
-      ];
-    }
+    return [
+      {
+        label: "Team Members",
+        value: data.teamMembersCount,
+        translationKey: "teamMembers" as const,
+      },
+      {
+        label: "Completed Projects",
+        value: parseInt(map.stat_completed_projects) || 0,
+        suffix: "+",
+        translationKey: "completedProjects" as const,
+      },
+      {
+        label: "Services",
+        value: data.servicesCount,
+        translationKey: "services" as const,
+      },
+      {
+        label: "Technologies",
+        value: parseInt(map.stat_technologies) || 0,
+        suffix: "+",
+        translationKey: "technologies" as const,
+      },
+    ];
   } catch {
-    // Fall through to static stats for the unchanged counters.
+    return [
+      { label: "Team Members", value: 0, translationKey: "teamMembers" as const },
+      { label: "Completed Projects", value: 0, suffix: "+", translationKey: "completedProjects" as const },
+      { label: "Services", value: 0, translationKey: "services" as const },
+      { label: "Technologies", value: 0, suffix: "+", translationKey: "technologies" as const },
+    ];
   }
-
-  return hardcodedStats.map((stat) => {
-    if (stat.translationKey === "teamMembers") {
-      return { ...stat, value: teamMembersCount };
-    }
-
-    if (stat.translationKey === "services") {
-      return { ...stat, value: servicesCount };
-    }
-
-    return stat;
-  });
 })
 
 // ── Server-side Site Config ──
@@ -551,15 +388,15 @@ export const getStatsServer = cache(async () => {
 export const getSiteConfigServer = cache(async (locale: LocaleCode = "ka") => {
   const settings = await getSettingsServer(locale);
   return {
-    ...siteConfig,
-    email: settings.contact_email || siteConfig.email,
-    phone: settings.contact_phone || siteConfig.phone,
-    address: settings.contact_address || (locale === "ka" ? "თბილისი, საქართველო" : siteConfig.address),
-    location: settings.contact_location || (locale === "ka" ? "თბილისი, საქართველო" : siteConfig.location),
-    availability: settings.contact_availability || (locale === "ka" ? "ვმუშაობთ ონლაინ" : siteConfig.availability),
+    name: settings.site_name || "BTA LAB",
+    tagline: "We help small businesses grow.",
+    description: settings.site_description || "BTA LAB is a digital innovation lab where students collaborate to build real-world digital products, websites, branding, marketing campaigns, and software solutions — bridging the gap between education and industry.",
+    phone: settings.contact_phone || "",
+    address: settings.contact_address || (locale === "ka" ? "თბილისი, საქართველო" : ""),
+    location: settings.contact_location || (locale === "ka" ? "თბილისი, საქართველო" : ""),
     socials: {
-      facebook: settings.social_facebook || siteConfig.socials.facebook,
-      instagram: settings.social_instagram || siteConfig.socials.instagram,
+      facebook: settings.social_facebook || "",
+      instagram: settings.social_instagram || "",
     },
   };
 })

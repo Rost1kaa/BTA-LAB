@@ -28,6 +28,7 @@ const navItems = [
   { label: "Services", href: "/admin/services", icon: Package },
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Service Requests", href: "/admin/service-requests", icon: ClipboardList },
+  { label: "Feature Tooltips", href: "/admin/feature-tooltips", icon: FileText },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

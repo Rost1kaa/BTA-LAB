@@ -90,12 +90,17 @@ export function PricingSectionBlock({
           })}
         </div>
 
-        {/* Note */}
+        {/* Note — advertising budget disclaimer */}
         {section.note && (
           <FadeIn direction="up" delay={0.2}>
-            <p className="mt-12 text-base md:text-lg text-[var(--color-fg-secondary)] text-center max-w-2xl mx-auto leading-relaxed">
-              {section.note}
-            </p>
+            <div className="mt-12 mx-auto max-w-4xl">
+              <div className="flex items-start gap-4 px-5 py-4 md:px-7 md:py-5 rounded-xl border border-[var(--color-border-secondary)] bg-[var(--color-overlay)]">
+                <div className="w-0.5 self-stretch shrink-0 rounded-full bg-[var(--color-accent)]/40" />
+                <p className="text-sm md:text-base text-[var(--color-fg-secondary)] font-medium leading-relaxed md:whitespace-nowrap">
+                  {section.note}
+                </p>
+              </div>
+            </div>
           </FadeIn>
         )}
       </div>
