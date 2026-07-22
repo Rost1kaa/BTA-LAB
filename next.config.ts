@@ -31,12 +31,42 @@ function buildCspHeader() {
   const supabaseOrigin = getSupabaseOrigin();
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"} https://challenges.cloudflare.com`,
+    [
+      "script-src 'self' 'unsafe-inline'",
+      isProduction ? "" : " 'unsafe-eval'",
+      "https://challenges.cloudflare.com",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+    ]
+      .filter(Boolean)
+      .join(" "),
     "style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
-    `img-src 'self' data: blob:${supabaseOrigin ? ` ${supabaseOrigin}` : ""}`,
+    [
+      "img-src 'self' data: blob:",
+      supabaseOrigin || "",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+    ]
+      .filter(Boolean)
+      .join(" "),
     "font-src 'self' data:",
-    `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ""} https://challenges.cloudflare.com`,
-    "frame-src https://www.google.com https://www.google.ge https://challenges.cloudflare.com",
+    [
+      "connect-src 'self'",
+      supabaseOrigin || "",
+      "https://challenges.cloudflare.com",
+      "https://www.googletagmanager.com",
+      "https://www.google-analytics.com",
+      "https://analytics.google.com",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    [
+      "frame-src",
+      "https://www.google.com",
+      "https://www.google.ge",
+      "https://challenges.cloudflare.com",
+      "https://www.googletagmanager.com",
+    ].join(" "),
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
