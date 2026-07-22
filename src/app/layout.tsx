@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/bta.ico",
     shortcut: "/bta.ico",
-    apple: "/bta-lab-logo.webp",
+    apple: "/bta.ico",
   },
   openGraph: {
     title: "BTA LAB | ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",

@@ -117,12 +117,12 @@ const categoryLabelsKa: Record<string, string> = {
 };
 
 const settingsKa: Record<string, string> = {
-  site_tagline: "ჩვენ ვეხმარებით მცირე ბიზნესს ზრდაში.",
-  site_description: "ციფრული ლაბორატორია, სადაც ბიზნესის ზრდისთვის ვქმნით თანამედროვე ვებგვერდებს, ონლაინ მაღაზიებს და ციფრულ გადაწყვეტებს.",
+  site_tagline: "ჩვენ ვეხმარებით მეწარმეებს ზრდაში",
+  site_description: "თანამედროვე ვებგვერდები და ციფრული გადაწყვეტები თქვენი ბიზნესის ზრდისთვის",
   contact_address: "თბილისი, საქართველო",
   contact_location: "თბილისი, საქართველო",
   copyright_text: "© 2024 BTA LAB. ყველა უფლება დაცულია.",
-  seo_title: "BTA LAB — ციფრული ინოვაციების ლაბორატორია",
+  seo_title: "ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",
   seo_description: "თანამედროვე ვებგვერდები, ონლაინ მაღაზიები და ციფრული გადაწყვეტები მცირე ბიზნესის ზრდისთვის.",
 };
 
@@ -893,7 +893,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "form",
     content_key: "budgetOptions_small",
-    content_value_en: "Under $1,000",
+    content_value_en: "Under ₾1,000",
     content_type: "text",
     sort_order: 12,
   },
@@ -901,7 +901,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "form",
     content_key: "budgetOptions_medium",
-    content_value_en: "$1,000 - $5,000",
+    content_value_en: "₾1,000 - ₾5,000",
     content_type: "text",
     sort_order: 13,
   },
@@ -909,7 +909,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "form",
     content_key: "budgetOptions_large",
-    content_value_en: "$5,000 - $15,000",
+    content_value_en: "₾5,000 - ₾15,000",
     content_type: "text",
     sort_order: 14,
   },
@@ -917,7 +917,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "form",
     content_key: "budgetOptions_enterprise",
-    content_value_en: "$15,000+",
+    content_value_en: "₾15,000+",
     content_type: "text",
     sort_order: 15,
   },
@@ -1099,7 +1099,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Landing Starter",
-    price: "$199",
+    price: "₾199",
     billing_label: "One-time payment",
     description: null,
     ideal_for: "For small businesses, new services, or showcasing a specific offer.",
@@ -1125,7 +1125,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "One Page Website",
-    price: "$300",
+    price: "₾300",
     billing_label: "One-time payment",
     description: null,
     ideal_for:
@@ -1157,7 +1157,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Business Website",
-    price: "$799",
+    price: "₾799",
     billing_label: "One-time payment",
     description: null,
     ideal_for: "For companies and growing businesses.",
@@ -1185,7 +1185,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Online Store",
-    price: "$999",
+    price: "₾999",
     billing_label: "One-time payment",
     description: null,
     ideal_for: "For online stores and product-selling businesses.",
@@ -1244,7 +1244,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Website Maintenance",
-    price: "$99",
+    price: "₾99",
     billing_label: "per month",
     description:
       "Continuous website operation, updates, and security monitoring.",
@@ -1271,7 +1271,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "social-media",
     name: "Starter",
-    price: "$150",
+    price: "₾150",
     billing_label: "per month",
     description: null,
     ideal_for: null,
@@ -1288,7 +1288,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "social-media",
     name: "Business",
-    price: "$450",
+    price: "₾450",
     billing_label: "per month",
     description: null,
     ideal_for: null,
@@ -1315,7 +1315,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "social-media",
     name: "Premium",
-    price: "$800",
+    price: "₾800",
     billing_label: "per month",
     description: null,
     ideal_for: null,
@@ -1347,7 +1347,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "social-media",
     name: "Full Social Media Management",
-    price: "1500+ ₾ / month",
+    price: "1500+ ₾",
     billing_label: "per month",
     description: null,
     ideal_for:
