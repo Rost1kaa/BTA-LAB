@@ -60,7 +60,7 @@ export interface ContentGroup {
 }
 
 // Revalidation helpers
-export function getRevalidationPaths(type: "content" | "portfolio" | "team" | "services"): string[] {
+export function getRevalidationPaths(type: "content" | "portfolio" | "team" | "services" | "legal"): string[] {
   switch (type) {
     case "content":
       return ["/", "/about", "/services", "/portfolio", "/team", "/contact"];
@@ -70,5 +70,7 @@ export function getRevalidationPaths(type: "content" | "portfolio" | "team" | "s
       return ["/team"];
     case "services":
       return ["/services"];
+    case "legal":
+      return ["/privacy", "/cookies"];
   }
 }

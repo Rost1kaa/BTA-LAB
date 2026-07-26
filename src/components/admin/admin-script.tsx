@@ -18,6 +18,7 @@ import {
   Package,
   MessageSquare,
   ClipboardList,
+  Scale,
 } from "lucide-react";
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Service Requests", href: "/admin/service-requests", icon: ClipboardList },
   { label: "Feature Tooltips", href: "/admin/feature-tooltips", icon: FileText },
+  { label: "იურიდიული", href: "/admin/legal", icon: Scale },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

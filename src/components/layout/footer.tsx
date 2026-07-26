@@ -25,8 +25,8 @@ export function Footer({ siteConfig }: FooterProps) {
   ).replace("%year%", String(currentYear));
   const footerLinks = [
     { href: "/about", label: t("footer.company.about") },
-    { href: "/terms", label: t("footer.info.terms") },
     { href: "/privacy", label: t("footer.info.privacy") },
+    { href: "/cookies", label: t("footer.info.cookies") },
   ];
 
   const socialLinks = [

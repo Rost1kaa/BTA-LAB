@@ -280,6 +280,32 @@ export type Database = {
           updated_at?: string;
         }
       >;
+      legal_policies: Table<
+        {
+          id: string;
+          type: "PRIVACY_POLICY" | "COOKIE_POLICY";
+          title_ka: string;
+          title_en: string;
+          description_ka: string;
+          description_en: string;
+          content_ka: string;
+          content_en: string;
+          updated_at: string;
+          created_at: string;
+        },
+        {
+          id?: string;
+          type: "PRIVACY_POLICY" | "COOKIE_POLICY";
+          title_ka?: string;
+          title_en?: string;
+          description_ka?: string;
+          description_en?: string;
+          content_ka?: string;
+          content_en?: string;
+          updated_at?: string;
+          created_at?: string;
+        }
+      >;
     };
     Views: Record<string, never>;
     Functions: {
@@ -408,6 +434,21 @@ export interface TeamMember {
   created_at: string;
   updated_at: string;
   updated_by: string | null;
+}
+
+export type LegalPolicyType = "PRIVACY_POLICY" | "COOKIE_POLICY";
+
+export interface LegalPolicy {
+  id: string;
+  type: LegalPolicyType;
+  title_ka: string;
+  title_en: string;
+  description_ka: string;
+  description_en: string;
+  content_ka: string;
+  content_en: string;
+  updated_at: string;
+  created_at: string;
 }
 
 export interface ServicePackage {

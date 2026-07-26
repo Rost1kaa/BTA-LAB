@@ -103,6 +103,7 @@ const requiredTables = [
   "contact_messages",
   "service_requests",
   "service_feature_tooltips",
+  "legal_policies",
 ] as const;
 
 const categoryLabelsKa: Record<string, string> = {
@@ -199,7 +200,7 @@ async function assertSchemaReady(): Promise<void> {
     throw new Error(
       "Supabase schema is not ready. Missing tables: " +
         missingTables.join(", ") +
-        ". Apply supabase/migrations/001_clean_initial_schema.sql to the project, then run npm run seed again."
+        ". Apply supabase/migrations/001_initial_schema.sql and supabase/migrations/002_legal_policies.sql to the project, then run npm run seed again."
     );
   }
 }
@@ -1849,7 +1850,62 @@ async function seed(): Promise<void> {
     `  ✓  ${counts["Feature tooltips"] || 0} tooltips processed`
   );
 
-  // ── 9. Team Members ───────────────────────────────────────────────
+  // ── 9. Legal Policies ─────────────────────────────────────────────
+
+  console.log("");
+  console.log("  ── Legal Policies ───────────────────────────");
+
+  const legalPolicies = [
+    {
+      type: "PRIVACY_POLICY",
+      title_ka: "კონფიდენციალურობის პოლიტიკა",
+      title_en: "Privacy Policy",
+      description_ka:
+        "BTA LAB აგროვებს მხოლოდ იმ ინფორმაციას, რომელიც საჭიროა მოთხოვნებზე პასუხისთვის, ვებსაიტის მუშაობისთვის და ადმინისტრირების პანელის დასაცავად.",
+      description_en:
+        "BTA LAB collects only the information needed to respond to inquiries, operate the website, and protect the Admin Panel.",
+      content_ka:
+        "## რა ინფორმაციას ვაგროვებთ\n\nსაკონტაქტო ფორმა შეიძლება მოიცავდეს თქვენს სახელს, ელფოსტას, ტელეფონს, კომპანიას, პროექტის პრეფერენციებს და შეტყობინებას. ადმინისტრატორის ავტორიზაცია მუშავდება Supabase Auth-ის მეშვეობით.\n\n## როგორ ვიყენებთ ინფორმაციას\n\nმონაცემებს ვიყენებთ მოთხოვნებზე პასუხისთვის, სერვისების დაგეგმვისთვის, საქმიანი კომუნიკაციის ჩანაწერებისთვის და ბოროტად გამოყენების თავიდან ასაცილებლად.\n\n## უსაფრთხოება\n\nსაიტს აქვს სერვერის მხარეს ვალიდაცია, დაცული ადმინისტრირების მარშრუტები, Row Level Security, ატვირთვების შემოწმება, უსაფრთხოების სათაურები და შეზღუდული ლოგირება შენიღბული პერსონალური მონაცემებით.\n\n## ქუქიები\n\nაუცილებელი ქუქიები გამოიყენება ენის არჩევისა და უსაფრთხო სესიებისთვის. არჩევითი ანალიტიკური ან მარკეტინგული ქუქიები გამოიყენება მხოლოდ თანხმობის შემდეგ.\n\n## კონტაქტი\n\nპერსონალურ ინფორმაციაზე წვდომის, გასწორების ან წაშლის მოთხოვნისთვის დაგვიკავშირდით კონტაქტის გვერდზე მითითებული მონაცემებით.",
+      content_en:
+        "## Information We Collect\n\nContact form submissions may include your name, email, phone, company, project preferences, and message. Admin authentication is handled by Supabase Auth.\n\n## How We Use Information\n\nWe use submitted information to reply to requests, plan services, keep records of legitimate business communication, and prevent abuse.\n\n## Security\n\nThe site uses server-side validation, protected admin routes, Row Level Security, upload validation, security headers, and limited logging with masked personal data.\n\n## Cookies\n\nNecessary cookies support language preference and secure sessions. Optional analytics or marketing cookies are used only after consent.\n\n## Contact\n\nTo request access, correction, or deletion of personal information, contact BTA LAB using the details on the Contact page.",
+    },
+    {
+      type: "COOKIE_POLICY",
+      title_ka: "ქუქიების პოლიტიკა",
+      title_en: "Cookie Policy",
+      description_ka:
+        "ეს გვერდი განმარტავს, როგორ იყენებს BTA LAB ქუქიებს და ბრაუზერის მსგავს საცავებს საჯარო ვებსაიტზე.",
+      description_en:
+        "This page explains how BTA LAB uses cookies and similar browser storage on the public website.",
+      content_ka:
+        "## აუცილებელი ქუქიები\n\nაუცილებელი ქუქიები ინახავს არჩეულ ენას, იცავს ადმინისტრირების სესიებს და უზრუნველყოფს საიტის ძირითად მუშაობას. მათი გამორთვა ბანერიდან შეუძლებელია.\n\n## არჩევითი ქუქიები\n\nანალიტიკური და მარკეტინგული ქუქიები გამორთულია, სანამ მათ მიღებას ან პარამეტრებიდან ჩართვას არ აირჩევთ.\n\n## პარამეტრების შეცვლა\n\nსაჯარო ვებსაიტის ქვედა ნაწილში გამოიყენეთ ქუქიების ღილაკი, რათა ნებისმიერ დროს გახსნათ პარამეტრები და შეცვალოთ არჩევანი.\n\n## მესამე მხარეები\n\nჩაშენებულმა რუკებმა და CAPTCHA პროვაიდერებმა შეიძლება დაამუშაონ ტექნიკური მონაცემები მათი ვიჯეტების ჩატვირთვისას. Production გარემოში უნდა დარჩეს მხოლოდ უსაფრთხოების კონფიგურაციაში მითითებული პროვაიდერები.",
+      content_en:
+        "## Necessary Cookies\n\nNecessary cookies keep the selected language, protect admin sessions, and support basic site operation. They cannot be turned off from the banner.\n\n## Optional Cookies\n\nAnalytics and marketing cookies stay disabled unless you accept them or enable them in cookie preferences.\n\n## Changing Preferences\n\nUse the Cookies button at the bottom of the public website to reopen preferences and update your choice at any time.\n\n## Third Parties\n\nEmbedded maps and CAPTCHA providers may process technical data when their widgets are loaded. Production deployment should keep only the providers listed in the security configuration.",
+    },
+  ];
+
+  for (const policy of legalPolicies) {
+    try {
+      const { error } = await supabase
+        .from("legal_policies")
+        .upsert(policy as never, { onConflict: "type" });
+
+      if (error) {
+        console.error(`  ✗  ${policy.type}: ${error.message}`);
+        hasError = true;
+      } else {
+        counts["Legal policies"] = (counts["Legal policies"] || 0) + 1;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`  ✗  ${policy.type}: ${message}`);
+      hasError = true;
+    }
+  }
+
+  console.log(`  ✓  ${counts["Legal policies"] || 0} policies processed`);
+
+  // ── 10. Team Members ───────────────────────────────────────────────
 
   console.log("");
   console.log("  ── Team Members ─────────────────────────────");
