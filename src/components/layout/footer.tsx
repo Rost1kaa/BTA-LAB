@@ -78,8 +78,8 @@ export function Footer({ siteConfig }: FooterProps) {
           <Image
             src="/images/logo.png"
             alt="BTA LAB Logo"
-            width={80}
-            height={80}
+            width={90}
+            height={90}
             className="object-contain"
             priority={false}
           />

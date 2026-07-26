@@ -91,175 +91,180 @@ export function SocialMediaTabbedPricing({
   return (
     <section className="relative py-24 md:py-32 bg-gradient-to-b from-transparent via-[var(--color-bg-secondary)]/30 to-transparent">
       <Container>
-        {/* Header */}
+        {/* Header Text Block — matches pricing-section.tsx pattern */}
         <FadeIn direction="up">
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-5xl">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-[1.05] text-gradient">
               {section.title}
             </h2>
-            <p className="mt-5 max-w-5xl text-[17px] md:text-xl text-[var(--color-fg-tertiary)] leading-relaxed">
+            <p className="mt-5 text-[17px] md:text-xl text-[var(--color-fg-tertiary)] leading-relaxed">
               {section.description}
             </p>
           </div>
         </FadeIn>
 
-        {/* === SEGMENTED CONTROL === */}
+        {/* Billing Switcher — centered below text with flexible width */}
         <FadeIn direction="up" delay={0.1}>
-          <div className="mt-12 md:mt-16 flex justify-center">
-            <div className="hidden xl:flex items-center gap-4">
-              <button
-                onClick={goPrev}
-                disabled={!hasPrev}
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200",
-                  "border border-[var(--color-border-primary)]/60",
-                  !hasPrev
-                    ? "opacity-25 cursor-not-allowed"
-                    : "hover:bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 cursor-pointer",
-                )}
-                aria-label="Previous package"
-              >
-                <ChevronLeft size={18} className="text-[var(--color-fg-tertiary)]" />
-              </button>
+          <div className="w-full flex justify-center items-center mt-8">
+            <div className="flex items-center justify-center gap-4 w-full max-w-4xl px-4">
 
-              <div
-                ref={tabsContainerRef}
-                className="relative flex flex-nowrap items-center gap-1 p-1.5 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60"
-                role="tablist"
-                aria-label="Social media packages"
-              >
-                {section.packages.map((pkg, i) => {
-                  const isActive = i === activeIndex;
-                  return (
-                    <button
-                      key={pkg.id}
-                      onClick={() => setActiveIndex(i)}
-                      className={cn(
-                        "relative px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap select-none",
-                        "transition-all duration-300",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
-                        isActive
-                          ? "text-[var(--color-fg-primary)]"
-                          : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
-                      )}
-                      role="tab"
-                      aria-selected={isActive}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="social-active-tab"
-                          className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
-                          transition={{
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 35,
-                          }}
-                        />
-                      )}
-                      <span className="relative z-10">{pkg.name}</span>
-                    </button>
-                  );
-                })}
+              {/* ── Desktop: full with chevrons (≥1280px) ── */}
+              <div className="hidden xl:flex items-center gap-4">
+                <button
+                  onClick={goPrev}
+                  disabled={!hasPrev}
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200",
+                    "border border-[var(--color-border-primary)]/60",
+                    !hasPrev
+                      ? "opacity-25 cursor-not-allowed"
+                      : "hover:bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 cursor-pointer",
+                  )}
+                  aria-label="Previous package"
+                >
+                  <ChevronLeft size={18} className="text-[var(--color-fg-tertiary)]" />
+                </button>
+
+                <div
+                  ref={tabsContainerRef}
+                  className="w-auto max-w-full inline-flex items-center justify-center gap-1 p-1.5 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60"
+                  role="tablist"
+                  aria-label="Social media packages"
+                >
+                  {section.packages.map((pkg, i) => {
+                    const isActive = i === activeIndex;
+                    return (
+                      <button
+                        key={pkg.id}
+                        onClick={() => setActiveIndex(i)}
+                        className={cn(
+                          "relative px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap select-none",
+                          "transition-all duration-300",
+                          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
+                          isActive
+                            ? "text-[var(--color-fg-primary)]"
+                            : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
+                        )}
+                        role="tab"
+                        aria-selected={isActive}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="social-active-tab"
+                            className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 35,
+                            }}
+                          />
+                        )}
+                        <span className="relative z-10">{pkg.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={goNext}
+                  disabled={!hasNext}
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200",
+                    "border border-[var(--color-border-primary)]/60",
+                    !hasNext
+                      ? "opacity-25 cursor-not-allowed"
+                      : "hover:bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 cursor-pointer",
+                  )}
+                  aria-label="Next package"
+                >
+                  <ChevronRight size={18} className="text-[var(--color-fg-tertiary)]" />
+                </button>
               </div>
 
-              <button
-                onClick={goNext}
-                disabled={!hasNext}
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200",
-                  "border border-[var(--color-border-primary)]/60",
-                  !hasNext
-                    ? "opacity-25 cursor-not-allowed"
-                    : "hover:bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 cursor-pointer",
-                )}
-                aria-label="Next package"
-              >
-                <ChevronRight size={18} className="text-[var(--color-fg-tertiary)]" />
-              </button>
-            </div>
-
-            {/* Mid-range tabs — wrapped layout without chevrons (1024px–1279px) */}
-            <div className="hidden lg:flex xl:hidden w-full max-w-full">
-              <div
-                className="relative flex flex-wrap justify-center items-center gap-1.5 p-1.5 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60"
-                role="tablist"
-                aria-label="Social media packages"
-              >
-                {section.packages.map((pkg, i) => {
-                  const isActive = i === activeIndex;
-                  return (
-                    <button
-                      key={pkg.id}
-                      onClick={() => setActiveIndex(i)}
-                      className={cn(
-                        "relative px-3 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap select-none",
-                        "transition-all duration-300",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
-                        isActive
-                          ? "text-[var(--color-fg-primary)]"
-                          : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
-                      )}
-                      role="tab"
-                      aria-selected={isActive}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="social-active-tab-mid"
-                          className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
-                          transition={{
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 35,
-                          }}
-                        />
-                      )}
-                      <span className="relative z-10">{pkg.name}</span>
-                    </button>
-                  );
-                })}
+              {/* ── Mid-range: wrapped tabs without chevrons (1024px–1279px) ── */}
+              <div className="hidden lg:flex xl:hidden w-full">
+                <div
+                  className="flex flex-wrap justify-center items-center gap-2 p-2 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60 w-full"
+                  role="tablist"
+                  aria-label="Social media packages"
+                >
+                  {section.packages.map((pkg, i) => {
+                    const isActive = i === activeIndex;
+                    return (
+                      <button
+                        key={pkg.id}
+                        onClick={() => setActiveIndex(i)}
+                        className={cn(
+                          "relative px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-sm font-medium whitespace-nowrap select-none",
+                          "transition-all duration-300",
+                          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
+                          isActive
+                            ? "text-[var(--color-fg-primary)]"
+                            : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
+                        )}
+                        role="tab"
+                        aria-selected={isActive}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="social-active-tab-mid"
+                            className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 35,
+                            }}
+                          />
+                        )}
+                        <span className="relative z-10">{pkg.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            {/* Responsive segmented control — wraps below lg */}
-            <div className="lg:hidden w-full max-w-full">
-              <div
-                className="flex flex-wrap justify-center gap-2 p-2 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60"
-                role="tablist"
-                aria-label="Social media packages"
-              >
-                {section.packages.map((pkg, i) => {
-                  const isActive = i === activeIndex;
-                  return (
-                    <button
-                      key={pkg.id}
-                      onClick={() => setActiveIndex(i)}
-                      className={cn(
-                        "relative flex-1 min-w-[130px] max-w-[200px] px-3 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap select-none text-center",
-                        "transition-all duration-300",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
-                        isActive
-                          ? "text-[var(--color-fg-primary)]"
-                          : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
-                      )}
-                      role="tab"
-                      aria-selected={isActive}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="social-active-tab-responsive"
-                          className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
-                          transition={{
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 35,
-                          }}
-                        />
-                      )}
-                      <span className="relative z-10">{pkg.name}</span>
-                    </button>
-                  );
-                })}
+              {/* ── Below lg: flex-wrap centered tabs ── */}
+              <div className="lg:hidden w-full">
+                <div
+                  className="flex flex-wrap justify-center items-center gap-2 p-2 rounded-2xl bg-[var(--color-overlay)] border border-[var(--color-border-primary)]/60 w-full"
+                  role="tablist"
+                  aria-label="Social media packages"
+                >
+                  {section.packages.map((pkg, i) => {
+                    const isActive = i === activeIndex;
+                    return (
+                      <button
+                        key={pkg.id}
+                        onClick={() => setActiveIndex(i)}
+                        className={cn(
+                          "relative px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap select-none",
+                          "transition-all duration-300",
+                          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
+                          isActive
+                            ? "text-[var(--color-fg-primary)]"
+                            : "text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)]",
+                        )}
+                        role="tab"
+                        aria-selected={isActive}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="social-active-tab-responsive"
+                            className="absolute inset-0 rounded-xl bg-[var(--color-bg-surface)] border border-[var(--color-accent)]/30 shadow-sm"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 35,
+                            }}
+                          />
+                        )}
+                        <span className="relative z-10">{pkg.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
             </div>
           </div>
         </FadeIn>
