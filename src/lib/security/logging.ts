@@ -7,7 +7,10 @@ type SecurityEvent =
   | "captcha_failed"
   | "contact_rate_limited"
   | "quiz_rate_limited"
-  | "upload_rejected";
+  | "upload_rejected"
+  | "otp_send"
+  | "otp_verify"
+  | "otp_rate_limited";
 
 interface SecurityLogInput {
   event: SecurityEvent;

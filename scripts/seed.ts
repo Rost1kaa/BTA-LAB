@@ -1472,6 +1472,23 @@ const featureTooltips: FeatureTooltipSeed[] = [
       "A management system built specifically for your business where you control all your data.",
   },
 
+  {
+    name_ka: "30-დღიანი ტექნიკური მხარდაჭერა",
+    name_en: "30-Day Technical Support",
+    description_ka:
+      "მხარდაჭერა არ გულისხმობს დიზაინის შეცვლას, არამედ მოიცავს ჩვენი მხრიდან შეცდომის გამოსწორებას ან ხარვეზის აღმოფხვრას.",
+    description_en:
+      "Support does not include design changes but covers error correction or bug fixing from our side.",
+  },
+  {
+    name_ka: "30-დღიანი ტექნიკური მხარდაჭერა",
+    name_en: "30-Day Technical Support",
+    description_ka:
+      "მხარდაჭერა არ გულისხმობს დიზაინის შეცვლას, არამედ მოიცავს ჩვენი მხრიდან შეცდომის გამოსწორებას ან ხარვეზის აღმოფხვრას.",
+    description_en:
+      "Support does not include design changes but covers error correction or bug fixing from our side.",
+  },
+
   // ── Social Media Tooltips ──
   {
     name_ka: "Reels იდეები და სცენარები",

@@ -306,12 +306,130 @@ export type Database = {
           created_at?: string;
         }
       >;
+
+      // ── Campaign Tables ────────────────────────────────────────
+
+      campaign_pages: Table<{
+        id: string; slug: string;
+        title_ka: string; title_en: string;
+        subtitle_ka: string; subtitle_en: string;
+        description_ka: string; description_en: string;
+        is_active: boolean; created_at: string; updated_at: string;
+      }, { id?: string; slug: string; title_ka?: string; title_en?: string; is_active?: boolean }>;
+
+      campaign_sections: Table<{
+        id: string; page_slug: string; section_key: string; section_type: string;
+        title_ka: string; title_en: string;
+        subtitle_ka: string; subtitle_en: string;
+        description_ka: string; description_en: string;
+        content_ka: string; content_en: string;
+        image: string; icon: string;
+        badge_ka: string; badge_en: string;
+        button_text_ka: string; button_text_en: string; button_url: string;
+        sort_order: number; is_active: boolean;
+      }, { id?: string; page_slug: string; section_key: string; section_type?: string; sort_order?: number; is_active?: boolean }>;
+
+      campaign_faq: Table<{
+        id: string; page_slug: string;
+        question_ka: string; question_en: string;
+        answer_ka: string; answer_en: string;
+        sort_order: number; is_active: boolean;
+      }, { id?: string; page_slug: string; sort_order?: number; is_active?: boolean }>;
+
+      campaign_cards: Table<{
+        id: string; page_slug: string; section_key: string;
+        title_ka: string; title_en: string;
+        description_ka: string; description_en: string;
+        image: string; icon: string;
+        badge_ka: string; badge_en: string;
+        button_text_ka: string; button_text_en: string; button_url: string;
+        sort_order: number; is_active: boolean;
+      }, { id?: string; page_slug: string; section_key?: string; sort_order?: number; is_active?: boolean }>;
+
+      campaign_timeline: Table<{
+        id: string; page_slug: string; section_key: string;
+        date_ka: string; date_en: string;
+        title_ka: string; title_en: string;
+        description_ka: string; description_en: string;
+        icon: string; sort_order: number; is_active: boolean;
+      }, { id?: string; page_slug: string; section_key?: string; sort_order?: number; is_active?: boolean }>;
+
+      campaign_statistics: Table<{
+        id: string; page_slug: string; section_key: string;
+        label_ka: string; label_en: string;
+        value: number; suffix_ka: string; suffix_en: string;
+        icon: string; sort_order: number; is_active: boolean;
+      }, { id?: string; page_slug: string; section_key?: string; value?: number; sort_order?: number; is_active?: boolean }>;
+
+      campaign_cta: Table<{
+        id: string; page_slug: string; section_key: string;
+        title_ka: string; title_en: string;
+        description_ka: string; description_en: string;
+        button_text_ka: string; button_text_en: string; button_url: string;
+        secondary_button_text_ka: string; secondary_button_text_en: string; secondary_button_url: string;
+        is_active: boolean;
+      }, { id?: string; page_slug: string; section_key?: string; is_active?: boolean }>;
+
+      campaign_settings: Table<{
+        id: string; setting_key: string;
+        setting_value_ka: string; setting_value_en: string;
+        setting_type: string; is_active: boolean;
+      }, { id?: string; setting_key: string; setting_type?: string; is_active?: boolean }>;
+
+      campaign_seo: Table<{
+        id: string; page_slug: string;
+        title_ka: string; title_en: string;
+        description_ka: string; description_en: string;
+        keywords_ka: string; keywords_en: string;
+        canonical_url: string;
+        og_title_ka: string; og_title_en: string;
+        og_description_ka: string; og_description_en: string;
+        og_image: string;
+        twitter_title_ka: string; twitter_title_en: string;
+        twitter_description_ka: string; twitter_description_en: string;
+        twitter_image: string;
+        schema_markup: Json;
+        is_active: boolean;
+      }, { id?: string; page_slug: string; is_active?: boolean }>;
+
+      campaign_applications: Table<{
+        id: string; application_number: string;
+        locale: string; status: string;
+        submitted_at: string; updated_at: string; created_at: string;
+        assigned_reviewer_id: string | null; reviewed_at: string | null; reviewer_notes: string;
+        [key: string]: Json | undefined;
+      }, { id?: string; application_number?: string; locale?: string; status?: string }>;
+
+      campaign_application_status_history: Table<{
+        id: string; application_id: string;
+        previous_status: string | null; new_status: string;
+        changed_by: string | null; notes: string;
+        is_public: boolean; created_at: string;
+      }, { id?: string; application_id: string; new_status: string; is_public?: boolean }>;
+
+      campaign_email_templates: Table<{
+        id: string; event: string;
+        subject_ka: string; subject_en: string;
+        body_ka: string; body_en: string;
+        is_active: boolean;
+      }, { id?: string; event: string; is_active?: boolean }>;
+
+      campaign_email_logs: Table<{
+        id: string; application_id: string | null; template_id: string | null;
+        event: string; recipient_email: string;
+        subject: string; body: string;
+        sent_at: string; delivered: boolean; error: string;
+      }, { id?: string; event: string; recipient_email: string }>;
     };
     Views: Record<string, never>;
     Functions: {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      generate_campaign_application_number: {
+        Args: Record<string, never>;
+        Returns: string;
       };
     };
     Enums: Record<string, never>;

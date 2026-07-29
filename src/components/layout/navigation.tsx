@@ -444,6 +444,7 @@ const navLinkKeys = [
   { key: "nav.services", href: "/services" },
   { key: "nav.portfolio", href: "/portfolio" },
   { key: "nav.team", href: "/team" },
+  { key: "nav.campaign", href: "/entrepreneur-support" },
   { key: "nav.contact", href: "/contact" },
 ];
 

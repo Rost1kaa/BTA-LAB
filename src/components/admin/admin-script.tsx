@@ -19,10 +19,13 @@ import {
   MessageSquare,
   ClipboardList,
   Scale,
+  Megaphone,
+  GanttChartSquare,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Campaign", href: "/admin/campaign", icon: Megaphone },
   { label: "Content", href: "/admin/content", icon: FileText },
   { label: "Portfolio", href: "/admin/portfolio", icon: FolderKanban },
   { label: "Team", href: "/admin/team", icon: Users },
