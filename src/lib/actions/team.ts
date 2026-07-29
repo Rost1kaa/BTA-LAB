@@ -1,12 +1,13 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireAdminMutation } from "@/lib/auth/admin";
 import { logSecurityEvent } from "@/lib/security/logging";
 import { validateUploadedImage } from "@/lib/security/upload";
+import { writeFile, mkdir, unlink, access } from "node:fs/promises";
+import path from "node:path";
 import type { TeamMember } from "@/types/supabase";
 
 const httpUrl = z.string().url().refine((value) => {
@@ -27,6 +28,9 @@ const memberSchema = z.object({
   name: z.string().min(1, "Name is required.").transform((v) => v.trim()),
   name_ka: z.string().default(""),
   name_en: z.string().default(""),
+  position: z.string().default(""),
+  position_ka: z.string().default(""),
+  position_en: z.string().default(""),
   bio: z.string().default(""),
   bio_ka: z.string().default(""),
   bio_en: z.string().default(""),
@@ -39,6 +43,25 @@ const memberSchema = z.object({
 });
 
 export type MemberInput = z.infer<typeof memberSchema>;
+
+const TEAM_UPLOAD_DIR = "public/team";
+
+function sanitizeFilename(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\u10A0-\u10FF_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getExtensionFromMime(mimeType: string): string {
+  const map: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+  };
+  return map[mimeType] || "webp";
+}
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
   const supabase = await createServerSupabaseClient();
@@ -113,9 +136,12 @@ function toMemberPayload(input: Partial<MemberInput>) {
   return {
     ...input,
     name: input.name_en || input.name_ka || input.name || "",
+    position: input.position_en || input.position_ka || input.position || "",
     bio: input.bio_en || input.bio || "",
     name_ka: input.name_ka || "",
     name_en: input.name_en || input.name || "",
+    position_ka: input.position_ka || "",
+    position_en: input.position_en || input.position || "",
     bio_ka: input.bio_ka || "",
     bio_en: input.bio_en || input.bio || "",
   };
@@ -165,45 +191,44 @@ export async function uploadTeamMemberImage(file: File): Promise<{ url?: string;
     return { error: validationError };
   }
 
-  const originalExtension = file.name.split(".").pop()?.toLowerCase() ?? "";
-  const normalizedExtension = file.type === "image/jpeg" ? "jpg" : originalExtension;
-  const filePath = `members/${admin.user.id}/${randomUUID()}.${normalizedExtension}`;
+  const ext = getExtensionFromMime(file.type);
+  const safeName = sanitizeFilename(file.name.replace(`.${file.name.split(".").pop()}`, ""));
+  const timestamp = Date.now();
+  const filename = `${safeName}-${timestamp}.${ext}`;
+  const filePath = path.join(process.cwd(), TEAM_UPLOAD_DIR, filename);
 
-  const { error: uploadError } = await admin.supabase.storage
-    .from("team-images")
-    .upload(filePath, file, { cacheControl: "3600", upsert: false });
-
-  if (uploadError) return { error: uploadError.message };
-
-  const { data: urlData } = admin.supabase.storage.from("team-images").getPublicUrl(filePath);
-  return { url: urlData.publicUrl };
+  try {
+    await mkdir(path.join(process.cwd(), TEAM_UPLOAD_DIR), { recursive: true });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(filePath, buffer);
+    return { url: `/team/${filename}` };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to upload image.";
+    return { error: message };
+  }
 }
 
 export async function deleteTeamMemberImage(url: string) {
   const admin = await requireAdminMutation("team:image-delete");
   if (!admin) return { error: "Unauthorized." };
 
-  const path = extractStoragePath(url);
-  if (!path) return { error: "Invalid image URL." };
+  const localPath = extractLocalPath(url);
+  if (!localPath) return { error: "Invalid image URL." };
 
-  const { error } = await admin.supabase.storage.from("team-images").remove([path]);
-  if (error) return { error: error.message };
-
-  return { success: true };
+  try {
+    await access(localPath);
+    await unlink(localPath);
+    return { success: true };
+  } catch {
+    return { success: true };
+  }
 }
 
-function extractStoragePath(url: string): string | null {
-  try {
-    const u = new URL(url);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl || u.origin !== new URL(supabaseUrl).origin) return null;
-    const prefix = "/storage/v1/object/public/team-images/";
-    if (!u.pathname.startsWith(prefix)) return null;
-    const path = decodeURIComponent(u.pathname.slice(prefix.length));
-    return path && !path.includes("..") ? path : null;
-  } catch {
-    return null;
-  }
+function extractLocalPath(url: string): string | null {
+  if (!url.startsWith("/team/")) return null;
+  const filename = url.replace("/team/", "");
+  if (filename.includes("..") || filename.includes("/")) return null;
+  return path.join(process.cwd(), TEAM_UPLOAD_DIR, filename);
 }
 
 function revalidateTeam() {

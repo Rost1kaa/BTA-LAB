@@ -163,6 +163,9 @@ export type Database = {
           name: string;
           name_ka?: string;
           name_en?: string;
+          position?: string;
+          position_ka?: string;
+          position_en?: string;
           bio?: string;
           bio_ka?: string;
           bio_en?: string;
@@ -539,6 +542,9 @@ export interface TeamMember {
   name: string;
   name_ka?: string;
   name_en?: string;
+  position: string;
+  position_ka?: string;
+  position_en?: string;
   bio: string;
   bio_ka?: string;
   bio_en?: string;

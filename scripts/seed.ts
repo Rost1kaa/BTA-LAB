@@ -306,6 +306,8 @@ function withBilingualTeamMember(member: TeamMemberSeed) {
     ...member,
     name_ka: member.name,
     name_en: member.name,
+    position_ka: ka.position,
+    position_en: member.position,
     bio_ka: ka.bio,
     bio_en: member.bio,
     image_alt_ka: `${member.name} პორტრეტი`,
@@ -1576,6 +1578,7 @@ const featureTooltips: FeatureTooltipSeed[] = [
 
 interface TeamMemberSeed {
   name: string;
+  position: string;
   bio: string;
   image: string;
   socials: Record<string, string>;
@@ -1586,56 +1589,63 @@ interface TeamMemberSeed {
 const teamMembers: TeamMemberSeed[] = [
   {
     name: "სოფიო მაჭარაშვილი",
+    position: "დირექტორი",
     bio: "კომპანიის განვითარების, სტრატეგიული მიმართულებებისა და გუნდის მართვის პასუხისმგებელი პირი.",
-    image: "",
+    image: "/team/sofio.webp",
     socials: {},
     display_order: 0,
     published: true,
   },
   {
     name: "მარიამ კაკიაშვილი",
+    position: "გუნდის ხელმძღვანელი",
     bio: "მარიამი კოორდინაციას უწევს ტექნიკურ მიმართულებას და ვებ პროექტების განხორციელებას. მრავალწლიანი გამოცდილებითა და ლიდერული უნარებით, ის უზრუნველყოფს თითოეული პროექტის უმაღლესი სტანდარტებით შესრულებას.",
-    image: "",
+    image: "/team/mariami.webp",
     socials: {},
     display_order: 1,
     published: true,
   },
   {
     name: "გაიოზ კუპრაშვილი",
+    position: "მასწავლებელი",
     bio: "გაიოზი ეხმარება დამწყებ დეველოპერებს ვებტექნოლოგიების შესწავლაში. თავისი გამოცდილებითა და მარტივი ახსნის მანერით, ის სტუდენტებს პრაქტიკულ უნარებს გადასცემს და უზიარებს იმ ცოდნას, რომელიც რეალური პროექტების შესაქმნელად არის საჭირო.",
-    image: "",
+    image: "/team/kupra.webp",
     socials: {},
     display_order: 2,
     published: true,
   },
   {
     name: "ცოტნე ჩადუნელი",
+    position: "მასწავლებელი",
     bio: "ცოტნე აერთიანებს მდიდარ პრაქტიკულ გამოცდილებას და ღრმა აკადემიურ ცოდნას. როგორც დარგის წამყვანი სპეციალისტი, ის უწევს მენტორობას ჩვენს გუნდს, აზიარებს თანამედროვე ტექნოლოგიურ ტენდენციებს და ზრუნავს სერვისების ხარისხის მუდმივ ზრდაზე.",
-    image: "",
+    image: "/team/cotne.webp",
     socials: {},
     display_order: 3,
     published: true,
   },
   {
     name: "ლუკა მეკოკიშვილი",
+    position: "ვებ დეველოპერი",
     bio: "ლუკა სპეციალიზებულია თანამედროვე, სრულყოფილად გამართული ვებ აპლიკაციებისა და საიტების შექმნაზე. მისი პრიორიტეტია მომხმარებლისთვის მოსახერხებელი, სწრაფი და უსაფრთხო ციფრული პროდუქტების მიწოდება.",
-    image: "",
+    image: "/team/rostika.webp",
     socials: {},
     display_order: 4,
     published: true,
   },
   {
     name: "ლუკა ხარაიშვილი",
+    position: "ვებ დეველოპერი",
     bio: "ლუკა არის ნიჭიერი და პერსპექტიული დეველოპერი, რომელიც თავისი მოტივაციითა და რთული ტექნიკური ამოცანების გადაჭრის უნარით მნიშვნელოვან წვლილს შეიტანს ჩვენს პროექტებში.",
-    image: "",
+    image: "/team/xaraishvili.webp",
     socials: {},
     display_order: 5,
     published: true,
   },
   {
     name: "გაგა ტრაპაიძე",
+    position: "სოციალური მედიის მართვა",
     bio: "გაგა წარმატებით აერთიანებს ტექნიკურ კომპეტენციას და კომუნიკაციის უნარებს. ის წარმართავს კომპანიის სოციალურ ურთიერთობებს, რაც უზრუნველყოფს მჭიდრო კავშირს მომხმარებლებთან და პარტნიორებთან.",
-    image: "",
+    image: "/team/gaga.webp",
     socials: {},
     display_order: 6,
     published: true,

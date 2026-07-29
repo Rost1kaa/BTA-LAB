@@ -85,7 +85,7 @@ function TeamPageContent({
       {/* Team Grid */}
       <Section className="py-16 md:py-20">
         <Container>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {members.map((member, index) => (
               <FadeIn key={member.id} delay={index * 0.05}>
                 <motion.div
@@ -94,11 +94,11 @@ function TeamPageContent({
                   className="group p-6 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] hover:bg-[var(--color-bg-surface-hover)] hover:border-[var(--color-border-primary)] transition-all duration-500 h-full flex flex-col"
                 >
                   {/* Avatar */}
-                  <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[var(--color-overlay)] to-transparent border border-[var(--color-border-primary)] flex items-center justify-center mb-4 overflow-hidden">
+                  <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-[var(--color-overlay)] to-transparent border border-[var(--color-border-primary)] flex items-center justify-center mb-6 overflow-hidden">
                     {member.image ? (
-                      <Image src={member.image} alt={member.image_alt || t("team.imageAlt").replace("%name%", member.name)} fill sizes="64px" className="object-cover" />
+                      <Image src={member.image} alt={member.image_alt || t("team.imageAlt").replace("%name%", member.name)} fill sizes="128px" className="object-cover" />
                     ) : (
-                      <span className="text-xl font-semibold text-[var(--color-fg-tertiary)]/70">
+                      <span className="text-3xl font-semibold text-[var(--color-fg-tertiary)]/70">
                         {member.name.split(" ").map((name) => name[0]).join("")}
                       </span>
                     )}
@@ -106,10 +106,13 @@ function TeamPageContent({
 
                   {/* Info */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-[var(--color-fg-primary)] group-hover:text-[var(--color-fg-primary)]/90 transition-colors">
+                    <h3 className="text-xl font-bold text-[var(--color-fg-primary)] group-hover:text-[var(--color-fg-primary)]/90 transition-colors">
                       {member.name}
                     </h3>
-                    <p className="mt-3 text-xs text-[var(--color-fg-tertiary)]/60 leading-relaxed line-clamp-3">
+                    <p className="mt-2 text-base font-bold underline underline-offset-4 decoration-[var(--color-accent)]/30 tracking-wide text-[var(--color-accent)]/90">
+                      {member.position}
+                    </p>
+                    <p className="mt-3 text-base text-[var(--color-fg-tertiary)]/70 leading-relaxed line-clamp-4">
                       {member.bio}
                     </p>
                   </div>

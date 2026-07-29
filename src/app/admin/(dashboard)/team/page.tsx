@@ -23,6 +23,8 @@ export default function TeamAdminPage() {
   const [form, setForm] = useState({
     name_ka: "",
     name_en: "",
+    position_ka: "",
+    position_en: "",
     bio_ka: "",
     bio_en: "",
     image: "",
@@ -61,6 +63,8 @@ export default function TeamAdminPage() {
     setForm({
       name_ka: "",
       name_en: "",
+      position_ka: "",
+      position_en: "",
       bio_ka: "",
       bio_en: "",
       image: "",
@@ -79,6 +83,8 @@ export default function TeamAdminPage() {
     setForm({
       name_ka: member.name_ka || member.name,
       name_en: member.name_en || member.name,
+      position_ka: member.position_ka || member.position,
+      position_en: member.position_en || member.position,
       bio_ka: member.bio_ka || member.bio,
       bio_en: member.bio_en || member.bio,
       image: member.image,
@@ -113,6 +119,9 @@ export default function TeamAdminPage() {
       name: form.name_en.trim() || form.name_ka.trim(),
       name_ka: form.name_ka.trim(),
       name_en: form.name_en.trim(),
+      position: form.position_en.trim() || form.position_ka.trim(),
+      position_ka: form.position_ka.trim(),
+      position_en: form.position_en.trim(),
       bio: form.bio_en.trim(),
       bio_ka: form.bio_ka.trim(),
       bio_en: form.bio_en.trim(),
@@ -196,9 +205,7 @@ export default function TeamAdminPage() {
               Cancel editing
             </button>
           )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        </div>            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label htmlFor="team-name-ka" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Name (Georgian)</label>
             <input id="team-name-ka" name="name_ka" type="text" value={form.name_ka} onChange={(e) => setForm((p) => ({ ...p, name_ka: e.target.value }))}
@@ -207,6 +214,19 @@ export default function TeamAdminPage() {
           <div className="space-y-2">
             <label htmlFor="team-name-en" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Name (English)</label>
             <input id="team-name-en" name="name_en" type="text" value={form.name_en} onChange={(e) => setForm((p) => ({ ...p, name_en: e.target.value }))}
+              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="team-position-ka" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Position (Georgian)</label>
+            <input id="team-position-ka" name="position_ka" type="text" value={form.position_ka} onChange={(e) => setForm((p) => ({ ...p, position_ka: e.target.value }))}
+              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all" />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="team-position-en" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Position (English)</label>
+            <input id="team-position-en" name="position_en" type="text" value={form.position_en} onChange={(e) => setForm((p) => ({ ...p, position_en: e.target.value }))}
               className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus:outline-none focus:border-[var(--color-fg-tertiary)]/30 transition-all" />
           </div>
         </div>

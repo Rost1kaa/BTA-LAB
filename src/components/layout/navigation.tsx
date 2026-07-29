@@ -491,22 +491,13 @@ export function Navigation({ siteConfig }: NavigationProps) {
               href="/"
               className="relative z-10 flex flex-col items-center group"
             >
-              <div className="flex items-center gap-2 leading-none mb-0.5">
+              <div className="flex items-center gap-2 leading-none">
                 <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
                   ბითიეი
                 </span>
                 <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
                 <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
                   ლაბი
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
-                  BTA
-                </span>
-                <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
-                <span className="text-sm font-light tracking-[0.2em] text-[var(--color-fg-tertiary)]/70 group-hover:text-[var(--color-fg-secondary)] transition-colors duration-300 uppercase">
-                  LAB
                 </span>
               </div>
             </Link>

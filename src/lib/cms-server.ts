@@ -50,6 +50,7 @@ function localizeTeamMember(member: TeamMember, locale: LocaleCode): TeamMember 
   return {
     ...member,
     name: getLocalizedText(record, "name", locale),
+    position: getLocalizedText(record, "position", locale),
     bio: getLocalizedText(record, "bio", locale),
     image_alt: getLocalizedText(record, "image_alt", locale, "name"),
   };
