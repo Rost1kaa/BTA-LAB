@@ -1,9 +1,12 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireAdminMutation } from "@/lib/auth/admin";
+import { logSecurityEvent } from "@/lib/security/logging";
+import { validateUploadedImage } from "@/lib/security/upload";
 import type { TeamMember } from "@/types/supabase";
 
 const httpUrl = z.string().url().refine((value) => {
@@ -145,6 +148,62 @@ export async function reorderTeamMembers(orderedIds: string[]) {
 
   revalidateTeam();
   return { success: true };
+}
+
+export async function uploadTeamMemberImage(file: File): Promise<{ url?: string; error?: string }> {
+  const admin = await requireAdminMutation("team:upload");
+  if (!admin) return { error: "Unauthorized." };
+
+  const validationError = await validateUploadedImage(file, 5 * 1024 * 1024);
+  if (validationError) {
+    logSecurityEvent({
+      event: "upload_rejected",
+      userId: admin.user.id,
+      reason: validationError,
+      route: "team:upload",
+    });
+    return { error: validationError };
+  }
+
+  const originalExtension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  const normalizedExtension = file.type === "image/jpeg" ? "jpg" : originalExtension;
+  const filePath = `members/${admin.user.id}/${randomUUID()}.${normalizedExtension}`;
+
+  const { error: uploadError } = await admin.supabase.storage
+    .from("team-images")
+    .upload(filePath, file, { cacheControl: "3600", upsert: false });
+
+  if (uploadError) return { error: uploadError.message };
+
+  const { data: urlData } = admin.supabase.storage.from("team-images").getPublicUrl(filePath);
+  return { url: urlData.publicUrl };
+}
+
+export async function deleteTeamMemberImage(url: string) {
+  const admin = await requireAdminMutation("team:image-delete");
+  if (!admin) return { error: "Unauthorized." };
+
+  const path = extractStoragePath(url);
+  if (!path) return { error: "Invalid image URL." };
+
+  const { error } = await admin.supabase.storage.from("team-images").remove([path]);
+  if (error) return { error: error.message };
+
+  return { success: true };
+}
+
+function extractStoragePath(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl || u.origin !== new URL(supabaseUrl).origin) return null;
+    const prefix = "/storage/v1/object/public/team-images/";
+    if (!u.pathname.startsWith(prefix)) return null;
+    const path = decodeURIComponent(u.pathname.slice(prefix.length));
+    return path && !path.includes("..") ? path : null;
+  } catch {
+    return null;
+  }
 }
 
 function revalidateTeam() {

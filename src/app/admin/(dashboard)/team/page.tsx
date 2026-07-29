@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { createTeamMember, updateTeamMember, deleteTeamMember } from "@/lib/actions/team";
-import { Save, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import { createTeamMember, updateTeamMember, deleteTeamMember, uploadTeamMemberImage } from "@/lib/actions/team";
+import { Save, Trash2, Edit, Eye, EyeOff, Upload, X } from "lucide-react";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import type { TeamMember } from "@/types/supabase";
 
 export default function TeamAdminPage() {
@@ -16,6 +17,8 @@ export default function TeamAdminPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     name_ka: "",
@@ -222,12 +225,90 @@ export default function TeamAdminPage() {
 
 
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="team-image" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Image URL</label>
-            <input id="team-image" type="url" value={form.image} onChange={(e) => setForm((p) => ({ ...p, image: e.target.value }))}
-              className="w-full h-11 px-4 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-tertiary)]/30" placeholder="https://…" />
+        <div className="space-y-3">
+          <label className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Profile Image</label>
+
+          {/* Upload area */}
+          <div className="relative flex items-center justify-center h-40 rounded-xl border-2 border-dashed border-[var(--color-border-primary)] bg-[var(--color-overlay)] hover:border-[var(--color-fg-tertiary)]/30 transition-colors overflow-hidden focus-within:ring-2 focus-within:ring-[var(--color-fg-tertiary)]/30">
+            <label htmlFor="team-image-upload" className="absolute inset-0 cursor-pointer">
+              {form.image ? (
+                <Image
+                  src={form.image}
+                  alt="Team member preview"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <span className="h-full flex items-center justify-center text-center">
+                  {uploading ? (
+                    <span className="flex flex-col items-center gap-2">
+                      <span className="animate-spin h-8 w-8 border-2 border-[var(--color-fg-tertiary)] border-t-transparent rounded-full" />
+                      <span className="text-xs text-[var(--color-fg-tertiary)]/70">Uploading…</span>
+                    </span>
+                  ) : (
+                    <span>
+                      <Upload size={24} aria-hidden="true" className="mx-auto mb-2 text-[var(--color-fg-tertiary)]/50" />
+                      <span className="block text-sm text-[var(--color-fg-tertiary)]/70">Upload Image</span>
+                      <span className="block text-xs text-[var(--color-fg-tertiary)]/50 mt-1">WebP, PNG, or JPEG up to 5 MB</span>
+                    </span>
+                  )}
+                </span>
+              )}
+            </label>
+            {form.image && (
+              <button
+                type="button"
+                onClick={() => setForm((p) => ({ ...p, image: "" }))}
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="Remove image"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            )}
           </div>
+
+          <input
+            id="team-image-upload"
+            ref={fileInputRef}
+            type="file"
+            accept="image/webp,image/png,image/jpeg"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setUploading(true);
+              try {                  const result = await uploadTeamMemberImage(file);
+                  if (result.error) {
+                    toast.error(result.error);
+                  } else if (result.url) {
+                    const uploadedUrl: string = result.url;
+                    setForm((p) => ({ ...p, image: uploadedUrl }));
+                    toast.success("Image uploaded!");
+                }
+              } catch {
+                toast.error("Failed to upload image.");
+              } finally {
+                setUploading(false);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }
+            }}
+            disabled={uploading}
+            className="hidden"
+          />
+
+          {/* Or paste URL */}
+          <div className="relative">
+            <input
+              id="team-image-url"
+              type="url"
+              value={form.image}
+              onChange={(e) => setForm((p) => ({ ...p, image: e.target.value }))}
+              className="w-full h-11 px-4 pr-10 bg-[var(--color-overlay)] border border-[var(--color-border-primary)] rounded-xl text-sm text-[var(--color-fg-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fg-tertiary)]/30"
+              placeholder="Or paste image URL…"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label htmlFor="team-display-order" className="text-xs font-medium text-[var(--color-fg-tertiary)]/70 uppercase tracking-wider">Display Order</label>
             <input id="team-display-order" type="number" min="0" value={form.display_order} onChange={(e) => setForm((p) => ({ ...p, display_order: Number.parseInt(e.target.value, 10) || 0 }))}
