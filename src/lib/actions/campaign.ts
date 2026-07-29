@@ -16,83 +16,115 @@ function db(supabase: any) {
 export async function submitCampaignApplication(formData: Record<string, unknown>) {
   const supabase = createServiceRoleClient();
 
-  // ── Verification Token Enforcement ──────────────────────────────────
-  // The verification token must be provided and valid.
-  // It proves the user has verified their email via OTP within the last 30 minutes.
-  const verificationToken = formData.verificationToken as string | undefined;
-  const formEmail = (formData.email as string || "").toLowerCase().trim();
+  try {
+    // ── Verification Token Enforcement ──────────────────────────────────
+    const verificationToken = formData.verificationToken as string | undefined;
+    const formEmail = (formData.email as string || "").toLowerCase().trim();
 
-  if (!verificationToken) {
-    throw new Error("ვერიფიკაციის ტოკენი არ მოიძებნა. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
+    if (!verificationToken) {
+      throw new Error("ვერიფიკაციის ტოკენი არ მოიძებნა. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
+    }
+
+    const tokenData = verifyTokenIntegrity(verificationToken);
+    if (!tokenData) {
+      throw new Error("ვერიფიკაციის ტოკენი არასწორია ან ვადაგასულია. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
+    }
+
+    if (tokenData.email !== formEmail) {
+      throw new Error("ელ-ფოსტა არ ემთხვევა დადასტურებულ მისამართს. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
+    }
+
+    // ── Personal ID validation (11 digits, if provided) ─────────────────
+    const personalId = formData.personalId as string | undefined;
+    if (personalId && personalId.trim().length > 0 && !/^\d{11}$/.test(personalId.trim())) {
+      throw new Error("პირადი ნომერი უნდა შეიცავდეს ზუსტად 11 ციფრს.");
+    }
+
+    // ── Duplicate email check ──────────────────────────────────────────
+    const { data: existingApp, error: dupError } = await supabase
+      .from("campaign_applications")
+      .select("id")
+      .eq("email", formEmail)
+      .limit(1);
+
+    if (dupError) {
+      console.error("[campaign] duplicate check error:", dupError);
+      throw new Error("განაცხადის გაგზავნა ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.");
+    }
+
+    if (existingApp && existingApp.length > 0) {
+      throw new Error("ამ ელ-ფოსტით განაცხადი უკვე მიღებულია.");
+    }
+
+    // Generate application number
+    let applicationNumber: string;
+    try {
+      const { data: seqData, error: seqError } = await supabase.rpc('generate_campaign_application_number');
+      if (seqError) {
+        console.error("[campaign] sequence error:", seqError);
+        applicationNumber = `BTA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
+      } else {
+        applicationNumber = seqData || `BTA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
+      }
+    } catch (seqErr) {
+      console.error("[campaign] sequence exception:", seqErr);
+      applicationNumber = `BTA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
+    }
+
+    // Build a fallback business name from the applicant's full name when the field is empty
+    const rawBusinessName = formData.businessName;
+    const businessNameValue =
+      rawBusinessName && typeof rawBusinessName === "string" && rawBusinessName.trim().length > 0
+        ? rawBusinessName.trim()
+        : `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "N/A";
+
+    // Extract basic identifiable fields for admin search, store full wizard data as form_data JSONB
+    const { data, error: insertError } = await db(supabase)
+      .from("campaign_applications")
+      .insert({
+        application_number: applicationNumber,
+        form_data: formData,
+        first_name_ka: formData.firstName || null,
+        first_name_en: formData.firstName || null,
+        last_name_ka: formData.lastName || null,
+        last_name_en: formData.lastName || null,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        business_name_ka: businessNameValue,
+        business_name_en: businessNameValue,
+        status: "UNOPENED",
+        submitted_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("[campaign] insert error:", insertError);
+      throw new Error("განაცხადის გაგზავნა ვერ მოხერხდა. გთხოვთ, სცადოთ თავიდან.");
+    }
+
+    // Create initial status history
+    try {
+      await db(supabase).from("campaign_application_status_history").insert({
+        application_id: data.id,
+        previous_status: null,
+        new_status: "UNOPENED",
+        is_public: true,
+        notes: "განაცხადი წარმატებით გაიგზავნა."
+      });
+    } catch (historyErr) {
+      console.error("[campaign] status history error:", historyErr);
+      // Non-critical — application was already created
+    }
+
+    revalidatePath("/entrepreneur-support");
+    return data as CampaignApplication;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "განაცხადის გაგზავნა ვერ მოხერხდა";
+    console.error("[campaign] submitCampaignApplication error:", err);
+    throw new Error(message);
   }
-
-  const tokenData = verifyTokenIntegrity(verificationToken);
-  if (!tokenData) {
-    throw new Error("ვერიფიკაციის ტოკენი არასწორია ან ვადაგასულია. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
-  }
-
-  if (tokenData.email !== formEmail) {
-    throw new Error("ელ-ფოსტა არ ემთხვევა დადასტურებულ მისამართს. გთხოვთ, თავიდან გაიაროთ ვერიფიკაცია.");
-  }
-
-  // ── Duplicate email check ──────────────────────────────────────────
-  const { data: existingApp } = await supabase
-    .from("campaign_applications")
-    .select("id")
-    .eq("email", formEmail)
-    .limit(1);
-
-  if (existingApp && existingApp.length > 0) {
-    throw new Error("ამ ელ-ფოსტით განაცხადი უკვე მიღებულია.");
-  }
-
-  // Generate application number
-  const { data: seqData } = await supabase.rpc('generate_campaign_application_number');
-  const applicationNumber = seqData || `BTA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
-
-  // Build a fallback business name from the applicant's full name when the field is empty
-  const rawBusinessName = formData.businessName;
-  const businessNameValue =
-    rawBusinessName && typeof rawBusinessName === "string" && rawBusinessName.trim().length > 0
-      ? rawBusinessName.trim()
-      : `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "N/A";
-
-  // Extract basic identifiable fields for admin search, store full wizard data as form_data JSONB
-  const { data, error } = await db(supabase)
-    .from("campaign_applications")
-    .insert({
-      application_number: applicationNumber,
-      form_data: formData,
-      first_name_ka: formData.firstName || null,
-      first_name_en: formData.firstName || null,
-      last_name_ka: formData.lastName || null,
-      last_name_en: formData.lastName || null,
-      email: formData.email || null,
-      phone: formData.phone || null,
-      business_name_ka: businessNameValue,
-      business_name_en: businessNameValue,
-      status: "UNOPENED",
-      submitted_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
-
-  if (error) throw new Error(`Failed to submit application: ${error.message}`);
-
-  // Create initial status history
-  await db(supabase).from("campaign_application_status_history").insert({
-    application_id: data.id,
-    previous_status: null,
-    new_status: "UNOPENED",
-    is_public: true,
-    notes: "Application submitted successfully.",
-  });
-
-  revalidatePath("/entrepreneur-support");
-  return data as CampaignApplication;
 }
-
-
 
 // ── Admin: Get Applications ───────────────────────────────────────────────
 
@@ -127,7 +159,10 @@ export async function getCampaignApplications(options?: {
   if (options?.offset) query = query.range(options.offset, options.offset + (options.limit || 20) - 1);
 
   const { data, error, count } = await query;
-  if (error) throw new Error(`Failed to get applications: ${error.message}`);
+  if (error) {
+    console.error("[campaign] getCampaignApplications error:", error);
+    throw new Error(`Failed to get applications: ${error.message}`);
+  }
 
   return { data: (data || []) as CampaignApplication[], count: count || 0 };
 }
@@ -140,13 +175,11 @@ export async function updateApplicationStatus(
   notes?: string,
   isPublic?: boolean
 ) {
-  // Validate allowed statuses
   if (newStatus !== 'UNOPENED' && newStatus !== 'CHECKED') {
     throw new Error(`Invalid status: ${newStatus}. Allowed values: UNOPENED, CHECKED`);
   }
   const supabase = createServiceRoleClient();
 
-  // Get current status
   const { data: app } = await db(supabase)
     .from("campaign_applications")
     .select("status")
@@ -164,9 +197,11 @@ export async function updateApplicationStatus(
     })
     .eq("id", applicationId);
 
-  if (updateError) throw new Error(`Failed to update status: ${updateError.message}`);
+  if (updateError) {
+    console.error("[campaign] updateApplicationStatus error:", updateError);
+    throw new Error(`Failed to update status: ${updateError.message}`);
+  }
 
-  // Record history
   const { error: historyError } = await db(supabase)
     .from("campaign_application_status_history")
     .insert({
@@ -177,15 +212,14 @@ export async function updateApplicationStatus(
       is_public: isPublic ?? true,
     });
 
-  if (historyError) throw new Error(`Failed to record status history: ${historyError.message}`);
+  if (historyError) {
+    console.error("[campaign] status history error:", historyError);
+    throw new Error(`Failed to record status history: ${historyError.message}`);
+  }
 
   revalidatePath("/admin/campaign", "layout");
   return { previousStatus, newStatus };
 }
-
-
-
-
 
 // ── Admin: Delete Application ─────────────────────────────────────────────
 
@@ -196,7 +230,10 @@ export async function deleteCampaignApplication(applicationId: string) {
     .delete()
     .eq("id", applicationId);
 
-  if (error) throw new Error(`Failed to delete application: ${error.message}`);
+  if (error) {
+    console.error("[campaign] deleteCampaignApplication error:", error);
+    throw new Error(`Failed to delete application: ${error.message}`);
+  }
   revalidatePath("/admin/campaign", "layout");
 }
 
@@ -212,7 +249,10 @@ export async function exportCampaignApplicationsCSV(status?: CampaignApplication
   if (status) query = query.eq("status", status);
 
   const { data, error } = await query;
-  if (error) throw new Error(`Failed to export: ${error.message}`);
+  if (error) {
+    console.error("[campaign] export error:", error);
+    throw new Error(`Failed to export: ${error.message}`);
+  }
 
   const applications = (data || []) as CampaignApplication[];
   if (applications.length === 0) return "";
@@ -250,13 +290,11 @@ export async function exportCampaignApplicationsCSV(status?: CampaignApplication
 // ── Revalidate Campaign Content ───────────────────────────────────────────
 
 export async function revalidateCampaignContent() {
-  // Clear Next.js page cache
   revalidatePath("/entrepreneur-support");
   revalidatePath("/entrepreneur-support/apply");
   revalidatePath("/entrepreneur-support/rules");
   revalidatePath("/admin/campaign/cms");
 
-  // Clear unstable_cache for ALL campaign data — revalidatePath does NOT do this!
   const tags = [
     "campaign-pages",
     "campaign-sections",

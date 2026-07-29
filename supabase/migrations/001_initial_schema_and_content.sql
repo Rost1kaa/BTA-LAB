@@ -1224,7 +1224,9 @@ VALUES (
   'BTA LAB — Digital Entrepreneurship Development Support',
   'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   'Develop your business with a modern website',
-  'ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო BTA LAB იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას. კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
+  'ბიზნესისა და ტექნოლოგიების აკადემია მისი საწარმოს ბითიეი ლაბის მეშვეობით იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.
+
+კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
   'The enterprise BTA LAB of the Business and Technology Academy is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations. Within the campaign, 10 projects will be selected to receive 100%, 60%, or 30% funding for website creation services.',
   true
 ) ON CONFLICT (slug) DO UPDATE SET
@@ -1248,7 +1250,9 @@ VALUES (
   'entrepreneur-support', 'hero', 'hero',
   'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   'Develop Your Business with a Modern Website',
-  'ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო BTA LAB იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას. კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
+  'ბიზნესისა და ტექნოლოგიების აკადემია მისი საწარმოს ბითიეი ლაბის მეშვეობით იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.
+
+კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
   'BTA LAB is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations. Within the campaign, 10 projects will be selected to receive 100%, 60%, or 30% funding for website creation services.',
   'ახალი შესაძლებლობა', 'New Opportunity',
   'შეავსე განაცხადი', 'Submit Application', '/entrepreneur-support/apply',
@@ -1840,8 +1844,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 INSERT INTO public.campaign_settings (id, setting_key, setting_value_ka, setting_value_en, setting_type, is_active) VALUES
   ('a1b2c3d4-0701-4000-8000-000000000001', 'campaign_name', 'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Development Support', 'text', true),
-  ('a1b2c3d4-0702-4000-8000-000000000001', 'campaign_email', 'campaign@bta.edu.ge', 'campaign@bta.edu.ge', 'text', true),
-  ('a1b2c3d4-0703-4000-8000-000000000001', 'campaign_phone', '+995 555 123 456', '+995 555 123 456', 'text', true),
+  ('a1b2c3d4-0702-4000-8000-000000000001', 'campaign_email', 'lab@bta.edu.ge', 'lab@bta.edu.ge', 'text', true),
+  ('a1b2c3d4-0703-4000-8000-000000000001', 'campaign_phone', '579009247', '579009247', 'text', true),
   ('a1b2c3d4-0704-4000-8000-000000000001', 'campaign_deadline', '2026-12-31', '2026-12-31', 'text', true),
   ('a1b2c3d4-0705-4000-8000-000000000001', 'campaign_max_funding', '5000', '5000', 'number', true),
   ('a1b2c3d4-0706-4000-8000-000000000001', 'campaign_currency', '₾', '₾', 'text', true),
@@ -1881,27 +1885,27 @@ ON CONFLICT (page_slug) DO UPDATE SET
 
 INSERT INTO public.campaign_email_templates (id, event, subject_ka, subject_en, body_ka, body_en, is_active) VALUES
   ('a1b2c3d4-0901-4000-8000-000000000001', 'application_received',
-   'განაცხადი მიღებულია — BTA LAB', 'Application Received — BTA LAB',
+   'განაცხადი მიღებულია', 'Application Received',
    'თქვენი განაცხადი მიღებულია. თქვენი განაცხადის ნომერია: {{applicationNumber}}. ჩვენი გუნდი განიხილავს მას და დაგიკავშირდებით 5 სამუშაო დღის განმავლობაში.',
    'Your application has been received. Your application number is: {{applicationNumber}}. Our team will review it and contact you within 5 business days.', true),
   ('a1b2c3d4-0902-4000-8000-000000000001', 'interview_invitation',
-   'გასაუბრების მოწვევა — BTA LAB', 'Interview Invitation — BTA LAB',
+   'გასაუბრების მოწვევა', 'Interview Invitation',
    'თქვენ მიწვეული ხართ გასაუბრებაზე. თარიღი: {{date}}, დრო: {{time}}, ბმული: {{meetingUrl}}.',
    'You are invited for an interview. Date: {{date}}, Time: {{time}}, Link: {{meetingUrl}}.', true),
   ('a1b2c3d4-0903-4000-8000-000000000001', 'need_more_information',
-   'დამატებითი ინფორმაცია — BTA LAB', 'Additional Information Needed — BTA LAB',
+   'დამატებითი ინფორმაცია', 'Additional Information Needed',
    'თქვენი განაცხადის განსახილველად საჭიროა დამატებითი ინფორმაცია: {{notes}}',
    'To review your application, we need additional information: {{notes}}', true),
   ('a1b2c3d4-0904-4000-8000-000000000001', 'offer_made',
-   'შეთავაზება — BTA LAB', 'Offer — BTA LAB',
+   'შეთავაზება', 'Offer',
    'გილოცავთ! თქვენ მიიღეთ შეთავაზება. დაფინანსება: {{amount}}₾ ({{percentage}}%). გთხოვთ, დაადასტუროთ {{deadline}}-მდე.',
    'Congratulations! You have received an offer. Funding: {{amount}}₾ ({{percentage}}%). Please confirm by {{deadline}}.', true),
   ('a1b2c3d4-0905-4000-8000-000000000001', 'status_changed',
-   'სტატუსის ცვლილება — BTA LAB', 'Status Change — BTA LAB',
+   'სტატუსის ცვლილება', 'Status Change',
    'თქვენი განაცხადის სტატუსი შეიცვალა: {{status}}.',
    'Your application status has changed to: {{status}}.', true),
   ('a1b2c3d4-0906-4000-8000-000000000001', 'final_decision',
-   'საბოლოო გადაწყვეტილება — BTA LAB', 'Final Decision — BTA LAB',
+   'საბოლოო გადაწყვეტილება', 'Final Decision',
    'თქვენი განაცხადის საბოლოო შედეგი: {{result}}.',
    'The final result of your application: {{result}}.', true)
 ON CONFLICT (event) DO UPDATE SET

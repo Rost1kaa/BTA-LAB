@@ -151,13 +151,6 @@ function TeamPageContent({
                 <p className="mt-4 text-base text-[var(--color-fg-tertiary)] leading-relaxed">
                   {t("team.join.description")}
                 </p>
-                <div className="mt-8">
-                  <a href="mailto:careers@bta-lab.com">
-                    <span className="inline-flex items-center gap-2 text-sm text-[var(--color-fg-tertiary)]/70 hover:text-[var(--color-fg-secondary)] transition-colors">
-                      careers@bta-lab.com
-                    </span>
-                  </a>
-                </div>
               </div>
             </div>
           </FadeIn>

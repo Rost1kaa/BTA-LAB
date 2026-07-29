@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -158,10 +158,15 @@ const STAGES = [
   { key: "declarations", title_ka: "დეკლარაციები და გაგზავნა", title_en: "Declarations & Submit", icon: CheckSquare },
 ];
 
-const COMMUNICATION_CHANNELS = ["ელფოსტა", "ტელეფონი", "WhatsApp", "სხვა"];
+const COMMUNICATION_CHANNELS = ["ელფოსტა", "ტელეფონი", "WhatsApp"];
 const LEGAL_STATUSES = [
-  "ინდივიდუალური მეწარმე", "შპს", "სხვა იურიდიული პირი",
-  "არაკომერციული ორგანიზაცია", "ჯერ არ ვარ რეგისტრირებული", "სხვა",
+  "ინდივიდუალური მეწარმე",
+  "შპს (შეზღუდული პასუხისმგებლობის საზოგადოება)",
+  "სს (სააქციო საზოგადოება)",
+  "კოოპერატივი",
+  "ა(ა)იპ (არასამეწარმეო (არაკომერციული) იურიდიული პირი)",
+  "სხვა იურიდიული პირი",
+  "ჯერ არ ვარ რეგისტრირებული",
 ];
 const PROJECT_TYPES = [
   "ერთგვერდიანი საიტი", "ბიზნესვებგვერდი", "პროდუქტის კატალოგი",
@@ -175,6 +180,18 @@ const FEATURES_LIST = [
   "WhatsApp/Messenger", "ელფოსტის შეტყობინებები", "მომხმარებლის რეგისტრაცია",
   "ბლოგი", "ფოტოგალერეა", "ვიდეო", "სხვა",
 ];
+const MUNICIPALITIES = [
+  "თბილისი", "ბათუმი", "ქუთაისი", "რუსთავი", "ფოთი", "გორი", "ზუგდიდი",
+  "თელავი", "ახალციხე", "ოზურგეთი", "სენაკი", "ხაშური", "სამტრედია",
+  "ჭიათურა", "საჩხერე", "ზესტაფონი", "ტყიბული", "წყალტუბო", "ბორჯომი",
+  "მცხეთა", "ყვარელი", "ლაგოდეხი", "საგარეჯო", "დედოფლისწყარო",
+  "გურჯაანი", "მარნეული", "ბოლნისი", "დმანისი", "წალკა", "ახალქალაქი",
+  "ნინოწმინდა", "ამბროლაური", "ცაგერი", "ონი", "ლენტეხი", "მესტია",
+  "ხობი", "აბაშა", "მარტვილი", "ჩხოროწყუ", "წალენჯიხა", "ქობულეთი",
+  "ხელვაჩაური", "ქედა", "შუახევი", "ხულო", "ადიგენი", "ასპინძა",
+  "თეთრიწყარო", "გარდაბანი", "კასპი", "ქარელი",
+];
+
 const READY_MATERIALS = [
   "ლოგო", "ბრენდის ფერები", "კომპანიის აღწერა", "პროდუქტების აღწერები",
   "მომსახურების აღწერები", "ფასები", "ფოტოები", "ვიდეო",
@@ -274,33 +291,58 @@ function StepNavigator({
 // FIELD HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-function Input({ label, value, onChange, required, type = "text", placeholder, maxLength }: {
+function Input({ label, value, onChange, required, type = "text", placeholder, maxLength, disabled }: {
   label: string; value: string; onChange: (v: string) => void;
-  required?: boolean; type?: string; placeholder?: string; maxLength?: number;
+  required?: boolean; type?: string; placeholder?: string; maxLength?: number; disabled?: boolean;
 }) {
+  const charCount = value.length;
+  const isOverLimit = maxLength !== undefined && charCount > maxLength;
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-medium text-[var(--color-fg-primary)]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {type === "textarea" ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          rows={4}
-          className="w-full px-4 py-3 rounded-xl border border-[var(--color-border-primary)] bg-[var(--color-bg-surface)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]/50 transition-all resize-vertical"
-        />
+        <div className="relative">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            rows={4}
+            className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-bg-surface)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]/50 transition-all resize-vertical ${
+              isOverLimit ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" : "border-[var(--color-border-primary)]"
+            }`}
+          />
+          {maxLength !== undefined && (
+            <div className="flex justify-end mt-1">
+              <span className={`text-xs font-medium ${isOverLimit ? "text-red-500" : "text-[var(--color-fg-tertiary)]"}`}>
+                {charCount} / {maxLength}
+              </span>
+            </div>
+          )}
+        </div>
       ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          className="w-full px-4 py-3 rounded-xl border border-[var(--color-border-primary)] bg-[var(--color-bg-surface)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]/50 transition-all"
-        />
+        <div className="relative">
+          <input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            disabled={disabled}
+            className={`w-full px-4 py-3 rounded-xl border bg-[var(--color-bg-surface)] text-sm text-[var(--color-fg-primary)] placeholder:text-[var(--color-fg-tertiary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]/50 transition-all ${
+              isOverLimit ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" : "border-[var(--color-border-primary)]"
+            }`}
+          />
+          {maxLength !== undefined && (
+            <div className="flex justify-end mt-1">
+              <span className={`text-xs font-medium ${isOverLimit ? "text-red-500" : "text-[var(--color-fg-tertiary)]"}`}>
+                {charCount} / {maxLength}
+              </span>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -435,15 +477,15 @@ function Stage1PersonalInfo({ data, onChange, locale }: {
         <Input label={locale === "ka" ? "გვარი" : "Last Name"} value={data.lastName} onChange={(v) => onChange({ lastName: v })} required />
       </div>
 
-      <Input label={locale === "ka" ? "პირადი ნომერი" : "Personal ID Number"} value={data.personalId} onChange={(v) => onChange({ personalId: v })} placeholder={locale === "ka" ? "მხოლოდ საჭიროების შემთხვევაში" : "Only if strictly necessary"} />
+      <Input label={locale === "ka" ? "პირადი ნომერი (11 ციფრი)" : "Personal ID Number (11 digits)"} value={data.personalId} onChange={(v) => { const digitsOnly = v.replace(/\D/g, ""); onChange({ personalId: digitsOnly }); }} placeholder={locale === "ka" ? "შეიყვანეთ 11 ციფრი" : "Enter 11 digits"} maxLength={11} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input label={locale === "ka" ? "ტელეფონის ნომერი" : "Phone Number"} value={data.phone} onChange={(v) => onChange({ phone: v })} type="tel" required />
-        <Input label={locale === "ka" ? "ელფოსტა" : "Email"} value={data.email} onChange={(v) => onChange({ email: v })} type="email" required />
+        <Input label={locale === "ka" ? "ელფოსტა" : "Email"} value={data.email} onChange={(v) => onChange({ email: v })} type="email" required disabled />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input label={locale === "ka" ? "ქალაქი/მუნიციპალიტეტი" : "City/Municipality"} value={data.city} onChange={(v) => onChange({ city: v })} required />
+        <Select label={locale === "ka" ? "ქალაქი/მუნიციპალიტეტი" : "City/Municipality"} value={data.city} onChange={(v) => onChange({ city: v })} options={MUNICIPALITIES} required />
         <Select label={locale === "ka" ? "სასურველი კომუნიკაციის არხი" : "Preferred Communication Channel"} value={data.communicationChannel} onChange={(v) => onChange({ communicationChannel: v })} options={COMMUNICATION_CHANNELS} required />
       </div>
 
@@ -466,7 +508,7 @@ function Stage1PersonalInfo({ data, onChange, locale }: {
 function Stage2LegalStatus({ data, onChange, locale }: {
   data: WizardFormData; onChange: (d: Partial<WizardFormData>) => void; locale: string;
 }) {
-  const needsBusinessFields = !["ჯერ არ ვარ რეგისტრირებული", "", "სხვა"].includes(data.legalStatus);
+  const needsBusinessFields = !["ჯერ არ ვარ რეგისტრირებული", ""].includes(data.legalStatus);
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[var(--color-fg-primary)]">
@@ -538,29 +580,29 @@ function Stage3BusinessDesc({ data, onChange, locale }: {
       </p>
 
       <Input label={locale === "ka" ? "მოკლე აღწერა (მაქს. 500 სიმბოლო)" : "Short Summary (max 500 chars)"} value={data.shortSummary} onChange={(v) => onChange({ shortSummary: v })} type="textarea" maxLength={500} required />
-      <Input label={locale === "ka" ? "სრული აღწერა (1500–2000 სიმბოლო)" : "Full Description (1500–2000 chars)"} value={data.fullDescription} onChange={(v) => onChange({ fullDescription: v })} type="textarea" maxLength={2000} required />
-      <Input label={locale === "ka" ? "რა პროდუქტს ან მომსახურებას სთავაზობთ?" : "What product or service do you offer?"} value={data.productService} onChange={(v) => onChange({ productService: v })} type="textarea" />
+      <Input label={locale === "ka" ? "სრული აღწერა (მაქს. 1000 სიმბოლო)" : "Full Description (max 1000 chars)"} value={data.fullDescription} onChange={(v) => onChange({ fullDescription: v })} type="textarea" maxLength={1000} required />
+      <Input label={locale === "ka" ? "რა პროდუქტს ან მომსახურებას სთავაზობთ?" : "What product or service do you offer?"} value={data.productService} onChange={(v) => onChange({ productService: v })} type="textarea" required />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input label={locale === "ka" ? "ვინ არის თქვენი სამიზნე მომხმარებელი?" : "Who is your target customer?"} value={data.targetCustomer} onChange={(v) => onChange({ targetCustomer: v })} type="textarea" />
-        <Input label={locale === "ka" ? "რამდენი ხანია საქმიანობთ?" : "How long have you been operating?"} value={data.yearsOperating} onChange={(v) => onChange({ yearsOperating: v })} />
+        <Input label={locale === "ka" ? "ვინ არის თქვენი სამიზნე მომხმარებელი?" : "Who is your target customer?"} value={data.targetCustomer} onChange={(v) => onChange({ targetCustomer: v })} type="textarea" required />
+        <Input label={locale === "ka" ? "რამდენი ხანია საქმიანობთ?" : "How long have you been operating?"} value={data.yearsOperating} onChange={(v) => onChange({ yearsOperating: v })} required />
       </div>
 
-      <Input label={locale === "ka" ? "როგორ იღებთ მომხმარებლებს ამჟამად?" : "How do you currently acquire customers?"} value={data.currentAcquisition} onChange={(v) => onChange({ currentAcquisition: v })} type="textarea" />
+      <Input label={locale === "ka" ? "როგორ იღებთ მომხმარებლებს ამჟამად?" : "How do you currently acquire customers?"} value={data.currentAcquisition} onChange={(v) => onChange({ currentAcquisition: v })} type="textarea" required />
 
       <RadioGroup
-        label={locale === "ka" ? "გაქვთ თუ არა არსებული გაყიდვები ან მომხმარებლები?" : "Do you have existing sales or customers?"}
+        label={locale === "ka" ? "გყავთ უკვე მომხმარებლები ან გაქვთ მიმდინარე გაყიდვები?" : "Do you already have customers or ongoing sales?"}
         options={["დიახ", "არა", "ეტაპობრივად"]}
         value={data.hasSales}
         onChange={(v) => onChange({ hasSales: v })}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input label={locale === "ka" ? "რამდენი ადამიანი მუშაობს საქმიანობაში?" : "How many people work in the business?"} value={data.teamSize} onChange={(v) => onChange({ teamSize: v })} type="number" />
-        <Input label={locale === "ka" ? "ქმნის თუ არა პროექტი სამუშაო ადგილებს?" : "Does the project create jobs?"} value={data.createsJobs} onChange={(v) => onChange({ createsJobs: v })} />
+        <Input label={locale === "ka" ? "რამდენი ადამიანი მუშაობს საქმიანობაში?" : "How many people work in the business?"} value={data.teamSize} onChange={(v) => onChange({ teamSize: v })} type="number" required />
+        <Input label={locale === "ka" ? "ქმნის თუ არა პროექტი სამუშაო ადგილებს?" : "Does the project create jobs?"} value={data.createsJobs} onChange={(v) => onChange({ createsJobs: v })} required />
       </div>
 
-      <Input label={locale === "ka" ? "რა რეგიონში ან ბაზარზე საქმიანობთ?" : "In what region or market do you operate?"} value={data.region} onChange={(v) => onChange({ region: v })} />
+      <Input label={locale === "ka" ? "რა რეგიონში ან ბაზარზე საქმიანობთ?" : "In what region or market do you operate?"} value={data.region} onChange={(v) => onChange({ region: v })} required />
     </div>
   );
 }
@@ -584,11 +626,11 @@ function Stage4WebsiteNeed({ data, onChange, locale }: {
       </p>
 
       <Input label={locale === "ka" ? "რატომ გჭირდებათ ვებგვერდი?" : "Why do you need a website?"} value={data.whyNeed} onChange={(v) => onChange({ whyNeed: v })} type="textarea" required />
-      <Input label={locale === "ka" ? "რა პრობლემას გადაჭრის?" : "What problem will it solve?"} value={data.problemSolved} onChange={(v) => onChange({ problemSolved: v })} type="textarea" />
-      <Input label={locale === "ka" ? "რა მიზანს უნდა მიაღწიოთ ვებგვერდით?" : "What goal should the website achieve?"} value={data.goalAchieve} onChange={(v) => onChange({ goalAchieve: v })} type="textarea" />
-      <Input label={locale === "ka" ? "როგორ გამოიყენებენ მას მომხმარებლები?" : "How will users use it?"} value={data.userUsage} onChange={(v) => onChange({ userUsage: v })} type="textarea" />
-      <Input label={locale === "ka" ? "რომელ მოქმედებას უნდა ასრულებდეს მომხმარებელი?" : "What action should the user perform?"} value={data.userAction} onChange={(v) => onChange({ userAction: v })} type="textarea" />
-      <Input label={locale === "ka" ? "რა შედეგს ელით პირველი 6 თვის განმავლობაში?" : "What results do you expect in the first 6 months?"} value={data.expected6Months} onChange={(v) => onChange({ expected6Months: v })} type="textarea" />
+      <Input label={locale === "ka" ? "რა პრობლემას გადაჭრის?" : "What problem will it solve?"} value={data.problemSolved} onChange={(v) => onChange({ problemSolved: v })} type="textarea" required />
+      <Input label={locale === "ka" ? "რა მიზანს უნდა მიაღწიოთ ვებგვერდით?" : "What goal should the website achieve?"} value={data.goalAchieve} onChange={(v) => onChange({ goalAchieve: v })} type="textarea" required />
+      <Input label={locale === "ka" ? "როგორ გამოიყენებენ მას მომხმარებლები?" : "How will users use it?"} value={data.userUsage} onChange={(v) => onChange({ userUsage: v })} type="textarea" required />
+      <Input label={locale === "ka" ? "რომელ მოქმედებას უნდა ასრულებდეს მომხმარებელი?" : "What action should the user perform?"} value={data.userAction} onChange={(v) => onChange({ userAction: v })} type="textarea" required />
+      <Input label={locale === "ka" ? "რა შედეგს ელით პირველი 6 თვის განმავლობაში?" : "What results do you expect in the first 6 months?"} value={data.expected6Months} onChange={(v) => onChange({ expected6Months: v })} type="textarea" required />
 
       <MultiCheckbox
         label={locale === "ka" ? "მონიშნეთ თქვენი მიზნები" : "Select your goals"}
@@ -659,20 +701,14 @@ function Stage6Development({ data, onChange, locale }: {
       </h2>
       <p className="text-sm text-[var(--color-fg-tertiary)]">
         {locale === "ka"
-          ? "უპასუხეთ თითოეულ კითხვას და საჭიროების შემთხვევაში დაწვრილებით დაასაბუთეთ."
-          : "Answer each question and provide detailed justification where needed."}
+          ? "გთხოვთ, დაწვრილებით უპასუხეთ თითოეულ კითხვას."
+          : "Please answer each question in detail."}
       </p>
 
       {DEVELOPMENT_CRITERIA.map((crit) => (
         <div key={crit.key} className="p-5 rounded-2xl border border-[var(--color-border-primary)] bg-[var(--color-bg-surface)] space-y-3">
           <p className="text-sm font-medium text-[var(--color-fg-primary)]">{crit.q_ka}</p>
-          <RadioGroup
-            label=""
-            options={["დიახ", "არა", "ნაწილობრივ", "არ შეესაბამება"]}
-            value={(data as any)[crit.key + "Radio"] || ""}
-            onChange={(v) => onChange({ [crit.key + "Radio"]: v } as any)}
-          />
-          <Input label={locale === "ka" ? "დასაბუთება" : "Justification"} value={(data as any)[crit.key] || ""} onChange={(v) => onChange({ [crit.key]: v } as any)} type="textarea" />
+          <Input label={locale === "ka" ? "პასუხი" : "Answer"} value={(data as any)[crit.key] || ""} onChange={(v) => onChange({ [crit.key]: v } as any)} type="textarea" required />
         </div>
       ))}
     </div>
@@ -713,15 +749,42 @@ function Stage7Materials({ data, onChange, locale }: {
         options={FEEDBACK_TIMES}
       />
 
-      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-1">
-        <p className="text-sm font-medium text-[var(--color-fg-primary)] mb-3">
+      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-3">
+        <p className="text-sm font-medium text-[var(--color-fg-primary)]">
           {locale === "ka" ? "თანამშრომლობის პირობები" : "Cooperation Conditions"}
         </p>
-        <Checkbox label={locale === "ka" ? "მზად ვარ მივიღო მონაწილეობა ონლაინ ან პირისპირ გასაუბრებაში" : "Ready to participate in online or in-person interview"} checked={data.coopInterview} onChange={(v) => onChange({ coopInterview: v })} required />
-        <Checkbox label={locale === "ka" ? "მზად ვარ გამოვყო პროექტზე პასუხისმგებელი პირი" : "Ready to assign a person responsible for the project"} checked={data.coopAssignPerson} onChange={(v) => onChange({ coopAssignPerson: v })} required />
-        <Checkbox label={locale === "ka" ? "მზად ვარ დროულად მივაწოდო BTA LAB-ს ინფორმაცია" : "Ready to provide information to BTA LAB in a timely manner"} checked={data.coopTimelyInfo} onChange={(v) => onChange({ coopTimelyInfo: v })} required />
-        <Checkbox label={locale === "ka" ? "ვეთანხმები, რომ დაგვიანებამ შეიძლება პროექტის ვადა გადაწიოს" : "I agree that delays may extend the project deadline"} checked={data.coopDelayAgree} onChange={(v) => onChange({ coopDelayAgree: v })} required />
-        <Checkbox label={locale === "ka" ? "ვეთანხმები, რომ ხანგრძლივი თანამშრომლობის არქონის შემთხვევაში პროექტი შეიძლება შეჩერდეს" : "I agree that prolonged lack of cooperation may result in project suspension"} checked={data.coopStopAgree} onChange={(v) => onChange({ coopStopAgree: v })} required />
+        <div className="space-y-2 text-sm text-[var(--color-fg-secondary)]">
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მზად ვარ მივიღო მონაწილეობა ონლაინ ან პირისპირ გასაუბრებაში" : "Ready to participate in online or in-person interview"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მზად ვარ გამოვყო პროექტზე პასუხისმგებელი პირი" : "Ready to assign a person responsible for the project"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მზად ვარ დროულად მივაწოდო BTA LAB-ს ინფორმაცია" : "Ready to provide information to BTA LAB in a timely manner"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "ვეთანხმები, რომ დაგვიანებამ შეიძლება პროექტის ვადა გადაწიოს" : "I agree that delays may extend the project deadline"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "ვეთანხმები, რომ ხანგრძლივი თანამშრომლობის არქონის შემთხვევაში პროექტი შეიძლება შეჩერდეს" : "I agree that prolonged lack of cooperation may result in project suspension"}</span>
+          </div>
+        </div>
+        <div className="pt-2 border-t border-[var(--color-border-primary)]">
+          <Checkbox
+            label={locale === "ka" ? "ვეთანხმები ყველა თანამშრომლობის პირობას" : "I agree to all cooperation conditions"}
+            checked={data.coopInterview && data.coopAssignPerson && data.coopTimelyInfo && data.coopDelayAgree && data.coopStopAgree}
+            onChange={(v) => {
+              onChange({ coopInterview: v, coopAssignPerson: v, coopTimelyInfo: v, coopDelayAgree: v, coopStopAgree: v });
+            }}
+            required
+          />
+        </div>
       </div>
     </div>
   );
@@ -745,16 +808,46 @@ function Stage8Consent({ data, onChange, locale }: {
           : "Please indicate which communication activities you consent to. Marked items are required."}
       </p>
 
-      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-1">
-        <p className="text-sm font-semibold text-[var(--color-fg-primary)] mb-2">
+      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-3">
+        <p className="text-sm font-semibold text-[var(--color-fg-primary)]">
           {locale === "ka" ? "სავალდებულო თანხმობები" : "Required Consents"}
         </p>
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, პროექტი განთავსდეს BTA LAB-ის პორტფოლიოში" : "I consent to the project being displayed in BTA LAB's portfolio"} checked={data.consentPortfolio} onChange={(v) => onChange({ consentPortfolio: v })} required />
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, გამოქვეყნდეს პროექტის სქრინშოტები" : "I consent to project screenshots being published"} checked={data.consentScreenshots} onChange={(v) => onChange({ consentScreenshots: v })} required />
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, აღწერილი იყოს პროექტის შექმნის პროცესი" : "I consent to the project creation process being described"} checked={data.consentProcess} onChange={(v) => onChange({ consentProcess: v })} required />
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, პროექტი წარმოდგენილ იქნეს აკადემიის პრეზენტაციაზე" : "I consent to the project being presented at academy presentations"} checked={data.consentPresentation} onChange={(v) => onChange({ consentPresentation: v })} required />
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, გამოქვეყნდეს ჩემი წერილობითი შეფასება" : "I consent to my written feedback being published"} checked={data.consentFeedback} onChange={(v) => onChange({ consentFeedback: v })} required />
-        <Checkbox label={locale === "ka" ? "თანახმა ვარ, მონაწილეობა მივიღო პროექტის შედეგების მოკლე შეფასებაში" : "I consent to participate in a brief project results evaluation"} checked={data.consentEvaluation} onChange={(v) => onChange({ consentEvaluation: v })} required />
+        <div className="space-y-2 text-sm text-[var(--color-fg-secondary)]">
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "პროექტი განთავსდება BTA LAB-ის პორტფოლიოში" : "Project will be displayed in BTA LAB's portfolio"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "გამოქვეყნდება პროექტის სქრინშოტები" : "Project screenshots will be published"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "აღწერილი იქნება პროექტის შექმნის პროცესი" : "Project creation process will be described"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "პროექტი წარმოდგენილი იქნება აკადემიის პრეზენტაციაზე" : "Project will be presented at academy presentations"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "გამოქვეყნდება ჩემი წერილობითი შეფასება" : "Written feedback will be published"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მონაწილეობა მივიღო პროექტის შედეგების მოკლე შეფასებაში" : "Participate in brief project results evaluation"}</span>
+          </div>
+        </div>
+        <div className="pt-2 border-t border-[var(--color-border-primary)]">
+          <Checkbox
+            label={locale === "ka" ? "ვეთანხმები საჯარო კომუნიკაციის პირობებს" : "I consent to public communication conditions"}
+            checked={data.consentPortfolio && data.consentScreenshots && data.consentProcess && data.consentPresentation && data.consentFeedback && data.consentEvaluation}
+            onChange={(v) => {
+              onChange({ consentPortfolio: v, consentScreenshots: v, consentProcess: v, consentPresentation: v, consentFeedback: v, consentEvaluation: v });
+            }}
+            required
+          />
+        </div>
       </div>
 
       <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-1">
@@ -787,15 +880,54 @@ function Stage9Declarations({ data, onChange, locale, isSubmitting }: {
           : "Please confirm your agreement to the campaign rules by checking the confirmation boxes."}
       </p>
 
-      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-1">
-        <Checkbox label={locale === "ka" ? "ვადასტურებ, რომ მოწოდებული ინფორმაცია სწორია" : "I confirm that the provided information is correct"} checked={data.declInfoCorrect} onChange={(v) => onChange({ declInfoCorrect: v })} required />
-        <Checkbox label={locale === "ka" ? "ვადასტურებ, რომ საქმიანობა კანონიერია" : "I confirm that the activity is legal"} checked={data.declLegalActivity} onChange={(v) => onChange({ declLegalActivity: v })} required />
-        <Checkbox label={locale === "ka" ? "გავეცანი კამპანიის წესებს" : "I have read the campaign rules"} checked={data.declReadRules} onChange={(v) => onChange({ declReadRules: v })} required />
-        <Checkbox label={locale === "ka" ? "მესმის, რომ განაცხადის შევსება დაფინანსების მიღებას არ ნიშნავს" : "I understand that submitting an application does not guarantee funding"} checked={data.declNotGuarantee} onChange={(v) => onChange({ declNotGuarantee: v })} required />
-        <Checkbox label={locale === "ka" ? "ვეთანხმები პერსონალური მონაცემების დამუშავებას განაცხადის შეფასების მიზნით" : "I consent to personal data processing for application evaluation"} checked={data.declDataProcessing} onChange={(v) => onChange({ declDataProcessing: v })} required />
-        <Checkbox label={locale === "ka" ? "მესმის, რომ BTA LAB-ს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" : "I understand that BTA LAB may request additional information"} checked={data.declAdditionalInfo} onChange={(v) => onChange({ declAdditionalInfo: v })} required />
-        <Checkbox label={locale === "ka" ? "მესმის, რომ მოთხოვნების კამპანიის შესაძლებლობებთან შეუსაბამობისას პროექტი შეიძლება არ შეირჩეს" : "I understand that if requirements don't match campaign capabilities, the project may not be selected"} checked={data.declMayNotSelect} onChange={(v) => onChange({ declMayNotSelect: v })} required />
-        <Checkbox label={locale === "ka" ? "ვეთანხმები გასაუბრების ეტაპზე მონაწილეობას, თუ მოკლე სიაში მოვხვდები" : "I consent to participate in the interview stage if shortlisted"} checked={data.declInterviewParticipate} onChange={(v) => onChange({ declInterviewParticipate: v })} required />
+      <div className="p-5 rounded-2xl border border-[var(--color-border-primary)] space-y-3">
+        <p className="text-sm font-semibold text-[var(--color-fg-primary)]">
+          {locale === "ka" ? "დეკლარაციები" : "Declarations"}
+        </p>
+        <div className="space-y-2 text-sm text-[var(--color-fg-secondary)]">
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მოწოდებული ინფორმაცია სწორია" : "Provided information is correct"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "საქმიანობა კანონიერია" : "Activity is legal"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "გავეცანი კამპანიის წესებს" : "I have read the campaign rules"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "მესმის, რომ განაცხადის შევსება დაფინანსების მიღებას არ ნიშნავს" : "Submitting does not guarantee funding"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "ვეთანხმები პერსონალური მონაცემების დამუშავებას" : "I consent to data processing"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "BTA LAB-ს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" : "BTA LAB may request additional information"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "პროექტი შეიძლება არ შეირჩეს" : "The project may not be selected"}</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <span>{locale === "ka" ? "ვეთანხმები გასაუბრების ეტაპზე მონაწილეობას" : "I consent to participate in the interview stage"}</span>
+          </div>
+        </div>
+        <div className="pt-2 border-t border-[var(--color-border-primary)]">
+          <Checkbox
+            label={locale === "ka" ? "ვეთანხმები კამპანიის წესებს და პირობებს" : "I agree to the campaign rules and conditions"}
+            checked={data.declInfoCorrect && data.declLegalActivity && data.declReadRules && data.declNotGuarantee && data.declDataProcessing && data.declAdditionalInfo && data.declMayNotSelect && data.declInterviewParticipate}
+            onChange={(v) => {
+              onChange({ declInfoCorrect: v, declLegalActivity: v, declReadRules: v, declNotGuarantee: v, declDataProcessing: v, declAdditionalInfo: v, declMayNotSelect: v, declInterviewParticipate: v });
+            }}
+            required
+          />
+        </div>
       </div>
     </div>
   );
@@ -813,15 +945,56 @@ export function CampaignWizardClient({ verificationToken, verifiedEmail }: { ver
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Use a ref to avoid stale closures inside the popstate event handler
+  const currentStepRef = useRef(currentStep);
+  currentStepRef.current = currentStep;
+
+  // Pre-populate email with the verified email from OTP gate
+  useEffect(() => {
+    if (verifiedEmail) {
+      setFormData((prev) => ({ ...prev, email: verifiedEmail }));
+    }
+  }, [verifiedEmail]);
+
+  // Intercept browser back button to navigate steps instead of leaving the form
+  useEffect(() => {
+    // Push an initial history entry so the popstate event fires correctly
+    window.history.pushState(null, "");
+
+    const handlePopState = () => {
+      const step = currentStepRef.current;
+      if (step > 0) {
+        // Go to previous step by updating state, keep user on this page
+        setCurrentStep(step - 1);
+        setError("");
+        // Push a new state to prevent the browser from navigating away
+        window.history.pushState(null, "");
+      }
+      // On step 0: do nothing — let the browser navigate back naturally
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const updateFormData = useCallback((partial: Partial<WizardFormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
   }, []);
+
+  // Update history state when step changes
+  useEffect(() => {
+    window.history.replaceState({ step: currentStep }, "");
+  }, [currentStep]);
 
   const validateStep = useCallback((step: number): boolean => {
     switch (step) {
       case 0: // Personal Info
         if (!formData.firstName || !formData.lastName || !formData.phone || !formData.email || !formData.city) {
           setError(locale === "ka" ? "გთხოვთ, შეავსოთ ყველა სავალდებულო ველი" : "Please fill in all required fields");
+          return false;
+        }
+        if (formData.personalId && formData.personalId.length !== 11) {
+          setError(locale === "ka" ? "პირადი ნომერი უნდა შეიცავდეს ზუსტად 11 ციფრს" : "Personal ID must contain exactly 11 digits");
           return false;
         }
         if (!formData.ageConfirmed) {
@@ -844,10 +1017,78 @@ export function CampaignWizardClient({ verificationToken, verifiedEmail }: { ver
           setError(locale === "ka" ? "გთხოვთ, შეიყვანოთ მოკლე აღწერა" : "Please enter a short summary");
           return false;
         }
+        if (formData.shortSummary.length > 500) {
+          setError(locale === "ka" ? "მოკლე აღწერა არ უნდა აღემატებოდეს 500 სიმბოლოს" : "Short summary must not exceed 500 characters");
+          return false;
+        }
+        if (!formData.fullDescription) {
+          setError(locale === "ka" ? "გთხოვთ, შეიყვანოთ სრული აღწერა" : "Please enter a full description");
+          return false;
+        }
+        if (formData.fullDescription.length > 1000) {
+          setError(locale === "ka" ? "სრული აღწერა არ უნდა აღემატებოდეს 1000 სიმბოლოს" : "Full description must not exceed 1000 characters");
+          return false;
+        }
+        if (!formData.productService) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რა პროდუქტს ან მომსახურებას სთავაზობთ" : "Please indicate what product or service you offer");
+          return false;
+        }
+        if (!formData.targetCustomer) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ თქვენი სამიზნე მომხმარებელი" : "Please indicate your target customer");
+          return false;
+        }
+        if (!formData.yearsOperating) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რამდენი ხანია საქმიანობთ" : "Please indicate how long you have been operating");
+          return false;
+        }
+        if (!formData.currentAcquisition) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ როგორ იღებთ მომხმარებლებს" : "Please indicate how you acquire customers");
+          return false;
+        }
+        if (!formData.hasSales) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ გყავთ თუ არა მომხმარებლები ან გაქვთ გაყიდვები" : "Please indicate if you have customers or sales");
+          return false;
+        }
+        if (!formData.teamSize) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რამდენი ადამიანი მუშაობს საქმიანობაში" : "Please indicate how many people work in the business");
+          return false;
+        }
+        if (!formData.createsJobs) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ ქმნის თუ არა პროექტი სამუშაო ადგილებს" : "Please indicate if the project creates jobs");
+          return false;
+        }
+        if (!formData.region) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რა რეგიონში საქმიანობთ" : "Please indicate your region or market");
+          return false;
+        }
         break;
       case 3: // Website Need
         if (!formData.whyNeed) {
           setError(locale === "ka" ? "გთხოვთ, აღწეროთ ვებგვერდის საჭიროება" : "Please describe why you need a website");
+          return false;
+        }
+        if (!formData.problemSolved) {
+          setError(locale === "ka" ? "გთხოვთ, აღწეროთ რა პრობლემას გადაჭრის ვებგვერდი" : "Please describe what problem the website will solve");
+          return false;
+        }
+        if (!formData.goalAchieve) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რა მიზანს უნდა მიაღწიოთ ვებგვერდით" : "Please indicate what goal the website should achieve");
+          return false;
+        }
+        if (!formData.userUsage) {
+          setError(locale === "ka" ? "გთხოვთ, აღწეროთ როგორ გამოიყენებენ ვებგვერდს მომხმარებლები" : "Please describe how users will use the website");
+          return false;
+        }
+        if (!formData.userAction) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რომელ მოქმედებას უნდა ასრულებდეს მომხმარებელი" : "Please indicate what action the user should perform");
+          return false;
+        }
+        if (!formData.expected6Months) {
+          setError(locale === "ka" ? "გთხოვთ, მიუთითოთ რა შედეგს ელით პირველი 6 თვის განმავლობაში" : "Please indicate what results you expect in the first 6 months");
+          return false;
+        }
+        if (!formData.goalsMulti || formData.goalsMulti.length === 0) {
+          setError(locale === "ka" ? "გთხოვთ აირჩიოთ მინიმუმ ერთი მიზანი" : "Please select at least one goal");
           return false;
         }
         break;
@@ -856,12 +1097,20 @@ export function CampaignWizardClient({ verificationToken, verifiedEmail }: { ver
           setError(locale === "ka" ? "გთხოვთ, აირჩიოთ პროექტის ტიპი" : "Please select a project type");
           return false;
         }
+        if (!formData.desiredFeatures || formData.desiredFeatures.length === 0) {
+          setError(locale === "ka" ? "გთხოვთ აირჩიოთ მინიმუმ ერთი სასურველი ფუნქცია" : "Please select at least one desired feature");
+          return false;
+        }
         break;
-      case 5: // Development - just a warning if empty
+      case 5: // Development Potential
+        if (!formData.developmentPlan || !formData.websiteHelps || !formData.jobCreationPotential || !formData.usesLocalResources || !formData.showcasesCulture || !formData.supportsRegion || !formData.internationalPotential || !formData.socialEconomicBenefit) {
+          setError(locale === "ka" ? "გთხოვთ შეავსოთ ყველა სავალდებულო პასუხი" : "Please fill in all required answers");
+          return false;
+        }
         break;
       case 6: // Materials & Cooperation
-        if (!formData.coopInterview || !formData.coopAssignPerson || !formData.coopTimelyInfo) {
-          setError(locale === "ka" ? "თანამშრომლობის სავალდებულო პირობები მონიშნეთ" : "Please check the required cooperation conditions");
+        if (!formData.coopInterview || !formData.coopAssignPerson || !formData.coopTimelyInfo || !formData.coopDelayAgree || !formData.coopStopAgree) {
+          setError(locale === "ka" ? "გთხოვთ დაეთანხმოთ ყველა თანამშრომლობის პირობას" : "Please agree to all cooperation conditions");
           return false;
         }
         break;
@@ -885,6 +1134,8 @@ export function CampaignWizardClient({ verificationToken, verifiedEmail }: { ver
   const handleNext = useCallback(() => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, STAGES.length - 1));
+      // Automatically scroll to top of the new step
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentStep, validateStep]);
 
@@ -909,16 +1160,15 @@ export function CampaignWizardClient({ verificationToken, verifiedEmail }: { ver
       // Redirect to thank-you page
       router.push(`/entrepreneur-support/thank-you?appId=${result.application_number}`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Submission failed";
+      console.error("[campaign-wizard] submit error:", err);
+      const message = err instanceof Error ? err.message : (locale === "ka" ? "განაცხადის გაგზავნა ვერ მოხერხდა" : "Failed to submit application");
       setError(message);
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
-  }, [formData, currentStep, validateStep, router, locale]);
+  }, [formData, currentStep, validateStep, router, locale, verificationToken]);
 
-  const allDeclarationsChecked =
-    formData.declInfoCorrect && formData.declLegalActivity && formData.declReadRules &&
-    formData.declNotGuarantee && formData.declDataProcessing && formData.declAdditionalInfo &&
-    formData.declMayNotSelect && formData.declInterviewParticipate;
+  const allDeclarationsChecked = formData.declInfoCorrect;
 
   const renderStage = () => {
     switch (currentStep) {

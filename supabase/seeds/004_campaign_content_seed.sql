@@ -21,7 +21,9 @@ VALUES (
   'BTA LAB — Digital Entrepreneurship Development Support',
   'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   'Develop your business with a modern website',
-  'ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო BTA LAB იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას. კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
+  'ბიზნესისა და ტექნოლოგიების აკადემია მისი საწარმოს ბითიეი ლაბის მეშვეობით იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.
+
+კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
   'The enterprise BTA LAB of the Business and Technology Academy is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations. Within the campaign, 10 projects will be selected to receive 100%, 60%, or 30% funding for website creation services.',
   true
 ) ON CONFLICT (slug) DO UPDATE SET
@@ -43,8 +45,10 @@ VALUES (
   'entrepreneur-support', 'hero', 'hero',
   'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   'Develop Your Business with a Modern Website',
-  'ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო BTA LAB იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.',
-  'BTA LAB is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations.',
+  'ბიზნესისა და ტექნოლოგიების აკადემია მისი საწარმოს ბითიეი ლაბის მეშვეობით იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.
+
+კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
+  'BTA LAB is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations. Within the campaign, 10 projects will be selected to receive 100%, 60%, or 30% funding for website creation services.',
   'ახალი შესაძლებლობა', 'New Opportunity',
   'შეავსე განაცხადი', 'Apply Now', '/entrepreneur-support/apply',
   0, true
@@ -542,8 +546,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 INSERT INTO public.campaign_settings (id, setting_key, setting_value_ka, setting_value_en, setting_type, is_active) VALUES
   ('a1b2c3d4-0601-4000-8000-000000000001', 'campaign_name', 'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Development Support', 'text', true),
-  ('a1b2c3d4-0602-4000-8000-000000000001', 'campaign_email', 'campaign@bta.edu.ge', 'campaign@bta.edu.ge', 'text', true),
-  ('a1b2c3d4-0603-4000-8000-000000000001', 'campaign_phone', '+995 555 123 456', '+995 555 123 456', 'text', true),
+  ('a1b2c3d4-0602-4000-8000-000000000001', 'campaign_email', 'lab@bta.edu.ge', 'lab@bta.edu.ge', 'text', true),
+  ('a1b2c3d4-0603-4000-8000-000000000001', 'campaign_phone', '579009247', '579009247', 'text', true),
   ('a1b2c3d4-0604-4000-8000-000000000001', 'campaign_deadline', '2026-12-31', '2026-12-31', 'text', true),
   ('a1b2c3d4-0605-4000-8000-000000000001', 'campaign_max_funding', '5000', '5000', 'number', true),
   ('a1b2c3d4-0606-4000-8000-000000000001', 'campaign_currency', '₾', '₾', 'text', true),

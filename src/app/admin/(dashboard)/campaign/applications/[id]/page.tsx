@@ -177,6 +177,11 @@ export default async function ApplicationDetailPage({
   const app = raw as unknown as ApplicationRecord;
   const f = app.form_data || {};
 
+  const statusLabels: Record<string, string> = {
+    UNOPENED: "გაუხსნელი",
+    CHECKED: "შემოწმებული",
+  };
+
   const statusColors: Record<string, string> = {
     UNOPENED: "bg-blue-500/10 text-blue-500",
     CHECKED: "bg-green-500/10 text-green-500",
@@ -195,7 +200,7 @@ export default async function ApplicationDetailPage({
               Application #{app.application_number || id.slice(0, 8)}
             </h1>
             <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusColors[app.status] || "bg-gray-500/10 text-gray-500"}`}>
-              {app.status}
+              {statusLabels[app.status] || app.status}
             </span>
           </div>
           <p className="text-sm text-[var(--color-fg-tertiary)]">
@@ -357,7 +362,7 @@ export default async function ApplicationDetailPage({
         <Field label="Application Number" value={app.application_number} />
         <Field label="Application ID" value={app.id} />
         <Field label="Submitted At" value={app.submitted_at ? new Date(app.submitted_at).toLocaleString("ka-GE") : "—"} />
-        <Field label="Status / სტატუსი" value={app.status} />
+        <Field label="Status / სტატუსი" value={statusLabels[app.status] || app.status} />
       </SectionCard>
     </div>
   );

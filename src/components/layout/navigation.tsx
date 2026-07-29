@@ -439,7 +439,6 @@ function LanguageSwitcher() {
 }
 
 const navLinkKeys = [
-  { key: "nav.home", href: "/" },
   { key: "nav.about", href: "/about" },
   { key: "nav.services", href: "/services" },
   { key: "nav.portfolio", href: "/portfolio" },
@@ -490,15 +489,26 @@ export function Navigation({ siteConfig }: NavigationProps) {
             {/* Logo */}
             <Link
               href="/"
-              className="relative z-10 flex items-center gap-2 group"
+              className="relative z-10 flex flex-col items-center group"
             >
-              <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
-                BTA
-              </span>
-              <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
-              <span className="text-sm font-light tracking-[0.2em] text-[var(--color-fg-tertiary)]/70 group-hover:text-[var(--color-fg-secondary)] transition-colors duration-300 uppercase">
-                LAB
-              </span>
+              <div className="flex items-center gap-2 leading-none mb-0.5">
+                <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
+                  ბითიეი
+                </span>
+                <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
+                <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
+                  ლაბი
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
+                  BTA
+                </span>
+                <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
+                <span className="text-sm font-light tracking-[0.2em] text-[var(--color-fg-tertiary)]/70 group-hover:text-[var(--color-fg-secondary)] transition-colors duration-300 uppercase">
+                  LAB
+                </span>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
@@ -508,22 +518,28 @@ export function Navigation({ siteConfig }: NavigationProps) {
                   return <ServicesNavDropdown key="services" />;
                 }
                 const isActive = pathname === link.href;
+                const isCampaign = link.key === "nav.campaign";
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "relative px-4 py-2 text-base font-medium transition-colors duration-300 rounded-lg",
+                      "relative px-4 py-2 text-base font-medium transition-all duration-300 rounded-lg",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-border-subtle)]",
-                      isActive
-                        ? "text-[var(--color-fg-primary)]"
-                        : "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]"
+                      isCampaign && !isActive
+                        ? "text-[var(--color-accent)] hover:text-[var(--color-accent)] bg-[var(--color-accent)]/5 hover:bg-[var(--color-accent)]/15 ring-1 ring-[var(--color-accent)]/20 hover:ring-[var(--color-accent)]/40"
+                        : isActive
+                          ? "text-[var(--color-fg-primary)]"
+                          : "text-[var(--color-fg-secondary)] hover:text-[var(--color-fg-primary)]"
                     )}
                   >
                     {t(link.key)}
                     {isActive && (
                       <span className="absolute inset-0 bg-[var(--color-overlay)] rounded-lg -z-10" />
+                    )}
+                    {isCampaign && !isActive && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse-soft" />
                     )}
                   </Link>
                 );

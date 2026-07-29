@@ -42,13 +42,13 @@ export async function sendOtpEmail(
     const t = getTransporter();
 
     // Determine sender name from SMTP user or use default
-    const fromName = "BTA LAB";
+    const fromName = "ბითიეი ლაბი";
     const fromAddress = process.env.SMTP_FROM || smtpUser;
 
     const info = await t.sendMail({
       from: `"${fromName}" <${fromAddress}>`,
       to: email,
-      subject: "თქვენი დამადასტურებელი კოდი | BTA LAB",
+      subject: "წვდომის კოდი",
       html: `
         <!DOCTYPE html>
         <html>
@@ -70,7 +70,7 @@ export async function sendOtpEmail(
         <body>
           <div class="container">
             <div class="header">
-              <h1>BTA LAB — წვდომის კოდი</h1>
+              <h1>ბითიეი ლაბი — წვდომის კოდი</h1>
             </div>
             <div class="body">
               <p class="info">თქვენი განაცხადის დასადასტურებლად, გთხოვთ გამოიყენოთ შემდეგი კოდი:</p>
@@ -83,7 +83,7 @@ export async function sendOtpEmail(
               </div>
             </div>
             <div class="footer">
-              BTA LAB — ბიზნესისა და ტექნოლოგიების აკადემია
+              ბითიეი ლაბი — ბიზნესისა და ტექნოლოგიების აკადემია
             </div>
           </div>
         </body>

@@ -88,7 +88,7 @@
   "contact.form.email": "ელ-ფოსტა",
   "contact.form.emailPlaceholder": "თქვენი ელ-ფოსტა",
   "contact.form.phone": "ტელეფონი",
-  "contact.form.phonePlaceholder": "+995 555 00 00 00",
+  "contact.form.phonePlaceholder": "579009247",
   "contact.form.company": "კომპანია",
   "contact.form.companyPlaceholder": "კომპანიის სახელი",
   "contact.form.service": "სერვისი",
@@ -145,10 +145,9 @@
   "language.en": "English",
   "language.current": "ენა",
   "language.select": "ენის არჩევა",
-  "nav.home": "მთავარი",
-  "nav.about": "ჩვენს შესახებ",
+  "nav.about": "ჩვენ შესახებ",
   "nav.services": "მომსახურება",
-  "nav.portfolio": "პორტფოლიო",
+  "nav.portfolio": "ნამუშევრები",
   "nav.team": "გუნდი",
   "nav.contact": "კონტაქტი",
   "nav.campaign": "კამპანია",
@@ -198,7 +197,7 @@
 "serviceRequest.general.email": "ელ-ფოსტა",
 "serviceRequest.general.emailPlaceholder": "თქვენი ელ-ფოსტა",
 "serviceRequest.general.phone": "ტელეფონის ნომერი",
-"serviceRequest.general.phonePlaceholder": "+995 555 00 00 00",
+"serviceRequest.general.phonePlaceholder": "579009247",
 "serviceRequest.general.businessType": "ბიზნესის ტიპი",
 "serviceRequest.general.businessTypePlaceholder": "აირჩიეთ ბიზნესის ტიპი",
 "serviceRequest.general.businessType.restaurant": "რესტორანი / კაფე",
@@ -287,7 +286,13 @@
 "admin.serviceRequests.answerLabel": "პასუხები",
 "admin.serviceRequests.close": "დახურვა",
 "admin.contactRequests.title": "საკონტაქტო მოთხოვნები",
-"admin.contactRequests.description": "შეტყობინებები საკონტაქტო ფორმიდან",
-"admin.contactRequests.empty": "ჯერ არ არის შეტყობინებები."
+"admin.contactRequests.description": "შეტყობინებები საკონტაქტო ფორმიდან",  "admin.contactRequests.empty": "ჯერ არ არის შეტყობინებები.",
+  "campaign.statusBadge": "განაცხადის სტატუსი",
+  "campaign.statusSubmitted": "განაცხადის მიღების თარიღი",
+  "campaign.currentStatus": "მიმდინარე სტატუსი",
+  "campaign.statusTimeline": "დროის ღერძი",
+  "campaign.nextSteps": "შემდეგი ნაბიჯები",
+  "campaign.nextStepsDescription": "განაცხადის პირველადი შეფასება, საჭიროების შემთხვევაში დამატებითი ინფორმაციის მოთხოვნა და შემდგომი ეტაპების შესახებ ინფორმირება."
 }
+
 

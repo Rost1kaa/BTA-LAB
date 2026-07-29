@@ -88,7 +88,7 @@
   "contact.form.email": "Email",
   "contact.form.emailPlaceholder": "your@email.com",
   "contact.form.phone": "Phone",
-  "contact.form.phonePlaceholder": "+1 (555) 000-0000",
+  "contact.form.phonePlaceholder": "579009247",
   "contact.form.company": "Company",
   "contact.form.companyPlaceholder": "Company name",
   "contact.form.service": "Service",
@@ -145,7 +145,6 @@
   "language.en": "English",
   "language.current": "Language",
   "language.select": "Select language",
-  "nav.home": "Home",
   "nav.about": "About",
   "nav.services": "Services",
   "nav.portfolio": "Portfolio",
@@ -201,7 +200,7 @@
 "serviceRequest.general.email": "Contact Email",
 "serviceRequest.general.emailPlaceholder": "your@email.com",
 "serviceRequest.general.phone": "Phone Number",
-"serviceRequest.general.phonePlaceholder": "+995 555 00 00 00",
+"serviceRequest.general.phonePlaceholder": "579009247",
 "serviceRequest.general.businessType": "Business Type",
 "serviceRequest.general.businessTypePlaceholder": "Select business type",
 "serviceRequest.general.businessType.restaurant": "Restaurant / Cafe",
@@ -290,7 +289,13 @@
 "admin.serviceRequests.answerLabel": "Answers",
 "admin.serviceRequests.close": "Close",
 "admin.contactRequests.title": "Contact Requests",
-"admin.contactRequests.description": "Messages submitted through the contact form",
-"admin.contactRequests.empty": "No contact messages yet."
+"admin.contactRequests.description": "Messages submitted through the contact form",  "admin.contactRequests.empty": "No contact messages yet.",
+  "campaign.statusBadge": "Application Status",
+  "campaign.statusSubmitted": "Submitted",
+  "campaign.currentStatus": "Current Status",
+  "campaign.statusTimeline": "Timeline",
+  "campaign.nextSteps": "Next Steps",
+  "campaign.nextStepsDescription": "We will review your application and contact you at the email address provided. You can check back here anytime to see the latest status updates."
 }
+
 

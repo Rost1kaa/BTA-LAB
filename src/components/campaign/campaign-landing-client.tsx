@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
-  ArrowRight, Award, Clock, Code, Heart, Shield,
+  ArrowRight, Award, Clock, Code, Heart, Shield, Handshake, TrendingUp,
   Star, Zap, ChevronDown, Phone, MessageCircle, Camera, Music,
   Check, FileText, Search, Gift,
   Globe, Package, MessageSquare, ShoppingCart, Rocket,
@@ -29,10 +29,11 @@ import type {
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Award, Clock, Code, Heart, Shield, Star, Zap,
+  Handshake, TrendingUp,
   ArrowRight,
 };
 
-function Icon({ name, className, size = 20 }: { name?: string; className?: string; size?: number }) {
+function Icon({ name, className, size = 24 }: { name?: string; className?: string; size?: number }) {
   if (!name) return null;
   const C = ICON_MAP[name];
   if (!C) return null;
@@ -166,13 +167,138 @@ function RoadmapCard({ currentStep }: { currentStep: number }) {
   );
 }
 
+// ── Process hero description with styled highlights and external links ──
+
+function renderRichSegment(segment: string, index: number): React.ReactNode {
+  const ACADEMY_TEXT = "ბიზნესისა და ტექნოლოგიების აკადემია";
+  const PROJECT_COUNT = "10 პროექტი";
+  const PERCENTAGE_PATTERN = /(100%|60%|30%-?იან)/g;
+
+  // Check for academy link
+  if (segment === ACADEMY_TEXT) {
+    return (
+      <a
+        key={index}
+        href="https://bta.edu.ge"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[var(--color-accent)] underline decoration-[var(--color-accent)]/40 underline-offset-4 hover:decoration-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 rounded-sm transition-all duration-200 font-semibold"
+      >
+        {ACADEMY_TEXT}
+      </a>
+    );
+  }
+
+  // Check for project count
+  if (segment === PROJECT_COUNT) {
+    return (
+      <span
+        key={index}
+        className="underline decoration-[var(--color-accent)]/40 underline-offset-4 font-semibold"
+      >
+        {PROJECT_COUNT}
+      </span>
+    );
+  }
+
+  // Check for percentage patterns — split further to highlight only the percentage part
+  const parts = segment.split(PERCENTAGE_PATTERN);
+  if (parts.length > 1) {
+    return (
+      <span key={index}>
+        {parts.map((part, i) => {
+          if (PERCENTAGE_PATTERN.test(part)) {
+            return (
+              <span
+                key={i}
+                className="underline decoration-[var(--color-accent)]/40 underline-offset-4 font-semibold"
+              >
+                {part}
+              </span>
+            );
+          }
+          // Re-test the regex because .test() advances lastIndex
+          PERCENTAGE_PATTERN.lastIndex = 0;
+          return part;
+        })}
+      </span>
+    );
+  }
+
+  // Plain text — return as-is
+  return <Fragment key={index}>{segment}</Fragment>;
+}
+
+function parseRichParagraph(paragraph: string): React.ReactNode[] {
+  const ACADEMY_TEXT = "ბიზნესისა და ტექნოლოგიების აკადემია";
+  const PROJECT_COUNT = "10 პროექტი";
+  const PERCENTAGE_PATTERN = /(100%|60%|30%-?იან)/g;
+
+  // Split by academy text first
+  const academyParts = paragraph.split(ACADEMY_TEXT);
+  const nodes: React.ReactNode[] = [];
+
+  academyParts.forEach((part, idx) => {
+    if (idx > 0) {
+      nodes.push(renderRichSegment(ACADEMY_TEXT, nodes.length));
+    }
+    if (part) {
+      // Further split by "10 პროექტი"
+      const projectParts = part.split(PROJECT_COUNT);
+      projectParts.forEach((projectPart, pIdx) => {
+        if (pIdx > 0) {
+          nodes.push(renderRichSegment(PROJECT_COUNT, nodes.length));
+        }
+        if (projectPart) {
+          // Check if this segment contains percentage patterns
+          if (PERCENTAGE_PATTERN.test(projectPart)) {
+            PERCENTAGE_PATTERN.lastIndex = 0;
+            nodes.push(renderRichSegment(projectPart, nodes.length));
+          } else {
+            PERCENTAGE_PATTERN.lastIndex = 0;
+            nodes.push(<Fragment key={nodes.length}>{projectPart}</Fragment>);
+          }
+        }
+      });
+    }
+  });
+
+  return nodes;
+}
+
+function HeroDescription({ text }: { text: string; locale: string }) {
+  if (!text) return null;
+
+  // Split into paragraphs on double newline
+  const paragraphs = text.split('\n\n').filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    // Single paragraph — render inline
+    return <>{parseRichParagraph(text)}</>;
+  }
+
+  // Multiple paragraphs — render each as its own <p>
+  return (
+    <>
+      {paragraphs.map((para, i) => (
+        <p key={i} className={i > 0 ? 'mt-4' : ''}>
+          {parseRichParagraph(para)}
+        </p>
+      ))}
+    </>
+  );
+}
+
 function HeroSection({ section, stats, currentStep }: { section: CampaignSection; stats?: CampaignStatistic[]; currentStep: number }) {
   const { locale } = useTranslation();
   const loc = useLocale(section);
   const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [0, 60]);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "start end"] });
+  // Smooth premium fade + upward parallax motion:
+  // - Stays fully visible through first ~35% of scroll
+  // - Gradually fades from 1 → 0.1 and moves upward
+  const opacity = useTransform(scrollYProgress, [0, 0.35, 0.7, 1], [1, 1, 0.35, 0.08]);
+  const y = useTransform(scrollYProgress, [0, 0.35, 0.85], [0, 0, -120]);
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pt-20" id="campaign-hero">
@@ -237,9 +363,9 @@ function HeroSection({ section, stats, currentStep }: { section: CampaignSection
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-gradient leading-[1.05]">
                   {loc.title}
                 </h1>
-                <p className="mt-6 text-lg md:text-xl text-[var(--color-fg-tertiary)] leading-relaxed">
-                  {loc.description}
-                </p>
+                <div className="mt-6 text-lg md:text-xl text-[var(--color-fg-tertiary)] leading-relaxed">
+                  <HeroDescription text={loc.description} locale={locale} />
+                </div>
                 <div className="mt-8 flex flex-wrap gap-4">
                   {loc.buttonText && (
                     <Link href={loc.buttonUrl || "/entrepreneur-support/apply"}>
@@ -272,7 +398,7 @@ function HeroSection({ section, stats, currentStep }: { section: CampaignSection
                           {/* Stat Header: Icon + Number on same line */}
                           <div className="flex items-center gap-3 mb-0.5 min-h-[36px]">
                             <div className="shrink-0">
-                              {s.icon && <Icon name={s.icon} size={20} className="text-[var(--color-fg-primary)]" />}
+                              {s.icon && <Icon name={s.icon} className="text-[var(--color-fg-primary)]" />}
                             </div>
                             {showCounter ? (
                               <span className="text-xl font-semibold tracking-tight text-[var(--color-fg-primary)]">
@@ -450,6 +576,9 @@ function FundingCards({ cards }: { cards: CampaignCard[] }) {
   const { locale } = useTranslation();
   const percentages = [100, 60, 30];
 
+  // Distinct icons per funding level
+  const cardIcons = ["Shield", "Handshake", "TrendingUp"];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {cards.slice(0, 3).map((card, i) => {
@@ -480,11 +609,9 @@ function FundingCards({ cards }: { cards: CampaignCard[] }) {
                 </p>
               </div>
 
-              {card.icon && (
-                <div className="mb-4 w-12 h-12 rounded-xl bg-[var(--color-overlay)] flex items-center justify-center">
-                  <Icon name={card.icon} className="text-[var(--color-fg-primary)]" size={24} />
-                </div>
-              )}
+              <div className="mb-4 w-14 h-14 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center">
+                <Icon name={cardIcons[i]} className="text-[var(--color-accent)]" size={28} />
+              </div>
               <h3 className={`text-xl font-semibold ${isFeatured ? "text-[var(--color-accent)]" : "text-[var(--color-fg-primary)]"}`}>
                 {loc.title}
               </h3>
@@ -507,7 +634,15 @@ function EligibilitySection({ section }: { section: CampaignSection }) {
   const loc = useLocale(section);
   if (!loc.title && !loc.description) return null;
 
-  const items = loc.description.split('\n').filter((line) => line.trim().startsWith('•') || line.trim().startsWith('- '));
+  // Split description into paragraphs and bullet items
+  const lines = loc.description.split('\n').filter((l) => l.trim());
+  const headerLines = lines.filter((l) => !l.trim().startsWith('•') && !l.trim().startsWith('- '));
+  const bulletLines = lines.filter((l) => l.trim().startsWith('•') || l.trim().startsWith('-'));
+
+  // Split bullets into two equal columns
+  const mid = Math.ceil(bulletLines.length / 2);
+  const leftBullets = bulletLines.slice(0, mid);
+  const rightBullets = bulletLines.slice(mid);
 
   return (
     <Section id="campaign-eligibility" className="bg-[var(--color-bg-secondary)]">
@@ -515,28 +650,47 @@ function EligibilitySection({ section }: { section: CampaignSection }) {
         <FadeIn direction="up">
           {loc.badge && <Badge variant="outline" className="mb-4">{loc.badge}</Badge>}
           {loc.title && <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gradient">{loc.title}</h2>}
-          {loc.description && (
-            <div className="mt-6 max-w-3xl">
-              {loc.description.split('\n').map((line, i) => {
-                const trimmed = line.trim();
-                if (!trimmed) return <div key={i} className="h-2" />;
-                const isBullet = trimmed.startsWith('•') || trimmed.startsWith('- ');
-                const isHeader = !isBullet && (i < 2 || !trimmed.startsWith('•'));
-                return (
-                  <p key={i} className={`leading-relaxed ${
-                    isBullet
-                      ? 'text-sm md:text-base text-[var(--color-fg-tertiary)] pl-4 mt-2'
-                      : isHeader
-                        ? 'text-base md:text-lg text-[var(--color-fg-primary)] font-medium mt-4'
-                        : 'text-sm md:text-base text-[var(--color-fg-tertiary)] mt-2'
-                  }`}>
-                    {isBullet ? trimmed.replace(/^[•-]\s*/, '') : trimmed}
-                  </p>
-                );
-              })}
-            </div>
-          )}
         </FadeIn>
+
+        {/* Two-column layout for content + bullet lists */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Left column: header text */}
+          <FadeIn direction="left">
+            <div className="space-y-4">
+              {headerLines.map((line, i) => (
+                <p key={i} className="text-base md:text-lg text-[var(--color-fg-primary)] font-medium leading-relaxed">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </FadeIn>
+
+          {/* Right column: bullet items */}
+          <FadeIn direction="right" delay={0.1}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+              <div className="space-y-3">
+                {leftBullets.map((line, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Check size={16} className="text-emerald-500 shrink-0 mt-1" />
+                    <p className="text-sm md:text-base text-[var(--color-fg-tertiary)] leading-relaxed">
+                      {line.trim().replace(/^[•-]\s*/, '')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-3">
+                {rightBullets.map((line, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Check size={16} className="text-emerald-500 shrink-0 mt-1" />
+                    <p className="text-sm md:text-base text-[var(--color-fg-tertiary)] leading-relaxed">
+                      {line.trim().replace(/^[•-]\s*/, '')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+        </div>
 
         {loc.content && (
           <FadeIn direction="up" delay={0.15}>
@@ -723,7 +877,7 @@ function FinalCTA({ ctaItems, settings }: { ctaItems: CampaignCTAType[]; setting
         {/* Contact Cards — all links from CMS settings */}
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Phone, label: "Phone", value: settings.campaign_phone || "+995 555 123 456", href: `tel:${settings.campaign_phone}` },
+            { icon: Phone, label: "Phone", value: settings.campaign_phone || "579009247", href: `tel:${settings.campaign_phone}` },
             { icon: MessageCircle, label: "Facebook", value: settings.campaign_facebook_label || "@btalab", href: settings.campaign_facebook_url || "https://facebook.com/bta-lab" },
             { icon: Camera, label: "Instagram", value: settings.campaign_instagram_label || "@bta_lab", href: settings.campaign_instagram_url || "https://instagram.com/bta_lab" },
             { icon: Music, label: "TikTok", value: settings.campaign_tiktok_label || "@bta_lab", href: settings.campaign_tiktok_url || "https://tiktok.com/@bta_lab" },

@@ -13,7 +13,9 @@
 UPDATE public.campaign_sections SET
   title_ka = 'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   title_en = 'Develop Your Business with a Modern Website',
-  description_ka = 'ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო ბიზნესისა და ტექნოლოგიების აკადემია იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას. კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
+  description_ka = 'ბიზნესისა და ტექნოლოგიების აკადემია მისი საწარმოს ბითიეი ლაბის მეშვეობით იწყებს მცირე და საშუალო მეწარმეების, დამწყები ბიზნესებისა და ორგანიზაციების ციფრული განვითარების მხარდამჭერ კამპანიას.
+
+კამპანიის ფარგლებში შეირჩევა 10 პროექტი, რომლებიც მიიღებენ ვებგვერდის შექმნის მომსახურების 100%, 60% ან 30%-იან დაფინანსებას.',
   description_en = 'BTA LAB is launching a campaign to support the digital development of small and medium entrepreneurs, startups, and organizations. Within the campaign, 10 projects will be selected to receive 100%, 60%, or 30% funding for website creation services.',
   badge_ka = 'ახალი შესაძლებლობა',
   badge_en = 'New Opportunity',
