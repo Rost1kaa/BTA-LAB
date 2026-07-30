@@ -398,6 +398,7 @@ export const getSiteConfigServer = cache(async (locale: LocaleCode = "ka") => {
     socials: {
       facebook: settings.social_facebook || "",
       instagram: settings.social_instagram || "",
+      tiktok: settings.social_tiktok || "",
     },
     footerDescription: settings.site_footer_description || (locale === "ka"
       ? "ციფრული ლაბორატორია, სადაც სტუდენტური იდეები ინდუსტრიის რეალურ გადაწყვეტილებებად იქცევა."

@@ -878,9 +878,9 @@ function FinalCTA({ ctaItems, settings }: { ctaItems: CampaignCTAType[]; setting
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: Phone, label: "Phone", value: settings.campaign_phone || "+995 579 009 247", href: `tel:${settings.campaign_phone}` },
-            { icon: MessageCircle, label: "Facebook", value: settings.campaign_facebook_label || "@btalab", href: settings.campaign_facebook_url || "https://facebook.com/bta-lab" },
-            { icon: Camera, label: "Instagram", value: settings.campaign_instagram_label || "@bta_lab", href: settings.campaign_instagram_url || "https://instagram.com/bta_lab" },
-            { icon: Music, label: "TikTok", value: settings.campaign_tiktok_label || "@bta_lab", href: settings.campaign_tiktok_url || "https://tiktok.com/@bta_lab" },
+            { icon: MessageCircle, label: "Facebook", value: settings.campaign_facebook_label || "@bta.lab.official", href: settings.campaign_facebook_url || "https://www.facebook.com/bta.lab.official" },
+            { icon: Camera, label: "Instagram", value: settings.campaign_instagram_label || "@bta.lab.official", href: settings.campaign_instagram_url || "https://www.instagram.com/bta.lab.official" },
+            { icon: Music, label: "TikTok", value: settings.campaign_tiktok_label || "@bta.lab.official", href: settings.campaign_tiktok_url || "https://www.tiktok.com/@bta.lab.official" },
           ].map((contact, i) => (
             <FadeIn key={i} delay={i * 0.06}>
               <a href={contact.href} target="_blank" rel="noopener noreferrer"

@@ -22,6 +22,7 @@ const SETTINGS_FIELDS: SettingField[] = [
   { key: "contact_location", label: "Location", type: "text", section: "Contact", localized: true },
   { key: "social_facebook", label: "Facebook URL", type: "url", section: "Social" },
   { key: "social_instagram", label: "Instagram URL", type: "url", section: "Social" },
+  { key: "social_tiktok", label: "TikTok URL", type: "url", section: "Social" },
   { key: "site_footer_description", label: "Footer Description", type: "textarea", section: "Footer", localized: true },
   { key: "nav_links", label: "Navigation Links (JSON)", type: "textarea", section: "Navigation" },
   { key: "stat_team_members", label: "Stat: Team Members Value", type: "number", section: "Statistics" },

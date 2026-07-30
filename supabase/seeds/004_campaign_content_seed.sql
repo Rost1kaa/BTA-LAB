@@ -17,7 +17,7 @@ INSERT INTO public.campaign_pages (id, slug, title_ka, title_en, subtitle_ka, su
 VALUES (
   'a1b2c3d4-0001-4000-8000-000000000001',
   'entrepreneur-support',
-  'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერა',
+  'ბითიეი ლაბი — მეწარმეების ციფრული განვითარების მხარდაჭერა',
   'BTA LAB — Digital Entrepreneurship Development Support',
   'განავითარე შენი ბიზნესი თანამედროვე ვებგვერდით',
   'Develop your business with a modern website',
@@ -81,7 +81,7 @@ VALUES (
   'a1b2c3d4-0103-4000-8000-000000000001',
   'entrepreneur-support', 'funding', 'content',
   'დაფინანსების მოდელი — 10 პროექტი', 'Funding Model — 10 Projects',
-  'BTA LAB დაფარავს ვებგვერდის შექმნის მომსახურების ღირებულების 30%-დან 100%-მდე.',
+  'ბითიეი ლაბი დაფარავს ვებგვერდის შექმნის მომსახურების ღირებულების 30%-დან 100%-მდე.',
   'BTA LAB will cover 30% to 100% of the website creation service cost.',
   'დაფინანსება', 'Funding',
   'დაფინანსება გულისხმობს ვებგვერდის შექმნის მომსახურების სრული ან შესაბამისი ნაწილის დაფარვას და არ წარმოადგენს მონაწილისთვის თანხის ჩარიცხვას. დომენის, ჰოსტინგის, ფასიანი პროგრამების, მესამე მხარის სერვისებისა და გადახდის სისტემების ხარჯები დაფინანსებაში არ შედის.',
@@ -273,10 +273,10 @@ VALUES (
   'a1b2c3d4-0115-4000-8000-000000000001',
   'entrepreneur-support', 'portfolio_rights', 'content',
   'პორტფოლიოს უფლებები', 'Portfolio Rights',
-  'BTA LAB-ს უფლება აქვს გამოიყენოს შექმნილი პროექტები საკუთარ პორტფოლიოში.',
+  'ბითიეი ლაბს უფლება აქვს გამოიყენოს შექმნილი პროექტები საკუთარ პორტფოლიოში.',
   'BTA LAB has the right to use created projects in its portfolio.',
   'პორტფოლიო', 'Portfolio',
-  'BTA LAB-ს უფლება აქვს განათავსოს შექმნილი ვებგვერდი საკუთარ პორტფოლიოში, როგორც სტუდენტური პროექტი. "შექმნილია BTA LAB-ის მიერ" ფუტერის ქრედიტი სავალდებულოა.',
+  'ბითიეი ლაბს უფლება აქვს განათავსოს შექმნილი ვებგვერდი საკუთარ პორტფოლიოში, როგორც სტუდენტური პროექტი. "შექმნილია ბითიეი ლაბის მიერ" ფუტერის ქრედიტი სავალდებულოა.',
   'BTA LAB has the right to display the created website in its portfolio as a student project. "Created by BTA LAB" footer credit is mandatory.',
   14, true
 ) ON CONFLICT (page_slug, section_key) DO UPDATE SET
@@ -291,7 +291,7 @@ VALUES (
   'a1b2c3d4-0116-4000-8000-000000000001',
   'entrepreneur-support', 'future_changes', 'content',
   'მომავალი ცვლილებები', 'Future Changes',
-  'მონაწილეს შეუძლია პროექტი მომავალში შეცვალოს, თუმცა BTA LAB პასუხისმგებელია მხოლოდ მის მიერ ჩაბარებულ ვერსიაზე.',
+  'მონაწილეს შეუძლია პროექტი მომავალში შეცვალოს, თუმცა ბითიეი ლაბი პასუხისმგებელია მხოლოდ მის მიერ ჩაბარებულ ვერსიაზე.',
   'The participant can change the project in the future, but BTA LAB is only responsible for the delivered version.',
   'ცვლილებები', 'Changes',
   15, true
@@ -336,7 +336,7 @@ VALUES (
   'a1b2c3d4-0119-4000-8000-000000000001',
   'entrepreneur-support', 'cta', 'cta',
   'მზად ხარ დასაწყებად?', 'Ready to Get Started?',
-  'შეავსე განაცხადი და გახდი BTA LAB-ის მხარდაჭერილი მეწარმე',
+  'შეავსე განაცხადი და გახდი ბითიეი ლაბის მხარდაჭერილი მეწარმე',
   'Fill out the application and become a BTA LAB-supported entrepreneur',
   'დაიწყე', 'Start',
   'შეავსე განაცხადი', 'Submit Application', '/entrepreneur-support/apply',
@@ -486,7 +486,7 @@ VALUES (
   'entrepreneur-support',
   'შემიძლია პროექტი მომავალში შევცვალო?',
   'Can I change the project in the future?',
-  'დიახ, თუმცა BTA LAB პასუხისმგებელი იქნება მხოლოდ მის მიერ ჩაბარებულ ვერსიაზე.',
+  'დიახ, თუმცა ბითიეი ლაბი პასუხისმგებელი იქნება მხოლოდ მის მიერ ჩაბარებულ ვერსიაზე.',
   'Yes, however BTA LAB will only be responsible for the version it delivered.',
   9, true
 ) ON CONFLICT (id) DO UPDATE SET
@@ -498,9 +498,9 @@ VALUES (
 -- ═══════════════════════════════════════════════════════════════════════════
 
 INSERT INTO public.campaign_cards (id, page_slug, section_key, title_ka, title_en, description_ka, description_en, icon, badge_ka, badge_en, sort_order, is_active) VALUES
-  ('a1b2c3d4-0301-4000-8000-000000000001', 'entrepreneur-support', 'funding', '100% დაფინანსება (1 პროექტი)', '100% Funding (1 Project)', 'BTA LAB სრულად დაფარავს შეთანხმებული ვებგვერდის შექმნის მომსახურების ღირებულებას.', 'BTA LAB will fully cover the cost of the agreed website creation service.', 'Zap', 'რეკომენდებული', 'Recommended', 0, true),
-  ('a1b2c3d4-0302-4000-8000-000000000001', 'entrepreneur-support', 'funding', '60% დაფინანსება (3 პროექტი)', '60% Funding (3 Projects)', 'BTA LAB დაფარავს მომსახურების სრული ღირებულების 60%-ს, ხოლო მონაწილე — 40%-ს.', 'BTA LAB covers 60% of the service cost, the participant covers 40%.', 'Star', '', '', 1, true),
-  ('a1b2c3d4-0303-4000-8000-000000000001', 'entrepreneur-support', 'funding', '30% დაფინანსება (6 პროექტი)', '30% Funding (6 Projects)', 'BTA LAB დაფარავს მომსახურების სრული ღირებულების 30%-ს, ხოლო მონაწილე — 70%-ს.', 'BTA LAB covers 30% of the service cost, the participant covers 70%.', 'Heart', '', '', 2, true)
+  ('a1b2c3d4-0301-4000-8000-000000000001', 'entrepreneur-support', 'funding', '100% დაფინანსება (1 პროექტი)', '100% Funding (1 Project)', 'ბითიეი ლაბი სრულად დაფარავს შეთანხმებული ვებგვერდის შექმნის მომსახურების ღირებულებას.', 'BTA LAB will fully cover the cost of the agreed website creation service.', 'Zap', 'რეკომენდებული', 'Recommended', 0, true),
+  ('a1b2c3d4-0302-4000-8000-000000000001', 'entrepreneur-support', 'funding', '60% დაფინანსება (3 პროექტი)', '60% Funding (3 Projects)', 'ბითიეი ლაბი დაფარავს მომსახურების სრული ღირებულების 60%-ს, ხოლო მონაწილე — 40%-ს.', 'BTA LAB covers 60% of the service cost, the participant covers 40%.', 'Star', '', '', 1, true),
+  ('a1b2c3d4-0303-4000-8000-000000000001', 'entrepreneur-support', 'funding', '30% დაფინანსება (6 პროექტი)', '30% Funding (6 Projects)', 'ბითიეი ლაბი დაფარავს მომსახურების სრული ღირებულების 30%-ს, ხოლო მონაწილე — 70%-ს.', 'BTA LAB covers 30% of the service cost, the participant covers 70%.', 'Heart', '', '', 2, true)
 ON CONFLICT (id) DO UPDATE SET
   title_ka = EXCLUDED.title_ka, title_en = EXCLUDED.title_en,
   description_ka = EXCLUDED.description_ka, description_en = EXCLUDED.description_en,
@@ -545,7 +545,7 @@ ON CONFLICT (id) DO UPDATE SET
 -- ═══════════════════════════════════════════════════════════════════════════
 
 INSERT INTO public.campaign_settings (id, setting_key, setting_value_ka, setting_value_en, setting_type, is_active) VALUES
-  ('a1b2c3d4-0601-4000-8000-000000000001', 'campaign_name', 'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Development Support', 'text', true),
+  ('a1b2c3d4-0601-4000-8000-000000000001', 'campaign_name', 'ბითიეი ლაბი — მეწარმეების ციფრული განვითარების მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Development Support', 'text', true),
   ('a1b2c3d4-0602-4000-8000-000000000001', 'campaign_email', 'lab@bta.edu.ge', 'lab@bta.edu.ge', 'text', true),
   ('a1b2c3d4-0603-4000-8000-000000000001', 'campaign_phone', '+995 579 009 247', '+995 579 009 247', 'text', true),
   ('a1b2c3d4-0604-4000-8000-000000000001', 'campaign_deadline', '2026-12-31', '2026-12-31', 'text', true),
@@ -565,14 +565,14 @@ INSERT INTO public.campaign_seo (id, page_slug, title_ka, title_en, description_
   (
     'a1b2c3d4-0701-4000-8000-000000000001',
     'entrepreneur-support',
-    'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერის კამპანია',
+    'ბითიეი ლაბი — მეწარმეების ციფრული განვითარების მხარდაჭერის კამპანია',
     'BTA LAB — Digital Entrepreneurship Development Support Campaign',
-    'BTA LAB-ის კამპანია 10 პროექტისთვის: მიიღეთ 100%, 60% ან 30% დაფინანსება ვებგვერდის შესაქმნელად. განაცხადი უფასოა!',
+    'ბითიეი ლაბის კამპანია 10 პროექტისთვის: მიიღეთ 100%, 60% ან 30% დაფინანსება ვებგვერდის შესაქმნელად. განაცხადი უფასოა!',
     'BTA LAB campaign for 10 projects: Get 100%, 60%, or 30% funding for website creation. Free application!',
-    'BTA LAB, მეწარმე, დაფინანსება, ვებგვერდი, ციფრული განვითარება, კამპანია, საქართველო',
-    'BTA LAB, entrepreneur, funding, website, digital development, campaign, Georgia',
+    'ბითიეი ლაბი, მეწარმე, დაფინანსება, ვებგვერდი, ციფრული განვითარება, კამპანია, საქართველო',
+    'ბითიეი ლაბი, entrepreneur, funding, website, digital development, campaign, Georgia',
     'https://lab.bta.edu.ge/entrepreneur-support',
-    'BTA LAB — მეწარმეების ციფრული მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Support',
+    'ბითიეი ლაბი — მეწარმეების ციფრული მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Support',
     'მიიღეთ 100%, 60% ან 30% დაფინანსება ვებგვერდის შესაქმნელად', 'Get 100%, 60%, or 30% funding for website creation',
     true
   )

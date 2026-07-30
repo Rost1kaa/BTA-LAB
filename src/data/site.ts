@@ -9,8 +9,9 @@ export const siteConfig = {
   address: "თბილისი, წერონისის 208",
   location: "Tbilisi, Tseronisi 208",
   socials: {
-    facebook: "https://facebook.com/bta-lab",
-    instagram: "https://instagram.com/bta_lab",
+    facebook: "https://www.facebook.com/bta.lab.official",
+    instagram: "https://www.instagram.com/bta.lab.official",
+    tiktok: "https://www.tiktok.com/@bta.lab.official",
   },
 };
 

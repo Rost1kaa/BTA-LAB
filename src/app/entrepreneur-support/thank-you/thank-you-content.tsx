@@ -13,7 +13,7 @@ const NEXT_STEPS = [
     icon: FileText,
     title_ka: "განაცხადის პირველადი შეფასება",
     title_en: "Initial Application Review",
-    desc_ka: "BTA LAB-ის შეფასების ჯგუფი განიხილავს თქვენს განაცხადს.",
+    desc_ka: "ბითიეი ლაბის შეფასების ჯგუფი განიხილავს თქვენს განაცხადს.",
     desc_en: "BTA LAB's evaluation team will review your application.",
   },
   {

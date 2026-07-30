@@ -15,6 +15,7 @@ interface NavigationProps {
     socials: {
       facebook: string;
       instagram: string;
+      tiktok?: string;
     };
     [key: string]: unknown;
   };

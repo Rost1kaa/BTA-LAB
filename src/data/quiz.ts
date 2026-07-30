@@ -394,7 +394,7 @@ export const quizContentByLocale: Record<"ka" | "en", QuizTranslations> = {
           { id: "partial", label: "მასალების ნაწილი მზად მაქვს", value: "partial" },
           { id: "text-help", label: "ტექსტურ კონტენტში დახმარება მჭირდება", value: "text-help" },
           { id: "visual-help", label: "ფოტოებსა და ვიზუალებში დახმარება მჭირდება", value: "visual-help" },
-          { id: "full", label: "BTA LAB-მა ყველაფერი უნდა მოამზადოს", value: "full" },
+          { id: "full", label: "ბითიეი ლაბმა ყველაფერი უნდა მოამზადოს", value: "full" },
         ],
       },
       8: {
@@ -438,7 +438,7 @@ export const quizContentByLocale: Record<"ka" | "en", QuizTranslations> = {
     },
     success: {
       title: "თქვენი მოთხოვნა მიღებულია",
-      message: "გმადლობთ ინტერესისთვის. BTA LAB-ის გუნდი განიხილავს თქვენს მოთხოვნებს და 24 საათის განმავლობაში დაგიკავშირდებათ.",
+      message: "გმადლობთ ინტერესისთვის. ბითიეი ლაბის გუნდი განიხილავს თქვენს მოთხოვნებს და 24 საათის განმავლობაში დაგიკავშირდებათ.",
       button: "მთავარზე დაბრუნება",
     },
     controls: {

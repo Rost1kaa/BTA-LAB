@@ -341,6 +341,7 @@ export function useSiteConfig() {
     socials: {
       facebook: settings.social_facebook || "",
       instagram: settings.social_instagram || "",
+      tiktok: settings.social_tiktok || "",
     },
     footerDescription: settings.site_footer_description || "",
   };

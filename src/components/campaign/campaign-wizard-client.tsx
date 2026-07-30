@@ -764,7 +764,7 @@ function Stage7Materials({ data, onChange, locale }: {
           </div>
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-            <span>{locale === "ka" ? "მზად ვარ დროულად მივაწოდო BTA LAB-ს ინფორმაცია" : "Ready to provide information to BTA LAB in a timely manner"}</span>
+            <span>{locale === "ka" ? "მზად ვარ დროულად მივაწოდო ბითიეი ლაბს ინფორმაცია" : "Ready to provide information to BTA LAB in a timely manner"}</span>
           </div>
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
@@ -815,7 +815,7 @@ function Stage8Consent({ data, onChange, locale }: {
         <div className="space-y-2 text-sm text-[var(--color-fg-secondary)]">
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-            <span>{locale === "ka" ? "პროექტი განთავსდება BTA LAB-ის პორტფოლიოში" : "Project will be displayed in BTA LAB's portfolio"}</span>
+            <span>{locale === "ka" ? "პროექტი განთავსდება ბითიეი ლაბის პორტფოლიოში" : "Project will be displayed in BTA LAB's portfolio"}</span>
           </div>
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
@@ -907,7 +907,7 @@ function Stage9Declarations({ data, onChange, locale, isSubmitting }: {
           </div>
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-            <span>{locale === "ka" ? "BTA LAB-ს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" : "BTA LAB may request additional information"}</span>
+            <span>{locale === "ka" ? "ბითიეი ლაბს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" : "BTA LAB may request additional information"}</span>
           </div>
           <div className="flex items-start gap-2">
             <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" />

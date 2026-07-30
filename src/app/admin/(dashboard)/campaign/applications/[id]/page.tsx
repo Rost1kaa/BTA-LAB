@@ -34,7 +34,7 @@ const COOP_LABELS = [
   { key: "coopStopAgree", label_ka: "ვეთანხმები, რომ ხანგრძლივი თანამშრომლობის არქონისას პროექტი შეიძლება შეჩერდეს" },
 ];
 const CONSENT_LABELS = [
-  { key: "consentPortfolio", label_ka: "პროექტი განთავსდეს BTA LAB-ის პორტფოლიოში", required: true },
+  { key: "consentPortfolio", label_ka: "პროექტი განთავსდეს ბითიეი ლაბის პორტფოლიოში", required: true },
   { key: "consentScreenshots", label_ka: "გამოქვეყნდეს პროექტის სქრინშოტები", required: true },
   { key: "consentProcess", label_ka: "აღწერილი იყოს პროექტის შექმნის პროცესი", required: true },
   { key: "consentPresentation", label_ka: "პროექტი წარმოდგენილ იქნეს აკადემიის პრეზენტაციაზე", required: true },
@@ -49,7 +49,7 @@ const DECLARATION_LABELS = [
   { key: "declReadRules", label_ka: "გავეცანი კამპანიის წესებს" },
   { key: "declNotGuarantee", label_ka: "მესმის, რომ განაცხადის შევსება დაფინანსების მიღებას არ ნიშნავს" },
   { key: "declDataProcessing", label_ka: "ვეთანხმები პერსონალური მონაცემების დამუშავებას" },
-  { key: "declAdditionalInfo", label_ka: "მესმის, რომ BTA LAB-ს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" },
+  { key: "declAdditionalInfo", label_ka: "მესმის, რომ ბითიეი ლაბს შეუძლია დამატებითი ინფორმაციის მოთხოვნა" },
   { key: "declMayNotSelect", label_ka: "მესმის, რომ პროექტი შეიძლება არ შეირჩეს" },
   { key: "declInterviewParticipate", label_ka: "ვეთანხმები გასაუბრების ეტაპზე მონაწილეობას" },
 ];

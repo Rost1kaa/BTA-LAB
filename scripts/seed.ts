@@ -354,12 +354,17 @@ const siteSettings: SiteSettingSeed[] = [
   },
   {
     setting_key: "social_facebook",
-    setting_value: "https://facebook.com/bta-lab",
+    setting_value: "https://www.facebook.com/bta.lab.official",
     setting_type: "url",
   },
   {
     setting_key: "social_instagram",
-    setting_value: "https://instagram.com/bta_lab",
+    setting_value: "https://www.instagram.com/bta.lab.official",
+    setting_type: "url",
+  },
+  {
+    setting_key: "social_tiktok",
+    setting_value: "https://www.tiktok.com/@bta.lab.official",
     setting_type: "url",
   },
   {
@@ -1909,7 +1914,7 @@ async function seed(): Promise<void> {
       title_ka: "კონფიდენციალურობის პოლიტიკა",
       title_en: "Privacy Policy",
       description_ka:
-        "BTA LAB აგროვებს მხოლოდ იმ ინფორმაციას, რომელიც საჭიროა მოთხოვნებზე პასუხისთვის, ვებსაიტის მუშაობისთვის და ადმინისტრირების პანელის დასაცავად.",
+        "ბითიეი ლაბი აგროვებს მხოლოდ იმ ინფორმაციას, რომელიც საჭიროა მოთხოვნებზე პასუხისთვის, ვებსაიტის მუშაობისთვის და ადმინისტრირების პანელის დასაცავად.",
       description_en:
         "BTA LAB collects only the information needed to respond to inquiries, operate the website, and protect the Admin Panel.",
       content_ka:
@@ -1922,7 +1927,7 @@ async function seed(): Promise<void> {
       title_ka: "ქუქიების პოლიტიკა",
       title_en: "Cookie Policy",
       description_ka:
-        "ეს გვერდი განმარტავს, როგორ იყენებს BTA LAB ქუქიებს და ბრაუზერის მსგავს საცავებს საჯარო ვებსაიტზე.",
+        "ეს გვერდი განმარტავს, როგორ იყენებს ბითიეი ლაბი ქუქიებს და ბრაუზერის მსგავს საცავებს საჯარო ვებსაიტზე.",
       description_en:
         "This page explains how BTA LAB uses cookies and similar browser storage on the public website.",
       content_ka:
