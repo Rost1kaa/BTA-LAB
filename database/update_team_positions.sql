@@ -36,16 +36,16 @@ WHERE name = 'მარიამ კაკიაშვილი';
 
 UPDATE team_members
 SET
-  position = 'მასწავლებელი',
-  position_ka = 'მასწავლებელი',
-  position_en = 'მასწავლებელი'
+  position = 'ლექტორი',
+  position_ka = 'ლექტორი',
+  position_en = 'ლექტორი'
 WHERE name = 'გაიოზ კუპრაშვილი';
 
 UPDATE team_members
 SET
-  position = 'მასწავლებელი',
-  position_ka = 'მასწავლებელი',
-  position_en = 'მასწავლებელი'
+  position = 'ლექტორი',
+  position_ka = 'ლექტორი',
+  position_en = 'ლექტორი'
 WHERE name = 'ცოტნე ჩადუნელი';
 
 UPDATE team_members
