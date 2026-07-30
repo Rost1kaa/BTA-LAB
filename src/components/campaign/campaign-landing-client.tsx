@@ -877,7 +877,7 @@ function FinalCTA({ ctaItems, settings }: { ctaItems: CampaignCTAType[]; setting
         {/* Contact Cards — all links from CMS settings */}
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Phone, label: "Phone", value: settings.campaign_phone || "579009247", href: `tel:${settings.campaign_phone}` },
+            { icon: Phone, label: "Phone", value: settings.campaign_phone || "+995 579 009 247", href: `tel:${settings.campaign_phone}` },
             { icon: MessageCircle, label: "Facebook", value: settings.campaign_facebook_label || "@btalab", href: settings.campaign_facebook_url || "https://facebook.com/bta-lab" },
             { icon: Camera, label: "Instagram", value: settings.campaign_instagram_label || "@bta_lab", href: settings.campaign_instagram_url || "https://instagram.com/bta_lab" },
             { icon: Music, label: "TikTok", value: settings.campaign_tiktok_label || "@bta_lab", href: settings.campaign_tiktok_url || "https://tiktok.com/@bta_lab" },

@@ -116,8 +116,8 @@ const categoryLabelsKa: Record<string, string> = {
 
 const settingsKa: Record<string, string> = {
   site_description: "თანამედროვე ვებგვერდები და ციფრული გადაწყვეტები თქვენი ბიზნესის ზრდისთვის",
-  contact_address: "თბილისი, საქართველო",
-  contact_location: "თბილისი, საქართველო",
+  contact_address: "თბილისი, წერონისის 208",
+  contact_location: "თბილისი, წერონისის 208",
   site_footer_description: "ციფრული ლაბორატორია, სადაც სტუდენტური იდეები ინდუსტრიის რეალურ გადაწყვეტილებებად იქცევა.",
 };
 
@@ -339,17 +339,17 @@ const siteSettings: SiteSettingSeed[] = [
   },
   {
     setting_key: "contact_phone",
-    setting_value: "579009247",
+    setting_value: "+995 579 009 247",
     setting_type: "text",
   },
   {
     setting_key: "contact_location",
-    setting_value: "Tbilisi, Georgia",
+    setting_value: "Tbilisi, Tseronisi 208",
     setting_type: "text",
   },
   {
     setting_key: "contact_address",
-    setting_value: "Tbilisi, Georgia",
+    setting_value: "თბილისი, წერონისის 208",
     setting_type: "text",
   },
   {
@@ -815,7 +815,7 @@ const siteContent: SiteContentSeed[] = [
     page: "contact",
     section: "form",
     content_key: "phonePlaceholder",
-    content_value_en: "579009247",
+    content_value_en: "+995 579 009 247",
     content_type: "text",
     sort_order: 5,
   },

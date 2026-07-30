@@ -93,7 +93,7 @@ async function seedCampaign() {
   const settings = [
     { key: "campaign_name", v_ka: "მეწარმის მხარდაჭერის კამპანია", v_en: "Entrepreneur Support Campaign", type: "text" },
     { key: "campaign_email", v_ka: "lab@bta.edu.ge", v_en: "lab@bta.edu.ge", type: "text" },
-    { key: "campaign_phone", v_ka: "579009247", v_en: "579009247", type: "text" },
+    { key: "campaign_phone", v_ka: "+995 579 009 247", v_en: "+995 579 009 247", type: "text" },
     { key: "campaign_deadline", v_ka: "2026-12-31", v_en: "2026-12-31", type: "text" },
     { key: "campaign_max_funding", v_ka: "5000", v_en: "5000", type: "number" },
     { key: "campaign_currency", v_ka: "₾", v_en: "₾", type: "text" },

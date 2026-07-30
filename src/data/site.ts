@@ -5,9 +5,9 @@ export const siteConfig = {
   tagline: "We help small businesses grow.",
   description:
     "BTA LAB is a digital innovation lab where students collaborate to build real-world digital products, websites, branding, marketing campaigns, and software solutions — bridging the gap between education and industry.",
-  phone: "579009247",
-  address: "123 Innovation Drive, Tech City, TC 10001",
-  location: "Tbilisi, Georgia",
+  phone: "+995 579 009 247",
+  address: "თბილისი, წერონისის 208",
+  location: "Tbilisi, Tseronisi 208",
   socials: {
     facebook: "https://facebook.com/bta-lab",
     instagram: "https://instagram.com/bta_lab",

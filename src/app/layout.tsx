@@ -107,6 +107,7 @@ export default async function RootLayout({
                 "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ვებგვერდების დამზადება, ციფრული ინოვაციები და ტექნოლოგიური გადაწყვეტილებები მცირე და საშუალო ბიზნესისთვის.",
               address: {
                 "@type": "PostalAddress",
+                streetAddress: "წერონისის 208",
                 addressLocality: "Tbilisi",
                 addressCountry: "GE",
               },

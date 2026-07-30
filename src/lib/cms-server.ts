@@ -393,8 +393,8 @@ export const getSiteConfigServer = cache(async (locale: LocaleCode = "ka") => {
     tagline: "We help small businesses grow.",
     description: settings.site_description || "BTA LAB is a digital innovation lab where students collaborate to build real-world digital products, websites, branding, marketing campaigns, and software solutions — bridging the gap between education and industry.",
     phone: settings.contact_phone || "",
-    address: settings.contact_address || (locale === "ka" ? "თბილისი, საქართველო" : ""),
-    location: settings.contact_location || (locale === "ka" ? "თბილისი, საქართველო" : ""),
+    address: settings.contact_address || (locale === "ka" ? "თბილისი, წერონისის 208" : ""),
+    location: settings.contact_location || (locale === "ka" ? "თბილისი, წერონისის 208" : ""),
     socials: {
       facebook: settings.social_facebook || "",
       instagram: settings.social_instagram || "",

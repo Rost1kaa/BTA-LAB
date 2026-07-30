@@ -210,7 +210,7 @@ function ContactFormContent({
             {/* Google Maps Embed */}
             <div className="overflow-hidden rounded-2xl border border-[var(--color-border-primary)] h-48 bg-[var(--color-bg-surface)] relative group">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.966!2d-73.9857!3d40.7484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQ0JzU0LjIiTiA3M8KwNTknMDguNSJX!5e0!3m2!1sen!2sus!4v1!4m1!1i1024!2i768"
+                src="https://www.google.com/maps/embed?pb=!1m22!1m8!1m3!1d3540.7367394949943!2d44.82653284270519!3d41.73361900108122!3m2!1i1024!2i768!4f13.1!4m11!3e6!4m3!3m2!1d41.7334244!2d44.828559999999996!4m5!1s0x40440d55b5eda87d%3A0x9219acbfd8de3158!2z4YOR4YOY4YOW4YOc4YOU4YOh4YOY4YOh4YOQIOGDk-GDkCDhg6Lhg5Thg6Xhg5zhg53hg5rhg53hg5Lhg5jhg5Thg5Hhg5jhg6Eg4YOQ4YOZ4YOQ4YOT4YOU4YOb4YOY4YOQLCAxODUg4YOs4YOU4YOg4YOd4YOc4YOY4YOh4YOY4YOhIOGDpeGDo-GDqeGDkCwg4YOX4YOR4YOY4YOa4YOY4YOh4YOY!3m2!1d41.7333581!2d44.8285699!5e0!3m2!1ska!2sge!4v1785440331826!5m2!1ska!2sge"
                 width="100%"
                 height="100%"
                 style={{ border: 0, filter: "grayscale(1) invert(0.9)" }}

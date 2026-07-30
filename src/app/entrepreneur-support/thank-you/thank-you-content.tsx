@@ -154,7 +154,7 @@ export default function ThankYouContent() {
                 <a href="mailto:lab@bta.edu.ge" className="flex items-center gap-2 text-[var(--color-accent)] hover:underline">
                   <Mail size={14} /> lab@bta.edu.ge
                 </a>
-                <a href="tel:579009247" className="flex items-center gap-2 text-[var(--color-accent)] hover:underline">
+                <a href="tel:+995579009247" className="flex items-center gap-2 text-[var(--color-accent)] hover:underline">
                   <Phone size={14} /> +995 32 299 99 99
                 </a>
               </div>

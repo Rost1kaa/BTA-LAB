@@ -1845,7 +1845,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.campaign_settings (id, setting_key, setting_value_ka, setting_value_en, setting_type, is_active) VALUES
   ('a1b2c3d4-0701-4000-8000-000000000001', 'campaign_name', 'BTA LAB — მეწარმეების ციფრული განვითარების მხარდაჭერა', 'BTA LAB — Digital Entrepreneurship Development Support', 'text', true),
   ('a1b2c3d4-0702-4000-8000-000000000001', 'campaign_email', 'lab@bta.edu.ge', 'lab@bta.edu.ge', 'text', true),
-  ('a1b2c3d4-0703-4000-8000-000000000001', 'campaign_phone', '579009247', '579009247', 'text', true),
+  ('a1b2c3d4-0703-4000-8000-000000000001', 'campaign_phone', '+995 579 009 247', '+995 579 009 247', 'text', true),
   ('a1b2c3d4-0704-4000-8000-000000000001', 'campaign_deadline', '2026-12-31', '2026-12-31', 'text', true),
   ('a1b2c3d4-0705-4000-8000-000000000001', 'campaign_max_funding', '5000', '5000', 'number', true),
   ('a1b2c3d4-0706-4000-8000-000000000001', 'campaign_currency', '₾', '₾', 'text', true),
