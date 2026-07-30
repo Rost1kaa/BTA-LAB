@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerLocale } from "@/lib/locale";
 import { getCampaignApplicationServer, getCampaignApplicationStatusHistoryServer } from "@/lib/campaign-cms-server";
 import { CampaignStatusClient } from "./status-client";
+
+export const metadata: Metadata = {
+  title: "განაცხადის სტატუსი",
+};
 
 export const revalidate = 10;
 

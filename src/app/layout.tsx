@@ -25,8 +25,8 @@ const SITE_URL = "https://lab.bta.edu.ge";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BTA LAB | ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",
-    template: "%s | BTA LAB",
+    default: "BTA LAB : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
+    template: "%s : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
   },
   description:
     "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ინოვაციური ციფრული გადაწყვეტილებები, ვებ დეველოპმენტი და ტექნოლოგიური პროექტები.",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     apple: "/bta.ico",
   },
   openGraph: {
-    title: "BTA LAB | ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",
+    title: "BTA LAB : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
     description:
       "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ინოვაციური ციფრული გადაწყვეტილებები, ვებ დეველოპმენტი და ტექნოლოგიური პროექტები.",
     url: SITE_URL,
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BTA LAB | ბიზნესისა და ტექნოლოგიების აკადემიის საწარმო",
+    title: "BTA LAB : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
     description:
       "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ინოვაციური ციფრული გადაწყვეტილებები, ვებ დეველოპმენტი და ტექნოლოგიური პროექტები.",
     images: ["/opengraph-image.png"],

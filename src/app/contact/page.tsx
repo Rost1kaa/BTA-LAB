@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { getContentMapServer, getSiteConfigServer } from "@/lib/cms-server";
 import { getServerLocale } from "@/lib/locale";
 import { ContactPageClient } from "./contact-client";
+
+export const metadata: Metadata = {
+  title: "კონტაქტი",
+};
 
 export default async function ContactPage() {
   const locale = await getServerLocale();

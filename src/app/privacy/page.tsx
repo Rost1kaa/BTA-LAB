@@ -9,7 +9,7 @@ import { getServerLocale } from "@/lib/locale";
 import { parseLegalSections } from "@/lib/parse-legal-sections";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
+  title: "კონფიდენციალურობის პოლიტიკა",
   robots: {
     index: true,
     follow: true,

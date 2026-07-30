@@ -8,8 +8,7 @@ import Link from "next/link";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Details | Entrepreneur Support Campaign",
-  description: "Campaign details for the BTA LAB Entrepreneur Support Campaign",
+  title: "დეტალები",
 };
 
 export const revalidate = 60;

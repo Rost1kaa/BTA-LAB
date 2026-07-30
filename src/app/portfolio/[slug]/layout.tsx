@@ -12,11 +12,11 @@ export async function generateMetadata({
   const project = await getProjectBySlugServer(slug, locale);
 
   if (!project) {
-    return { title: "Project Not Found | BTA LAB" };
+    return { title: "Project Not Found" };
   }
 
   return {
-    title: project.seo_title || `${project.title} | BTA LAB`,
+    title: project.seo_title || project.title,
     description: project.seo_description || project.description,
   };
 }

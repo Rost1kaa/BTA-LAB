@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { getServerLocale } from "@/lib/locale";
 import {
   getCampaignLandingDataServer,
   getCampaignDetailsServer,
 } from "@/lib/campaign-cms-server";
 import { CampaignLandingClient } from "@/components/campaign/campaign-landing-client";
+
+export const metadata: Metadata = {
+  title: "მეწარმეთა ციფრული მხარდაჭერის კამპანია",
+};
 
 export const revalidate = 60;
 

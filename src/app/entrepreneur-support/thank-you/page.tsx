@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import ThankYouContent from "./thank-you-content";
+
+export const metadata: Metadata = {
+  title: "მადლობა",
+};
 
 export default function ThankYouPage() {
   return (
