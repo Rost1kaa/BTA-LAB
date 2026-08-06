@@ -43,9 +43,9 @@ export const metadata: Metadata = {
   creator: "BTA LAB",
   publisher: "BTA LAB",
   icons: {
-    icon: "/bta.ico",
-    shortcut: "/bta.ico",
-    apple: "/bta.ico",
+    icon: "/web-info/logo.ico",
+    shortcut: "/web-info/logo.ico",
+    apple: "/web-info/logo.ico",
   },
   openGraph: {
     title: "BTA LAB : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "/web-info/opengraph-image.webp",
         width: 1200,
         height: 630,
         alt: "BTA LAB — ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია",
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     title: "BTA LAB : ბითიეი ლაბ, ბიზნესისა და ტექნოლოგიების აკადემია",
     description:
       "ბიზნესისა და ტექნოლოგიების აკადემიის ლაბორატორია — ინოვაციური ციფრული გადაწყვეტილებები, ვებ დეველოპმენტი და ტექნოლოგიური პროექტები.",
-    images: ["/opengraph-image.png"],
+    images: ["/web-info/opengraph-image.webp"],
   },
   robots: {
     index: true,

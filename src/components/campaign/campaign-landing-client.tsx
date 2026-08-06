@@ -458,7 +458,7 @@ function ContentSection({ section, index }: { section: CampaignSection; index: n
                   {section.section_key === "overview" ? (
                     <>
                       <Image
-                        src="/images/campain.png"
+                        src="/images/campain.webp"
                         alt="Campaign Illustration"
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"

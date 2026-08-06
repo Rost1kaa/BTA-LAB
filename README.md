@@ -79,12 +79,11 @@ The seed script:
 
 3. **Apply the database migrations:**
 
-   Apply the SQL files in `supabase/migrations` in numeric order before using the
-   Admin Panel. For an existing database created from `001_initial_schema.sql`,
-   apply `002_fix_admin_profiles_rls.sql` and
-   every later migration. `003_secure_admin_cms_policies.sql` removes automatic
-   admin grants and secures CMS/storage writes. `008_security_hardening.sql`
-   reinforces storage MIME, extension, and size controls.
+   Apply the SQL files in `supabase/migrations` in numeric order (`001` → `020`)
+   before using the Admin Panel. The migration chain is the single SQL source:
+   it creates the schema, campaign tables, seed content, and data updates.
+   Migration `020_campaign_content_seed.sql` contains the campaign content seed
+   (previously `supabase/seeds/`), so no separate seed SQL is required.
 
    Use the Supabase SQL Editor, or `supabase db push` when the project is linked
    to the Supabase CLI.
@@ -112,7 +111,7 @@ The seed script:
 | `portfolio_categories` | 5 | `slug` |
 | `portfolio_projects` | 1 (qey.ge) | `slug` |
 | `service_packages` | 10 | Deterministic `id` |
-| `team_members` | 8 | Deterministic `id` |
+| `team_members` | 7 | Deterministic `id` |
 | `admin_profiles` | 1 | `id` |
 
 ### Password Requirements

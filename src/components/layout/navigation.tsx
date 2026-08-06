@@ -452,7 +452,7 @@ export function Navigation({ siteConfig }: NavigationProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -494,11 +494,11 @@ export function Navigation({ siteConfig }: NavigationProps) {
             >
               <div className="flex items-center gap-2 leading-none">
                 <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
-                  ბითიეი
+                  {locale === "ka" ? "ბითიეი" : "BTA"}
                 </span>
                 <span className="w-6 h-[1px] bg-[var(--color-fg-tertiary)]/50 group-hover:bg-[var(--color-fg-secondary)] transition-colors duration-300" />
                 <span className="text-lg font-semibold tracking-tight text-[var(--color-fg-primary)]">
-                  ლაბი
+                  {locale === "ka" ? "ლაბი" : "LAB"}
                 </span>
               </div>
             </Link>

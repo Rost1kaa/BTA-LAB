@@ -305,13 +305,13 @@ function withBilingualTeamMember(member: TeamMemberSeed) {
   return {
     ...member,
     name_ka: member.name,
-    name_en: member.name,
+    name_en: member.name_en || member.name,
     position_ka: ka.position,
-    position_en: member.position,
+    position_en: member.position_en || member.position,
     bio_ka: ka.bio,
-    bio_en: member.bio,
+    bio_en: member.bio_en || member.bio,
     image_alt_ka: `${member.name} პორტრეტი`,
-    image_alt_en: `${member.name} portrait`,
+    image_alt_en: `${member.name_en || member.name} portrait`,
   };
 }
 
@@ -715,7 +715,7 @@ const siteContent: SiteContentSeed[] = [
     page: "team",
     section: "hero",
     content_key: "heading",
-    content_value_en: "Meet the People Behind the Work",
+    content_value_en: "Meet the Team",
     content_type: "text",
     sort_order: 1,
   },
@@ -724,7 +724,7 @@ const siteContent: SiteContentSeed[] = [
     section: "hero",
     content_key: "description",
     content_value_en:
-      "A diverse team of passionate creators, engineers, and strategists dedicated to turning bold ideas into exceptional digital experiences.",
+      "A diverse group of talented students, designers, developers, and marketers working together to bring ideas to life.",
     content_type: "textarea",
     sort_order: 2,
   },
@@ -1589,6 +1589,9 @@ interface TeamMemberSeed {
   socials: Record<string, string>;
   display_order: number;
   published: boolean;
+  name_en?: string;
+  position_en?: string;
+  bio_en?: string;
 }
 
 const teamMembers: TeamMemberSeed[] = [
@@ -1600,6 +1603,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 0,
     published: true,
+    name_en: "Sopio Macharashvili",
+    position_en: "Director",
+    bio_en: "Responsible for company development, strategic direction, and team management.",
   },
   {
     name: "მარიამ კაკიაშვილი",
@@ -1609,6 +1615,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 1,
     published: true,
+    name_en: "Mariam Kakiashvili",
+    position_en: "Team Lead",
+    bio_en: "Mariam coordinates the technical direction and implementation of web projects. With years of experience and leadership skills, she ensures that every project is delivered to the highest standards.",
   },
   {
     name: "გაიოზ კუპრაშვილი",
@@ -1618,6 +1627,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 2,
     published: true,
+    name_en: "Gaioz Kupravishvili",
+    position_en: "Lecturer",
+    bio_en: "Gaioz helps beginner developers learn web technologies. Through his experience and simple teaching style, he passes practical skills to students and shares the knowledge needed to build real projects.",
   },
   {
     name: "ცოტნე ჩადუნელი",
@@ -1627,6 +1639,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 3,
     published: true,
+    name_en: "Tsotne Chaduneli",
+    position_en: "Lecturer",
+    bio_en: "Tsotne combines rich practical experience with deep academic knowledge. As a leading specialist in the field, he mentors our team, shares modern technology trends, and ensures the continuous growth of service quality.",
   },
   {
     name: "ლუკა მეკოკიშვილი",
@@ -1636,6 +1651,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 4,
     published: true,
+    name_en: "Luka Mekokishvili",
+    position_en: "Web Developer",
+    bio_en: "Luka specializes in building modern, fully functional web applications and websites. His priority is delivering user-friendly, fast, and secure digital products.",
   },
   {
     name: "ლუკა ხარაიშვილი",
@@ -1645,6 +1663,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 5,
     published: true,
+    name_en: "Luka Kharaishvili",
+    position_en: "Web Developer",
+    bio_en: "Luka is a talented and promising developer whose motivation and ability to solve complex technical problems make a significant contribution to our projects.",
   },
   {
     name: "გაგა ტრაპაიძე",
@@ -1654,6 +1675,9 @@ const teamMembers: TeamMemberSeed[] = [
     socials: {},
     display_order: 6,
     published: true,
+    name_en: "Gaga Trapaidze",
+    position_en: "Social Media Manager",
+    bio_en: "Gaga successfully combines technical competence with communication skills. He manages the company's social relations, ensuring a close connection with customers and partners.",
   },
 ];
 
@@ -1966,6 +1990,9 @@ async function seed(): Promise<void> {
   for (const member of teamMembers) {
     try {
       const id = deterministicId(`team-member-${member.name}`);
+
+      // Upsert the canonical (deterministic-id) row first, so a failed upsert
+      // never leaves the member missing.
       const { error } = await supabase.from("team_members").upsert(
           {
           id,
@@ -1978,9 +2005,27 @@ async function seed(): Promise<void> {
       if (error) {
         console.error(`  ✗  ${member.name}: ${error.message}`);
         hasError = true;
-      } else {
-        counts["Team members"] = (counts["Team members"] || 0) + 1;
+        continue;
       }
+
+      // Consolidate: remove any pre-existing rows for this member that use a
+      // different id (e.g. the fixed UUIDs from migration 016 or rows created
+      // through the admin panel). Matches both the legacy `name` column and
+      // `name_ka` so rows stored with English names are consolidated too.
+      // After this, exactly one row per team member remains — no duplicates.
+      const { error: deleteError } = await supabase
+        .from("team_members")
+        .delete()
+        .or(`name.eq."${member.name}",name_ka.eq."${member.name}"`)
+        .neq("id", id);
+
+      if (deleteError) {
+        console.error(`  ✗  ${member.name}: ${deleteError.message}`);
+        hasError = true;
+        continue;
+      }
+
+      counts["Team members"] = (counts["Team members"] || 0) + 1;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`  ✗  ${member.name}: ${message}`);

@@ -98,7 +98,7 @@ export function Footer({ siteConfig }: FooterProps) {
         <div className="footer-brand flex w-full max-w-xl flex-col gap-5 md:col-span-2 lg:col-span-1 lg:max-w-[38%]">
           {/* Logo */}
           <Image
-            src="/images/logo.png"
+            src="/web-info/logo.webp"
             alt="BTA LAB Logo"
             width={90}
             height={90}

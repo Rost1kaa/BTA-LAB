@@ -42,7 +42,10 @@ supabase link --project-ref your-project-ref
 supabase db push
 ```
 
-The schema comes from `supabase/migrations/001_clean_initial_schema.sql`.
+The schema comes from the sequential migration chain in `supabase/migrations/`
+(`001_initial_schema.sql` → `020_campaign_content_seed.sql`). The campaign
+content seed is included in migration `020_campaign_content_seed.sql`, so no
+separate `supabase/seeds/` folder is needed.
 
 ## 5. Run the seed
 

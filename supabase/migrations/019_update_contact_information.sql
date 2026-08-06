@@ -1,58 +1,129 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- BTA LAB — Phone Number Migration to International Format
+-- BTA LAB — Update Contact Information (019)
 -- ═══════════════════════════════════════════════════════════════════════════
+-- Consolidated from:
+--   • sql/update_address_to_official.sql
+--   • sql/update_phone_number_to_international_format.sql
 --
--- Purpose:
---   Update all existing phone number values from the old local format
---   "579009247" to the international format "+995 579 009 247".
---
---   Also update bare telephone URI links from "tel:579009247" to
---   "tel:+995579009247".
---
--- Tables potentially affected (sorted):
---   • site_settings           — contact_phone (setting_value, value_ka, value_en)
---   • site_content            — CMS text placeholders (content_value_ka, content_value_en)
---   • campaign_settings       — campaign_phone (setting_value_ka, setting_value_en)
---   • contact_messages        — user-submitted phone
---   • service_requests        — user-submitted phone, customer_phone
---   • campaign_applications   — applicant phone
---   • campaign_application_drafts — JSONB form_data — DROPPED in migration 008,
---                                   included with existence guard for safety
---   • campaign_email_templates    — email body templates (body_ka, body_en)
---   • campaign_email_log          — sent email bodies (body)
---   • legal_policies              — policy content (content_ka, content_en)
+-- Changes applied:
+--   1. Address: "თბილისი, საქართველო" → "თბილისი, წერონისის 208"
+--      (EN: "Tbilisi, Georgia" → "Tbilisi, Tseronisi 208")
+--   2. Phone: "579009247" → "+995 579 009 247"
+--      tel: "tel:579009247" → "tel:+995579009247"
 --
 -- Safety / Idempotency:
 --   • Every table reference is guarded by an existence check via
 --     information_schema.tables — no error if a table was dropped.
---   • WHERE clauses use LIKE '%579009247%' — only rows containing the
---     old exact string are touched.
---   • WHERE clauses also exclude strings that already start with '+995'
---     so the new format is never double-replaced.
---   • Safe to run any number of times.
---   • No schema changes — UPDATE statements only.
---
--- Rollback:
---   Update the same columns replacing '+995 579 009 247' with '579009247'
---   and 'tel:+995579009247' with 'tel:579009247'.
---
+--   • WHERE clauses use exact string match or LIKE on the old literal.
+--   • Safe to run any number of times. UPDATE statements only — no schema changes.
 -- ═══════════════════════════════════════════════════════════════════════════
 
-BEGIN;
-
 -- ═══════════════════════════════════════════════════════════════════════════
--- Helper: safe update macro (exists → update)
+-- PART 1 — ADDRESS UPDATE
 -- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
-  RAISE NOTICE '═══ Starting phone number migration ═══';
-  RAISE NOTICE 'Old format:  579009247  →  New format:  +995 579 009 247';
-  RAISE NOTICE 'Tel format:  tel:579009247  →  tel:+995579009247';
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'site_settings') THEN
+    UPDATE public.site_settings
+    SET
+      setting_value = 'თბილისი, წერონისის 208',
+      value_ka      = 'თბილისი, წერონისის 208',
+      value_en      = 'Tbilisi, Tseronisi 208'
+    WHERE
+      setting_key IN ('contact_address', 'contact_location')
+      AND setting_value = 'თბილისი, საქართველო';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'site_content') THEN
+    UPDATE public.site_content
+    SET
+      content_value_ka = REPLACE(content_value_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      content_value_en = REPLACE(content_value_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         content_value_ka LIKE '%თბილისი, საქართველო%'
+      OR content_value_en LIKE '%Tbilisi, Georgia%';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'campaign_settings') THEN
+    UPDATE public.campaign_settings
+    SET
+      setting_value_ka = REPLACE(setting_value_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      setting_value_en = REPLACE(setting_value_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         setting_value_ka LIKE '%თბილისი, საქართველო%'
+      OR setting_value_en LIKE '%Tbilisi, Georgia%';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'campaign_sections') THEN
+    UPDATE public.campaign_sections
+    SET
+      description_ka = REPLACE(description_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      description_en = REPLACE(description_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208'),
+      content_ka     = REPLACE(content_ka,     'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      content_en     = REPLACE(content_en,     'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208'),
+      title_ka       = REPLACE(title_ka,       'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      title_en       = REPLACE(title_en,       'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         description_ka LIKE '%თბილისი, საქართველო%'
+      OR description_en LIKE '%Tbilisi, Georgia%'
+      OR content_ka     LIKE '%თბილისი, საქართველო%'
+      OR content_en     LIKE '%Tbilisi, Georgia%'
+      OR title_ka       LIKE '%თბილისი, საქართველო%'
+      OR title_en       LIKE '%Tbilisi, Georgia%';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'campaign_pages') THEN
+    UPDATE public.campaign_pages
+    SET
+      description_ka = REPLACE(description_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      description_en = REPLACE(description_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         description_ka LIKE '%თბილისი, საქართველო%'
+      OR description_en LIKE '%Tbilisi, Georgia%';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'legal_policies') THEN
+    UPDATE public.legal_policies
+    SET
+      content_ka = REPLACE(content_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      content_en = REPLACE(content_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         content_ka LIKE '%თბილისი, საქართველო%'
+      OR content_en LIKE '%Tbilisi, Georgia%';
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'campaign_email_templates') THEN
+    UPDATE public.campaign_email_templates
+    SET
+      body_ka = REPLACE(body_ka, 'თბილისი, საქართველო', 'თბილისი, წერონისის 208'),
+      body_en = REPLACE(body_en, 'Tbilisi, Georgia', 'Tbilisi, Tseronisi 208')
+    WHERE
+         body_ka LIKE '%თბილისი, საქართველო%'
+      OR body_en LIKE '%Tbilisi, Georgia%';
+  END IF;
 END $$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- 1. site_settings — contact_phone
+-- PART 2 — PHONE NUMBER FORMAT UPDATE
 -- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
@@ -68,15 +139,8 @@ BEGIN
       AND (   setting_value LIKE '%579009247%'
            OR value_ka      LIKE '%579009247%'
            OR value_en      LIKE '%579009247%');
-    RAISE NOTICE 'site_settings: updated';
-  ELSE
-    RAISE NOTICE 'site_settings: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 2. site_content — CMS text content (phone placeholders, footer info, etc.)
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -88,15 +152,8 @@ BEGIN
     WHERE
          content_value_ka LIKE '%579009247%'
       OR content_value_en LIKE '%579009247%';
-    RAISE NOTICE 'site_content: updated';
-  ELSE
-    RAISE NOTICE 'site_content: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 3. campaign_settings — campaign_phone
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -109,15 +166,8 @@ BEGIN
       setting_key IN ('campaign_phone')
       AND (   setting_value_ka LIKE '%579009247%'
            OR setting_value_en LIKE '%579009247%');
-    RAISE NOTICE 'campaign_settings: updated';
-  ELSE
-    RAISE NOTICE 'campaign_settings: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 4. contact_messages — user-submitted phone numbers
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -126,15 +176,8 @@ BEGIN
     SET phone = REPLACE(phone, '579009247', '+995 579 009 247')
     WHERE phone LIKE '%579009247%'
       AND phone NOT LIKE '+995%';
-    RAISE NOTICE 'contact_messages: updated';
-  ELSE
-    RAISE NOTICE 'contact_messages: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 5. service_requests — user-submitted phone numbers
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -146,15 +189,8 @@ BEGIN
     WHERE
          (phone          LIKE '%579009247%' AND phone          NOT LIKE '+995%')
       OR (customer_phone LIKE '%579009247%' AND customer_phone NOT LIKE '+995%');
-    RAISE NOTICE 'service_requests: updated';
-  ELSE
-    RAISE NOTICE 'service_requests: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 6. campaign_applications — applicant phone numbers
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -163,17 +199,8 @@ BEGIN
     SET phone = REPLACE(phone, '579009247', '+995 579 009 247')
     WHERE phone LIKE '%579009247%'
       AND phone NOT LIKE '+995%';
-    RAISE NOTICE 'campaign_applications: updated';
-  ELSE
-    RAISE NOTICE 'campaign_applications: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 7. campaign_application_drafts — JSONB form_data (contains phone as string)
---    ⚠  This table was DROPPED in migration 008_cleanup_unused_tables.
---       The existence guard ensures this runs safely on any database.
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -182,15 +209,8 @@ BEGIN
     SET form_data = REPLACE(form_data::text, '579009247', '+995 579 009 247')::jsonb
     WHERE form_data::text LIKE '%579009247%'
       AND form_data::text NOT LIKE '%+995%';
-    RAISE NOTICE 'campaign_application_drafts: updated';
-  ELSE
-    RAISE NOTICE 'campaign_application_drafts: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 8. campaign_email_templates — email body content
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -202,15 +222,8 @@ BEGIN
     WHERE
          body_ka LIKE '%579009247%'
       OR body_en LIKE '%579009247%';
-    RAISE NOTICE 'campaign_email_templates: updated';
-  ELSE
-    RAISE NOTICE 'campaign_email_templates: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 9. campaign_email_log — sent email body content
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -219,15 +232,8 @@ BEGIN
     SET body = REPLACE(body, '579009247', '+995 579 009 247')
     WHERE body LIKE '%579009247%'
       AND body NOT LIKE '%+995 579 009 247%';
-    RAISE NOTICE 'campaign_email_log: updated';
-  ELSE
-    RAISE NOTICE 'campaign_email_log: skipped (table does not exist)';
   END IF;
 END $$;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- 10. legal_policies — policy document content
--- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
 BEGIN
@@ -239,16 +245,10 @@ BEGIN
     WHERE
          content_ka LIKE '%579009247%'
       OR content_en LIKE '%579009247%';
-    RAISE NOTICE 'legal_policies: updated';
-  ELSE
-    RAISE NOTICE 'legal_policies: skipped (table does not exist)';
   END IF;
 END $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- 11. Telephone URI links (tel:) — update bare number links
--- ═══════════════════════════════════════════════════════════════════════════
--- Handles cases where "tel:579009247" was stored (without +995 prefix).
+-- ── Telephone URI links (tel:) ───────────────────────────────────────────
 
 DO $$
 BEGIN
@@ -291,17 +291,10 @@ BEGIN
   END IF;
 END $$;
 
--- ═══════════════════════════════════════════════════════════════════════════
--- 12. ANY remaining text/jsonb column — dynamic catch-all scan
--- ═══════════════════════════════════════════════════════════════════════════
--- This DO block iterates over all text-like columns in the public schema
--- and issues REPLACE UPDATEs for any that still contain '579009247'.
--- It handles both plain text columns and JSONB columns (cast to text).
--- Already-updated rows are unaffected because the old literal no longer
--- exists in them.
---
--- ⚠  The dynamic scan queries information_schema.tables at runtime,
---    so it naturally skips tables that do not exist. No guard needed.
+-- ── Any remaining text/jsonb column — dynamic catch-all scan ────────────
+-- Iterates over all text-like columns in the public schema and replaces the
+-- old phone literal. Already-updated rows are unaffected. Tables that no
+-- longer exist are naturally skipped via information_schema at runtime.
 -- ═══════════════════════════════════════════════════════════════════════════
 
 DO $$
@@ -358,17 +351,9 @@ BEGIN
 END $$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- Summary
+-- SUMMARY
 -- ═══════════════════════════════════════════════════════════════════════════
-
-DO $$
-BEGIN
-  RAISE NOTICE '═══════════════════════════════════════════════════════════════════════════';
-  RAISE NOTICE 'Phone number migration complete.';
-  RAISE NOTICE 'Old format:  579009247';
-  RAISE NOTICE 'New format:  +995 579 009 247';
-  RAISE NOTICE 'Tel format:  tel:+995579009247';
-  RAISE NOTICE '═══════════════════════════════════════════════════════════════════════════';
-END $$;
-
-COMMIT;
+-- Address:  თბილისი, საქართველო  →  თბილისი, წერონისის 208
+-- Phone:    579009247  →  +995 579 009 247
+-- Tel:      tel:579009247  →  tel:+995579009247
+-- ═══════════════════════════════════════════════════════════════════════════

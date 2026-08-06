@@ -78,7 +78,7 @@ async function seedCampaign() {
     og_title_en: "Entrepreneur Support Campaign | BTA LAB",
     og_description_ka: "მიიღეთ დაფინანსება და პროფესიონალური მხარდაჭერა თქვენი ციფრული პროექტის განსავითარებლად.",
     og_description_en: "Get funding and professional support to develop your digital project.",
-    og_image: "/images/og-campaign.png",
+    og_image: "/images/campain.webp",
     twitter_title_ka: "მეწარმის მხარდაჭერის კამპანია | ბითიეი ლაბი",
     twitter_title_en: "Entrepreneur Support Campaign | BTA LAB",
     twitter_description_ka: "დაფინანსება და მხარდაჭერა ციფრული პროექტებისთვის",

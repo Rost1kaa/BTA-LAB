@@ -251,15 +251,6 @@ export function OtpVerificationGate({ onVerified }: OtpVerificationProps) {
                       />
                     </div>
 
-                    <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-                      <Clock size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-600">
-                        {locale === "ka"
-                          ? "თუ არ მოგივიდათ კოდი, გთხოვთ შეამოწმოთ სპამის (Spam) საქაღალდე."
-                          : "If you don't receive the code, please check your Spam folder."}
-                      </p>
-                    </div>
-
                     <Button
                       variant="primary"
                       size="xl"
@@ -274,7 +265,7 @@ export function OtpVerificationGate({ onVerified }: OtpVerificationProps) {
                         </span>
                       ) : (
                         <>
-                          {locale === "ka" ? "კოდის გაგზავნა" : "Send Code"}
+                          {locale === "ka" ? "კოდის მიღება" : "Receive Code"}
                           <ArrowRight size={18} />
                         </>
                       )}
