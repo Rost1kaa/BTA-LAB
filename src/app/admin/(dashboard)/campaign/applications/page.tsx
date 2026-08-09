@@ -1,237 +1,383 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Fragment, useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
-import { updateApplicationStatus } from "@/lib/actions/campaign";
+import { motion, MotionConfig } from "framer-motion";
+import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
+import {
+  updateApplicationStatus,
+  deleteCampaignApplication,
+} from "@/lib/actions/campaign";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  Inbox,
+  GripVertical,
+  CalendarDays,
+  Mail,
+  Trash2,
+  ExternalLink,
+  ChevronRight,
+} from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Types
+// Types & status helpers
 // ═══════════════════════════════════════════════════════════════════════════
+
+type ApplicationStatus = "UNOPENED" | "CHECKED";
 
 interface ApplicationRecord {
   id: string;
   application_number: string;
-  status: string;
+  status: ApplicationStatus;
   first_name_ka: string | null;
   first_name_en: string | null;
   last_name_ka: string | null;
   last_name_en: string | null;
   email: string | null;
   business_name_ka: string | null;
-  project_title_ka: string | null;
+  business_name_en: string | null;
   submitted_at: string;
-  assigned_reviewer_id: string | null;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Status Helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
-const STATUS_OPTIONS = [
-  { value: "UNOPENED", label: "გაუხსნელი" },
-  { value: "CHECKED", label: "შემოწმებული" },
+const COLUMNS: { status: ApplicationStatus; label: string; dotClass: string }[] = [
+  { status: "UNOPENED", label: "გაუხსნელი", dotClass: "bg-blue-500" },
+  { status: "CHECKED", label: "შემოწმებული", dotClass: "bg-green-500" },
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Status Selector Component
-// ═══════════════════════════════════════════════════════════════════════════
+const STATUS_BADGES: Record<ApplicationStatus, { label: string; className: string }> = {
+  UNOPENED: {
+    label: "გაუხსნელი",
+    className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  },
+  CHECKED: {
+    label: "შემოწმებული",
+    className: "bg-green-500/10 text-green-500 border-green-500/20",
+  },
+};
 
-function StatusSelector({
-  currentStatus,
-  applicationId,
-  onStatusChange,
-}: {
-  currentStatus: string;
-  applicationId: string;
-  onStatusChange: (id: string, newStatus: string) => void;
-}) {
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [error, setError] = useState("");
+const georgianDateFormatter = new Intl.DateTimeFormat("ka-GE", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
-  const handleChange = useCallback(
-    async (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newStatus = e.target.value;
-      if (newStatus === currentStatus) return;
-
-      setIsUpdating(true);
-      setError("");
-
-      try {
-        await updateApplicationStatus(applicationId, newStatus as any);
-        onStatusChange(applicationId, newStatus);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to update status";
-        setError(message);
-      } finally {
-        setIsUpdating(false);
-      }
-    },
-    [applicationId, currentStatus, onStatusChange]
-  );
-
-  return (
-    <div className="relative">
-      <div className="flex items-center gap-2">
-        <select
-          value={currentStatus}
-          onChange={handleChange}
-          disabled={isUpdating}
-          className={`appearance-none px-2.5 py-1.5 pr-7 text-xs font-medium rounded-lg border transition-all cursor-pointer ${
-            currentStatus === "UNOPENED"
-              ? "bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20"
-              : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
-          } disabled:opacity-50 disabled:cursor-wait`}
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          size={12}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${
-            currentStatus === "UNOPENED" ? "text-blue-500" : "text-green-500"
-          }`}
-        />
-      </div>
-      {isUpdating && <Loader2 size={12} className="animate-spin ml-1 text-[var(--color-fg-tertiary)]" />}
-      {error && (
-        <div className="absolute top-full left-0 mt-1 z-10 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/20 whitespace-nowrap">
-          <AlertCircle size={10} className="text-red-500 shrink-0" />
-          <span className="text-[10px] text-red-600">{error}</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Applications Table Component
-// ═══════════════════════════════════════════════════════════════════════════
-
-function ApplicationsTable({
-  applications,
-  onStatusChange,
-  emptyMessage,
-}: {
-  applications: ApplicationRecord[];
-  onStatusChange: (id: string, newStatus: string) => void;
-  emptyMessage: string;
-}) {
-  if (applications.length === 0) {
-    return (
-      <div className="p-8 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] text-center">
-        <p className="text-[var(--color-fg-tertiary)]">{emptyMessage}</p>
-      </div>
-    );
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  try {
+    return georgianDateFormatter.format(new Date(value));
+  } catch {
+    return "—";
   }
-
-  return (
-    <div className="rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border-primary)]">
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Number</th>
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Name</th>
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Email</th>
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Business</th>
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Status</th>
-              <th className="text-left p-4 font-medium text-[var(--color-fg-tertiary)]">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border-primary)]">
-            {applications.map((app) => (
-              <tr key={app.id} className="hover:bg-[var(--color-overlay)] transition-colors">
-                <td className="p-4 text-[var(--color-fg-primary)] font-medium">
-                  <Link
-                    href={`/admin/campaign/applications/${app.id}`}
-                    className="hover:text-[var(--color-accent)] transition-colors"
-                  >
-                    {app.application_number}
-                  </Link>
-                </td>
-                <td className="p-4 text-[var(--color-fg-primary)]">
-                  <Link
-                    href={`/admin/campaign/applications/${app.id}`}
-                    className="hover:text-[var(--color-accent)] transition-colors"
-                  >
-                    {app.first_name_ka} {app.last_name_ka}
-                  </Link>
-                </td>
-                <td className="p-4 text-[var(--color-fg-tertiary)]">{app.email}</td>
-                <td className="p-4 text-[var(--color-fg-tertiary)]">{app.business_name_ka}</td>
-                <td className="p-4">
-                  <StatusSelector
-                    currentStatus={app.status}
-                    applicationId={app.id}
-                    onStatusChange={onStatusChange}
-                  />
-                </td>
-                <td className="p-4 text-[var(--color-fg-tertiary)]">
-                  {new Date(app.submitted_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Page Component
+// Page
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function CampaignApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  // Fetch applications
-  const fetchApplications = useCallback(async () => {
-    setIsLoading(true);
-    setError("");
 
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<ApplicationStatus | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ApplicationRecord | null>(null);
+
+  const loadApplications = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/campaign/applications");
       if (!response.ok) throw new Error("Failed to fetch applications");
       const data = await response.json();
       setApplications(data.applications || []);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load applications";
-      setError(message);
+    } catch {
+      setError("განაცხადების ჩატვირთვა ვერ მოხერხდა.");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  // Initial load — the await runs before any setState, so no synchronous
+  // state update happens inside the effect itself.
   useEffect(() => {
-    fetchApplications();
-  }, [fetchApplications]);
+    let active = true;
+    (async () => {
+      try {
+        const response = await fetch("/api/admin/campaign/applications");
+        if (!active) return;
+        if (!response.ok) throw new Error("Failed to fetch applications");
+        const data = await response.json();
+        if (active) setApplications(data.applications || []);
+      } catch {
+        if (active) setError("განაცხადების ჩატვირთვა ვერ მოხერხდა.");
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  // Handle status change
-  const handleStatusChange = useCallback(
-    (id: string, newStatus: string) => {
-      setApplications((prev) =>
-        prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-      );
+  const handleRetry = () => {
+    setIsLoading(true);
+    setError("");
+    void loadApplications();
+  };
+
+  const byStatus = useMemo(() => {
+    const map: Record<ApplicationStatus, ApplicationRecord[]> = {
+      UNOPENED: [],
+      CHECKED: [],
+    };
+    for (const app of applications) {
+      if (app.status === "UNOPENED" || app.status === "CHECKED") {
+        map[app.status].push(app);
+      } else {
+        // Defensive: unknown statuses land in "unopened" for review.
+        map.UNOPENED.push(app);
+      }
+    }
+    return map;
+  }, [applications]);
+
+  const total = applications.length;
+
+  const moveApplication = useCallback(
+    async (id: string, newStatus: ApplicationStatus) => {
+      const item = applications.find((a) => a.id === id);
+      if (!item || item.status === newStatus) return;
+
+      const updated = { ...item, status: newStatus };
+      setMovingId(id);
+      // Optimistic move — the DB is the source of truth via the server action.
+      setApplications((prev) => prev.map((a) => (a.id === id ? updated : a)));
+
+      try {
+        await updateApplicationStatus(id, newStatus);
+        toast.success(
+          newStatus === "CHECKED"
+            ? "გადატანილია შემოწმებულში."
+            : "გადატანილია გაუხსნელში."
+        );
+      } catch (err) {
+        // Revert on failure.
+        setApplications((prev) => prev.map((a) => (a.id === id ? item : a)));
+        const message = err instanceof Error ? err.message : "";
+        toast.error(message || "სტატუსის განახლება ვერ მოხერხდა.");
+      } finally {
+        setMovingId(null);
+      }
     },
-    []
+    [applications]
   );
 
-  // Separate unopened and checked
-  const unopened = applications.filter((app) => app.status === "UNOPENED");
-  const checked = applications.filter((app) => app.status === "CHECKED");
+  const handleDrop = (status: ApplicationStatus) => {
+    if (dragId) {
+      moveApplication(dragId, status);
+    }
+    setDragId(null);
+    setDropTarget(null);
+  };
+
+  const handleDelete = async (item: ApplicationRecord) => {
+    setDeleteTarget(null);
+    // Optimistic removal.
+    setApplications((prev) => prev.filter((a) => a.id !== item.id));
+    try {
+      await deleteCampaignApplication(item.id);
+      toast.success("განაცხადი წაიშალა.");
+    } catch (err) {
+      // Revert on failure.
+      setApplications((prev) => [item, ...prev]);
+      const message = err instanceof Error ? err.message : "";
+      toast.error(message || "წაშლა ვერ მოხერხდა.");
+    }
+  };
+
+  const renderColumn = (status: ApplicationStatus) => {
+    const column = COLUMNS.find((c) => c.status === status)!;
+    const items = byStatus[status];
+    const isDropTarget = dropTarget === status;
+
+    return (
+      <div
+        role="list"
+        aria-label={column.label}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          setDropTarget(status);
+        }}
+        onDragLeave={() => setDropTarget((prev) => (prev === status ? null : prev))}
+        onDrop={(e) => {
+          e.preventDefault();
+          handleDrop(status);
+        }}
+        className={cn(
+          "flex-1 min-w-0 rounded-2xl border transition-all duration-200",
+          isDropTarget
+            ? "border-[var(--color-accent)]/50 bg-[var(--color-accent)]/5"
+            : "border-[var(--color-border-primary)] bg-[var(--color-bg-surface)]"
+        )}
+      >
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border-primary)]">
+          <span className={cn("w-2 h-2 rounded-full", column.dotClass)} />
+          <h2 className="text-sm font-semibold text-[var(--color-fg-primary)]">{column.label}</h2>
+          <span className="ml-auto text-xs text-[var(--color-fg-tertiary)]/60">{items.length}</span>
+        </div>
+
+        <div className="p-3 space-y-3 min-h-[160px]">
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <Inbox size={24} className="text-[var(--color-fg-tertiary)]/25 mb-2" />
+              <p className="text-xs text-[var(--color-fg-tertiary)]/50">
+                {status === "UNOPENED" ? "გაუხსნელი განაცხადები არ არის" : "შემოწმებული განაცხადები არ არის"}
+              </p>
+            </div>
+          ) : (
+            items.map((item) => {
+              const isDragging = dragId === item.id;
+              const isMoving = movingId === item.id;
+              const name = item.first_name_ka || item.first_name_en || "—";
+              const lastName = item.last_name_ka || item.last_name_en || "";
+              const business = item.business_name_ka || item.business_name_en || null;
+              const badge = STATUS_BADGES[item.status];
+
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  layoutId={`app-${item.id}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.18 }}
+                  role="listitem"
+                >
+                  <div
+                    draggable
+                    onDragStart={(e) => {
+                      setDragId(item.id);
+                      e.dataTransfer.effectAllowed = "move";
+                      try {
+                        e.dataTransfer.setData("text/plain", item.id);
+                      } catch {
+                        // fallback not needed
+                      }
+                    }}
+                    onDragEnd={() => {
+                      setDragId(null);
+                      setDropTarget(null);
+                    }}
+                    className={cn(
+                      "rounded-xl border bg-[var(--color-bg-primary)] p-4 transition-all duration-200 select-none",
+                      isDragging
+                        ? "border-[var(--color-accent)]/50 shadow-lg opacity-60"
+                        : "border-[var(--color-border-primary)] hover:border-[var(--color-fg-tertiary)]/25"
+                    )}
+                  >
+                    <div className="flex items-start gap-2">
+                      <GripVertical
+                        size={16}
+                        className="mt-0.5 shrink-0 text-[var(--color-fg-tertiary)]/30 cursor-grab"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link
+                            href={`/admin/campaign/applications/${item.id}`}
+                            className="text-sm font-semibold text-[var(--color-fg-primary)] truncate hover:text-[var(--color-accent)] transition-colors"
+                          >
+                            {item.application_number}
+                          </Link>
+                          {isMoving && (
+                            <Loader2 size={12} className="animate-spin text-[var(--color-fg-tertiary)]/50" />
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-[var(--color-fg-secondary)] truncate">
+                          {name} {lastName}
+                        </p>
+                        <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border",
+                              badge.className
+                            )}
+                          >
+                            {badge.label}
+                          </span>
+                        </div>
+                        <div className="mt-2.5 space-y-1 text-[11px] text-[var(--color-fg-tertiary)]/70">
+                          {item.email && (
+                            <div className="flex items-center gap-1.5 truncate">
+                              <Mail size={11} className="shrink-0" />
+                              <span className="truncate">{item.email}</span>
+                            </div>
+                          )}
+                          {business && (
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="shrink-0 font-medium">ბიზნესი:</span>
+                              <span className="truncate">{business}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5">
+                            <CalendarDays size={11} />
+                            <span>გაგზავნილი: {formatDate(item.submitted_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-[var(--color-border-primary)] flex items-center gap-1">
+                      <Link
+                        href={`/admin/campaign/applications/${item.id}`}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)] transition-colors"
+                      >
+                        <ExternalLink size={12} />
+                        ვრცლად
+                      </Link>
+                      <div className="ml-auto flex items-center gap-1">
+                        <button
+                          onClick={() => moveApplication(item.id, item.status === "CHECKED" ? "UNOPENED" : "CHECKED")}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)] transition-colors cursor-pointer"
+                          aria-label={
+                            item.status === "CHECKED" ? "გადატანა გაუხსნელში" : "გადატანა შემოწმებულში"
+                          }
+                        >
+                          <ChevronRight size={12} className={cn("transition-transform", item.status === "CHECKED" && "rotate-180")} />
+                          {item.status === "CHECKED" ? "გაუხსნელი" : "შემოწმებული"}
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(item)}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-red-500/70 hover:text-red-500 hover:bg-red-500/5 transition-colors cursor-pointer"
+                          aria-label={`წაშალე განაცხადი ${item.application_number}`}
+                        >
+                          <Trash2 size={12} />
+                          წაშლა
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center gap-3">
           <Loader2 size={20} className="animate-spin text-[var(--color-fg-tertiary)]" />
-          <p className="text-sm text-[var(--color-fg-tertiary)]">Loading applications...</p>
+          <p className="text-sm text-[var(--color-fg-tertiary)]">განაცხადები იტვირთება...</p>
         </div>
       </div>
     );
@@ -242,76 +388,69 @@ export default function CampaignApplicationsPage() {
       <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/20 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <AlertCircle size={18} className="text-red-500" />
-          <p className="text-sm font-medium text-red-600">Failed to load applications</p>
+          <p className="text-sm font-medium text-red-600">განაცხადების ჩატვირთვა ვერ მოხერხდა</p>
         </div>
         <p className="text-xs text-red-500/80 mb-4">{error}</p>
         <button
-          onClick={fetchApplications}
-          className="px-4 py-2 text-xs font-medium rounded-lg bg-red-500/10 text-red-600 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+          onClick={handleRetry}
+          className="px-4 py-2 text-xs font-medium rounded-lg bg-red-500/10 text-red-600 border border-red-500/20 hover:bg-red-500/20 transition-colors cursor-pointer"
         >
-          Try Again
+          ხელახლა ცდა
         </button>
       </div>
     );
   }
 
   return (
+    <MotionConfig reducedMotion="user">
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <Link
           href="/admin/campaign"
           className="p-2 rounded-lg hover:bg-[var(--color-overlay)] transition-colors"
+          aria-label="უკან კამპანიაზე"
         >
           <ArrowLeft size={18} className="text-[var(--color-fg-tertiary)]" />
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
-            Applications
+            განაცხადები
           </h1>
           <p className="mt-1 text-sm text-[var(--color-fg-tertiary)]">
-            {applications.length} total applications — {unopened.length} unopened, {checked.length} checked
+            მართეთ მეწარმეთა მხარდაჭერის კამპანიის განაცხადები — გადაიტანეთ ბარათები სტატუსებს შორის.
           </p>
         </div>
-      </div>
-
-      {/* ── Unopened Applications Section ── */}
-      <div className="mb-12">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full bg-blue-500" />
-          <h2 className="text-lg font-semibold text-[var(--color-fg-primary)]">
-            განაცხადები — Applications
-          </h2>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500">
-            {unopened.length}
-          </span>
+        <div className="text-xs text-[var(--color-fg-tertiary)] bg-[var(--color-overlay)] px-3 py-1.5 rounded-full whitespace-nowrap">
+          {total} სულ
         </div>
-
-        <ApplicationsTable
-          applications={unopened}
-          onStatusChange={handleStatusChange}
-          emptyMessage="ყველა განაცხადი შემოწმებულია — No unopened applications."
-        />
       </div>
 
-      {/* ── Checked Applications Section ── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <CheckCircle2 size={16} className="text-green-500" />
-          <h2 className="text-lg font-semibold text-[var(--color-fg-primary)]">
-            შემოწმებული განაცხადები — Checked Applications
-          </h2>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
-            {checked.length}
-          </span>
-        </div>
-
-        <ApplicationsTable
-          applications={checked}
-          onStatusChange={handleStatusChange}
-          emptyMessage="No checked applications yet. Change status from the main applications list."
-        />
+      {/* Drag & drop hint */}
+      <div className="flex items-center gap-2 text-xs text-[var(--color-fg-tertiary)]/60 mb-4">
+        <GripVertical size={14} />
+        <span>გადაიტანეთ ბარათები გაუხსნელსა და შემოწმებულს შორის</span>
       </div>
+
+      {/* Columns */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        {COLUMNS.map((c) => (
+          <Fragment key={c.status}>{renderColumn(c.status)}</Fragment>
+        ))}
+      </div>
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="განაცხადის წაშლა"
+        message="ნამდვილად გსურთ ამ ჩანაწერის წაშლა?"
+        detail={deleteTarget ? `${deleteTarget.application_number} — ${deleteTarget.first_name_ka || ""} ${deleteTarget.last_name_ka || ""}`.trim() : undefined}
+        confirmLabel="წაშლა"
+        cancelLabel="გაუქმება"
+        onConfirm={() => (deleteTarget ? handleDelete(deleteTarget) : undefined)}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
+    </MotionConfig>
   );
 }

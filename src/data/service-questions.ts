@@ -25,7 +25,7 @@ export interface ServiceQuestions {
   questions: QuestionField[];
 }
 
-// ── Landing Starter (₾199) ──
+// ── Landing Starter (₾300) ──
 
 const landingStarterQuestions: QuestionField[] = [
   {
@@ -79,7 +79,7 @@ const landingStarterQuestions: QuestionField[] = [
   },
 ];
 
-// ── One Page Website (₾300) ──
+// ── One Page Website (₾500) ──
 
 const onePageQuestions: QuestionField[] = [
   {
@@ -181,7 +181,7 @@ const onePageQuestions: QuestionField[] = [
   },
 ];
 
-// ── Business Website (₾799) ──
+// ── Business Website (₾999) ──
 
 const businessQuestions: QuestionField[] = [
   {
@@ -253,7 +253,7 @@ const businessQuestions: QuestionField[] = [
   },
 ];
 
-// ── Online Store (₾999) ──
+// ── Online Store (₾1199) ──
 
 const onlineStoreQuestions: QuestionField[] = [
   {

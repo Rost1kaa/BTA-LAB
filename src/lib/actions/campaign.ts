@@ -3,11 +3,13 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { verifyTokenIntegrity } from "@/lib/email/otp-utils";
+import { requireAdminMutation } from "@/lib/auth/admin";
 import type { CampaignApplicationStatus, CampaignApplication } from "@/lib/campaign-types";
 
 // Helper to bypass strict typing for campaign tables not recognized by supabase-js types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function db(supabase: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { from: (t: string) => (supabase as any).from(t) };
 }
 
@@ -175,6 +177,9 @@ export async function updateApplicationStatus(
   notes?: string,
   isPublic?: boolean
 ) {
+  const admin = await requireAdminMutation("campaign:update-status");
+  if (!admin) throw new Error("წვდომა აკრძალულია.");
+
   if (newStatus !== 'UNOPENED' && newStatus !== 'CHECKED') {
     throw new Error(`Invalid status: ${newStatus}. Allowed values: UNOPENED, CHECKED`);
   }
@@ -199,7 +204,7 @@ export async function updateApplicationStatus(
 
   if (updateError) {
     console.error("[campaign] updateApplicationStatus error:", updateError);
-    throw new Error(`Failed to update status: ${updateError.message}`);
+    throw new Error("სტატუსის განახლება ვერ მოხერხდა.");
   }
 
   const { error: historyError } = await db(supabase)
@@ -214,7 +219,7 @@ export async function updateApplicationStatus(
 
   if (historyError) {
     console.error("[campaign] status history error:", historyError);
-    throw new Error(`Failed to record status history: ${historyError.message}`);
+    throw new Error("სტატუსის ისტორიის შენახვა ვერ მოხერხდა.");
   }
 
   revalidatePath("/admin/campaign", "layout");
@@ -224,6 +229,9 @@ export async function updateApplicationStatus(
 // ── Admin: Delete Application ─────────────────────────────────────────────
 
 export async function deleteCampaignApplication(applicationId: string) {
+  const admin = await requireAdminMutation("campaign:delete");
+  if (!admin) throw new Error("წვდომა აკრძალულია.");
+
   const supabase = createServiceRoleClient();
   const { error } = await db(supabase)
     .from("campaign_applications")
@@ -232,7 +240,7 @@ export async function deleteCampaignApplication(applicationId: string) {
 
   if (error) {
     console.error("[campaign] deleteCampaignApplication error:", error);
-    throw new Error(`Failed to delete application: ${error.message}`);
+    throw new Error("განაცხადის წაშლა ვერ მოხერხდა.");
   }
   revalidatePath("/admin/campaign", "layout");
 }

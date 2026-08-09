@@ -423,6 +423,37 @@ export type Database = {
         subject: string; body: string;
         sent_at: string; delivered: boolean; error: string;
       }, { id?: string; event: string; recipient_email: string }>;
+
+      // ── Questionnaire (One-Time Invitation) ───────────────────────
+
+      questionnaire_invitations: Table<
+        {
+          id: string;
+          full_name: string;
+          token: string;
+          answers: Json;
+          draft_answers: Json;
+          status: "pending" | "submitted";
+          submitted_at: string | null;
+          is_viewed: boolean;
+          viewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        },
+        {
+          id?: string;
+          full_name: string;
+          token: string;
+          answers?: Json;
+          draft_answers?: Json;
+          status?: "pending" | "submitted";
+          submitted_at?: string | null;
+          is_viewed?: boolean;
+          viewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        }
+      >;
     };
     Views: Record<string, never>;
     Functions: {
@@ -487,6 +518,8 @@ export type ServiceRequest = {
 export type ContactStatus = "new" | "read" | "in_progress" | "closed" | "spam";
 export type ServiceRequestStatus = "new" | "contacted" | "in_progress" | "completed" | "cancelled";
 export type ServiceRequestType = "website_creation" | "social_media" | "advertising" | "seo_services";
+export type QuestionnaireInvitation = Database["public"]["Tables"]["questionnaire_invitations"]["Row"];
+export type QuestionnaireInvitationStatus = "pending" | "submitted";
 
 export interface PortfolioProject {
   id: string;

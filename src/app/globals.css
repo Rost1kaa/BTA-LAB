@@ -423,6 +423,247 @@
   }
 }
 
+/* Questionnaire entrance — the background fades in while the card rises
+   gently into place. Durations stay inside the 400-700ms sweet spot and
+   the global prefers-reduced-motion rule collapses them to ~0ms.
+
+   The card entrance is delayed (via --questionnaire-card-entrance-delay)
+   so it rises exactly as the BTA LAB intro overlay starts to fade out. The
+   card is hidden behind the opaque overlay until then, so the delay is
+   invisible and the reveal feels like one continuous transition. */
+@keyframes questionnaire-bg-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes questionnaire-card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.questionnaire-bg-in {
+  animation: questionnaire-bg-in 0.7s ease-out both;
+}
+
+/* Shared intro timing — the card entrance delay is derived from the intro
+   fade-out delay so the two can never desync. The card starts rising
+   slightly before the overlay begins to fade, then settles as it reveals. */
+:root {
+  --questionnaire-intro-out-delay: 1.2s;
+  --questionnaire-card-entrance-delay: calc(var(--questionnaire-intro-out-delay) - 0.35s);
+}
+
+.questionnaire-card-in {
+  animation: questionnaire-card-in 0.55s cubic-bezier(0.25, 0.1, 0.25, 1) var(--questionnaire-card-entrance-delay) both;
+}
+
+/* BTA LAB branded intro — fullscreen opening shown when a questionnaire
+   link is opened. Pure CSS so it can never block the questionnaire:
+
+     • fixed timeline (~1.65s total), entirely keyframe-driven
+     • ends at opacity 0 + visibility hidden (forwards fill) — the overlay
+       removes itself even if JavaScript fails
+     • transform/opacity only (one tiny blur on the words), GPU-friendly
+     • prefers-reduced-motion below skips it entirely
+
+   Timeline: 0ms background fade · 200ms ბითიეი · 400ms ლაბი · 800ms
+   settle · 1200ms fade out · ~1650ms questionnaire revealed. */
+
+@keyframes questionnaire-intro-bg-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes questionnaire-intro-word-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes questionnaire-intro-line-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes questionnaire-intro-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes questionnaire-intro-settle {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+@keyframes questionnaire-intro-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    visibility: visible;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0) scale(1.02);
+    visibility: hidden;
+  }
+}
+
+.questionnaire-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  animation:
+    questionnaire-intro-bg-in 0.4s ease-out both,
+    questionnaire-intro-out 0.45s cubic-bezier(0.4, 0, 0.2, 1) var(--questionnaire-intro-out-delay) forwards;
+}
+
+.questionnaire-intro-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(var(--color-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 72%);
+  animation: questionnaire-intro-bg-in 0.5s ease-out 0.05s both;
+}
+
+.questionnaire-intro-orb {
+  position: absolute;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  filter: blur(48px);
+  animation: questionnaire-intro-bg-in 0.6s ease-out 0.1s both;
+}
+
+.questionnaire-intro-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  will-change: transform, opacity;
+  animation:
+    questionnaire-intro-settle 0.55s ease-in-out 0.75s both,
+    questionnaire-intro-out 0.45s cubic-bezier(0.4, 0, 0.2, 1) var(--questionnaire-intro-out-delay) forwards;
+}
+
+.questionnaire-intro-word {
+  font-family: var(--font-bpg-nino-mtavruli), var(--font-space-grotesk), system-ui, sans-serif;
+  color: var(--color-fg-primary);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  font-size: clamp(2.75rem, 9vw, 4.5rem);
+  letter-spacing: -0.01em;
+  will-change: transform, opacity, filter;
+  animation: questionnaire-intro-word-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.questionnaire-intro-word-1 {
+  animation-delay: 0.2s;
+}
+
+.questionnaire-intro-word-2 {
+  animation-delay: 0.4s;
+}
+
+.questionnaire-intro-line {
+  width: 3.5rem;
+  height: 1px;
+  background: var(--color-fg-tertiary);
+  opacity: 0.35;
+  transform: scaleX(0);
+  will-change: transform, opacity;
+  animation: questionnaire-intro-line-in 0.45s cubic-bezier(0.25, 0.1, 0.25, 1) 0.55s both;
+}
+
+.questionnaire-intro-tagline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 0.5rem;
+  will-change: transform, opacity;
+  animation: questionnaire-intro-fade-up 0.45s ease-out 0.7s both;
+}
+
+.questionnaire-intro-tick {
+  width: 1.25rem;
+  height: 1px;
+  background: var(--color-fg-tertiary);
+  opacity: 0.4;
+  transform: scaleX(0);
+  animation: questionnaire-intro-line-in 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) 0.75s both;
+}
+
+.questionnaire-intro-tagline {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-fg-tertiary);
+  white-space: nowrap;
+}
+
+/* Reduced motion: skip the intro entirely (instant hide) and drop the card
+   entrance delay so the questionnaire is usable immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .questionnaire-intro {
+    animation: none !important;
+    visibility: hidden !important;
+  }
+
+  .questionnaire-card-in {
+    animation-delay: 0s;
+  }
+}
+
 @utility animate-float {
   animation: float 6s ease-in-out infinite;
 }

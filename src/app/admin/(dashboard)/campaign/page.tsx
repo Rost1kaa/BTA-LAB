@@ -20,16 +20,16 @@ export default async function CampaignAdminPage() {
   const stats = await getCampaignStats();
 
   const menuItems = [
-    { label: "Landing Page CMS", href: "/admin/campaign/cms", icon: FileText, description: "Edit campaign landing page content" },
-    { label: "Applications", href: "/admin/campaign/applications", icon: Users, description: `Manage ${stats.totalApplications} applications` },
-    { label: "SEO", href: "/admin/campaign/seo", icon: Search, description: "Campaign SEO settings" },
-    { label: "Email Templates", href: "/admin/campaign/emails", icon: Mail, description: "Automated email templates" },
-    { label: "Settings", href: "/admin/campaign/settings", icon: SettingsIcon, description: "Campaign configuration" },
+    { label: "მთავარი გვერდის CMS", href: "/admin/campaign/cms", icon: FileText, description: "კამპანიის მთავარი გვერდის კონტენტის რედაქტირება" },
+    { label: "განაცხადები", href: "/admin/campaign/applications", icon: Users, description: `${stats.totalApplications} განაცხადის მართვა` },
+    { label: "SEO", href: "/admin/campaign/seo", icon: Search, description: "კამპანიის SEO პარამეტრები" },
+    { label: "ელფოსტის შაბლონები", href: "/admin/campaign/emails", icon: Mail, description: "ავტომატური ელფოსტის შაბლონები" },
+    { label: "პარამეტრები", href: "/admin/campaign/settings", icon: SettingsIcon, description: "კამპანიის კონფიგურაცია" },
   ];
 
   const detailItems = [
-    { label: "დეტალების რედაქტირება", href: "/admin/campaign/details", icon: Edit, description: "Edit full text content, title, and detailed terms for /entrepreneur-support/details" },
-    { label: "კამპანიის ეტაპები", href: "/admin/campaign/steps", icon: Layers, description: "Change the active campaign progress step (1-4) to control the green progress bar on the landing page" },
+    { label: "დეტალების რედაქტირება", href: "/admin/campaign/details", icon: Edit, description: "სრული ტექსტის, სათაურისა და დეტალური პირობების რედაქტირება /entrepreneur-support/details გვერდისთვის" },
+    { label: "კამპანიის ეტაპები", href: "/admin/campaign/steps", icon: Layers, description: "აქტიური კამპანიის ეტაპის (1-4) შეცვლა მთავარ გვერდზე მწვანე პროგრესის ზოლის სამართავად" },
   ];
 
   return (
@@ -39,11 +39,11 @@ export default async function CampaignAdminPage() {
           <div className="flex items-center gap-3">
             <Megaphone size={24} className="text-[var(--color-fg-primary)]" />
             <h1 className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
-              Campaign Management
+              კამპანიის მართვა
             </h1>
           </div>
           <p className="mt-1 text-sm text-[var(--color-fg-tertiary)]">
-            Entrepreneur Support Campaign — manage applications and content
+            მეწარმეთა მხარდაჭერის კამპანია — განაცხადებისა და კონტენტის მართვა
           </p>
         </div>
       </div>
@@ -52,11 +52,11 @@ export default async function CampaignAdminPage() {
       <div className="grid grid-cols-2 gap-4 mb-8 max-w-sm">
         <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
           <p className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">{stats.totalApplications}</p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Applications</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">განაცხადები</p>
         </div>
         <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
           <p className="text-2xl font-bold tracking-tight text-amber-500">{stats.pendingReview}</p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Pending Review</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">განხილვამდე</p>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default async function CampaignAdminPage() {
       {/* Content Management Section */}
       <div className="mt-10 mb-4">
         <h2 className="text-sm font-semibold text-[var(--color-fg-secondary)] uppercase tracking-wider">
-          Content Management
+          კონტენტის მართვა
         </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

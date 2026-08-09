@@ -20,21 +20,22 @@ import {
   ClipboardList,
   Scale,
   Megaphone,
-  GanttChartSquare,
+  ListChecks,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Campaign", href: "/admin/campaign", icon: Megaphone },
-  { label: "Content", href: "/admin/content", icon: FileText },
-  { label: "Portfolio", href: "/admin/portfolio", icon: FolderKanban },
-  { label: "Team", href: "/admin/team", icon: Users },
-  { label: "Services", href: "/admin/services", icon: Package },
-  { label: "Messages", href: "/admin/messages", icon: MessageSquare },
-  { label: "Service Requests", href: "/admin/service-requests", icon: ClipboardList },
-  { label: "Feature Tooltips", href: "/admin/feature-tooltips", icon: FileText },
+  { label: "მთავარი", href: "/admin", icon: LayoutDashboard },
+  { label: "კამპანია", href: "/admin/campaign", icon: Megaphone },
+  { label: "კონტენტი", href: "/admin/content", icon: FileText },
+  { label: "პორტფოლიო", href: "/admin/portfolio", icon: FolderKanban },
+  { label: "გუნდი", href: "/admin/team", icon: Users },
+  { label: "სერვისები", href: "/admin/services", icon: Package },
+  { label: "შეტყობინებები", href: "/admin/messages", icon: MessageSquare },
+  { label: "მომსახურების მოთხოვნები", href: "/admin/service-requests", icon: ClipboardList },
+  { label: "კითხვარი", href: "/admin/questionnaires", icon: ListChecks },
+  { label: "ინსტრუმენტების წარწერები", href: "/admin/feature-tooltips", icon: FileText },
   { label: "იურიდიული", href: "/admin/legal", icon: Scale },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { label: "პარამეტრები", href: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -109,15 +110,14 @@ export function AdminSidebar() {
         </nav>
 
         {/* Bottom actions */}
-        <div className="border-t border-[var(--color-border-primary)] p-3 space-y-1">
-          <a
+        <div className="border-t border-[var(--color-border-primary)] p-3 space-y-1">            <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-[var(--color-fg-tertiary)] hover:text-[var(--color-fg-primary)] hover:bg-[var(--color-overlay)] rounded-xl transition-all duration-200"
           >
             <ExternalLink size={18} className="shrink-0" />
-            View Website
+            ვებსაიტის ნახვა
           </a>
           <form action={logout}>
             <button
@@ -125,7 +125,7 @@ export function AdminSidebar() {
               className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-500/80 hover:text-red-500 hover:bg-red-500/5 rounded-xl transition-all duration-200"
             >
               <LogOut size={18} className="shrink-0" />
-              Log Out
+              გამოსვლა
             </button>
           </form>
         </div>

@@ -463,7 +463,9 @@ export function Navigation({ siteConfig }: NavigationProps) {
   }, []);
 
   useEffect(() => {
-    if (mobileOpen) {
+    // On admin routes the component returns null (admin owns its own chrome),
+    // so never leave the public mobile menu's scroll-lock behind there.
+    if (mobileOpen && !pathname.startsWith("/admin")) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -471,9 +473,15 @@ export function Navigation({ siteConfig }: NavigationProps) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, pathname]);
 
   const closeMobile = () => setMobileOpen(false);
+
+  // The public site header must never render inside the admin dashboard —
+  // the admin layout provides its own fixed/sticky header and sidebar.
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <>

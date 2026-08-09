@@ -987,7 +987,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Landing Starter",
-    price: "199",
+    price: "300",
     billing_label: "One-time",
     description: null,
     ideal_for: "For small businesses, new services, or showcasing a specific offer.",
@@ -999,7 +999,7 @@ const servicePackages: ServicePackageSeed[] = [
       "Contact button",
       "Responsive design",
       "Basic SEO optimization",
-      "7-day technical support",
+      "30-day technical support",
     ],
     delivery_time: "1–3 business days",
     cta: "Choose Package",
@@ -1013,7 +1013,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "One Page Website",
-    price: "300",
+    price: "500",
     billing_label: "One-time",
     description: null,
     ideal_for:
@@ -1031,7 +1031,7 @@ const servicePackages: ServicePackageSeed[] = [
       "Social media links",
       "Responsive design",
       "Basic SEO optimization",
-      "7-day technical support",
+      "30-day technical support",
     ],
     delivery_time: "2–5 business days",
     cta: "Choose Package",
@@ -1045,7 +1045,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Business Website",
-    price: "799",
+    price: "999",
     billing_label: "One-time",
     description: null,
     ideal_for: "For companies and growing businesses.",
@@ -1059,7 +1059,7 @@ const servicePackages: ServicePackageSeed[] = [
       "Google Maps integration",
       "Google Analytics setup",
       "API integrations",
-      "14-day technical support",
+      "30-day technical support",
     ],
     delivery_time: "5–10 business days",
     cta: "Choose Package",
@@ -1073,7 +1073,7 @@ const servicePackages: ServicePackageSeed[] = [
   {
     section: "website",
     name: "Online Store",
-    price: "999",
+    price: "1199",
     billing_label: "One-time",
     description: null,
     ideal_for: "For online stores and product-selling businesses.",

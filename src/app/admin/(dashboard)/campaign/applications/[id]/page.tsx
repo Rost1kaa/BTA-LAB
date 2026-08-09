@@ -141,7 +141,7 @@ function OptionList({ title, options, selected }: { title: string; options: stri
         ))}
       </div>
       {!hasSelection && (
-        <p className="text-xs text-[var(--color-fg-tertiary)] italic">No options selected</p>
+        <p className="text-xs text-[var(--color-fg-tertiary)] italic">არჩეული ვარიანტი არ არის</p>
       )}
     </div>
   );
@@ -166,9 +166,9 @@ export default async function ApplicationDetailPage({
   if (!raw) {
     return (
       <div className="p-8 text-center">
-        <p className="text-[var(--color-fg-tertiary)]">Application not found.</p>
+        <p className="text-[var(--color-fg-tertiary)]">განაცხადი ვერ მოიძებნა.</p>
         <Link href="/admin/campaign/applications" className="text-sm text-[var(--color-accent)] hover:underline mt-4 inline-block">
-          ← Back to Applications
+          ← უკან განაცხადებზე
         </Link>
       </div>
     );
@@ -197,95 +197,95 @@ export default async function ApplicationDetailPage({
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-xl font-bold tracking-tight text-[var(--color-fg-primary)]">
-              Application #{app.application_number || id.slice(0, 8)}
+              განაცხადი #{app.application_number || id.slice(0, 8)}
             </h1>
             <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusColors[app.status] || "bg-gray-500/10 text-gray-500"}`}>
               {statusLabels[app.status] || app.status}
             </span>
           </div>
           <p className="text-sm text-[var(--color-fg-tertiary)]">
-            Submitted {new Date(app.submitted_at).toLocaleDateString("ka-GE", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+            გაგზავნილია {new Date(app.submitted_at).toLocaleDateString("ka-GE", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
       </div>
 
       {/* ── Applicant Information (Stage 1) ── */}
-      <SectionCard title="განმცხადებლის ინფორმაცია — Applicant Information">
-        <Field label="Application Number" value={app.application_number} />
-        <Field label="First Name / სახელი" value={app.first_name_ka || f.firstName} />
-        <Field label="Last Name / გვარი" value={app.last_name_ka || f.lastName} />
-        <Field label="Email / ელფოსტა" value={app.email || f.email} />
-        <Field label="Phone / ტელეფონი" value={app.phone || f.phone} />
-        <Field label="Personal ID / პირადი ნომერი" value={f.personalId} />
-        <Field label="City / ქალაქი" value={f.city} />
-        <Field label="Communication Channel" value={f.communicationChannel} />
-        <Field label="Responsible Person" value={f.responsiblePerson} />
-        <Field label="Age Confirmed (18+)" value={f.ageConfirmed} />
+      <SectionCard title="განმცხადებლის ინფორმაცია">
+        <Field label="განაცხადის ნომერი" value={app.application_number} />
+        <Field label="სახელი" value={app.first_name_ka || f.firstName} />
+        <Field label="გვარი" value={app.last_name_ka || f.lastName} />
+        <Field label="ელფოსტა" value={app.email || f.email} />
+        <Field label="ტელეფონი" value={app.phone || f.phone} />
+        <Field label="პირადი ნომერი" value={f.personalId} />
+        <Field label="ქალაქი" value={f.city} />
+        <Field label="კომუნიკაციის არხი" value={f.communicationChannel} />
+        <Field label="პასუხისმგებელი პირი" value={f.responsiblePerson} />
+        <Field label="ასაკი დადასტურებულია (18+)" value={f.ageConfirmed} />
       </SectionCard>
 
       {/* ── Business / Legal Status (Stage 2) ── */}
-      <SectionCard title="სამართლებრივი სტატუსი — Legal Status">
-        <Field label="Legal Status / სტატუსი" value={f.legalStatus} />
-        <Field label="Business Name / დასახელება" value={app.business_name_ka || f.businessName} />
-        <Field label="Identification Number" value={f.identificationNumber} />
-        <Field label="Registration Date" value={f.registrationDate} />
-        <Field label="Activity Field / სფერო" value={f.activityField} />
-        <Field label="Business Address / მისამართი" value={f.businessAddress} />
-        <Field label="Existing Website" value={f.existingWebsite} />
+      <SectionCard title="სამართლებრივი სტატუსი">
+        <Field label="სამართლებრივი სტატუსი" value={f.legalStatus} />
+        <Field label="ბიზნესის დასახელება" value={app.business_name_ka || f.businessName} />
+        <Field label="საიდენტიფიკაციო ნომერი" value={f.identificationNumber} />
+        <Field label="რეგისტრაციის თარიღი" value={f.registrationDate} />
+        <Field label="საქმიანობის სფერო" value={f.activityField} />
+        <Field label="ბიზნესის მისამართი" value={f.businessAddress} />
+        <Field label="არსებული ვებსაიტი" value={f.existingWebsite} />
         <Field label="Facebook" value={f.socialFacebook} />
         <Field label="Instagram" value={f.socialInstagram} />
         <Field label="LinkedIn" value={f.socialLinkedin} />
-        <Field label="Other Social Channel" value={f.socialOther} />
-        <Field label="Legal Status Confirmed" value={f.legalStatusConfirmed} />
+        <Field label="სხვა სოციალური არხი" value={f.socialOther} />
+        <Field label="სამართლებრივი სტატუსი დადასტურებულია" value={f.legalStatusConfirmed} />
       </SectionCard>
 
       {/* ── Business Description (Stage 3) ── */}
-      <SectionCard title="ბიზნესის აღწერა — Business Description">
+      <SectionCard title="ბიზნესის აღწერა">
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Short Summary / მოკლე აღწერა" value={f.shortSummary} />
+          <Field label="მოკლე აღწერა" value={f.shortSummary} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Full Description / სრული აღწერა" value={f.fullDescription} />
+          <Field label="სრული აღწერა" value={f.fullDescription} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Product / Service" value={f.productService} />
+          <Field label="პროდუქტი / მომსახურება" value={f.productService} />
         </div>
-        <Field label="Target Customer" value={f.targetCustomer} />
-        <Field label="Years Operating" value={f.yearsOperating} />
-        <Field label="Customer Acquisition" value={f.currentAcquisition} />
-        <Field label="Has Sales / გაყიდვები" value={f.hasSales} />
-        <Field label="Team Size" value={f.teamSize} />
-        <Field label="Creates Jobs" value={f.createsJobs} />
-        <Field label="Region / Market" value={f.region} />
+        <Field label="სამიზნე მომხმარებელი" value={f.targetCustomer} />
+        <Field label="მუშაობის წლები" value={f.yearsOperating} />
+        <Field label="მომხმარებლების მოზიდვა" value={f.currentAcquisition} />
+        <Field label="აქვს გაყიდვები" value={f.hasSales} />
+        <Field label="გუნდის ზომა" value={f.teamSize} />
+        <Field label="ქმნის სამუშაო ადგილებს" value={f.createsJobs} />
+        <Field label="რეგიონი / ბაზარი" value={f.region} />
       </SectionCard>
 
       {/* ── Website Need & Goals (Stage 4) ── */}
-      <SectionCard title="ვებგვერდის საჭიროება — Website Need">
+      <SectionCard title="ვებგვერდის საჭიროება">
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Why Need Website?" value={f.whyNeed} />
+          <Field label="რატომ სჭირდება ვებგვერდი?" value={f.whyNeed} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Problem Solved" value={f.problemSolved} />
+          <Field label="რა პრობლემას წყვეტს" value={f.problemSolved} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="Goal to Achieve" value={f.goalAchieve} />
+          <Field label="მიზანი" value={f.goalAchieve} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <Field label="How Users Will Use It" value={f.userUsage} />
+          <Field label="როგორ გამოიყენებენ მას მომხმარებლები" value={f.userUsage} />
         </div>
-        <Field label="User Action" value={f.userAction} />
-        <Field label="Expected 6 Months" value={f.expected6Months} />
-        <OptionList title="Selected Goals / არჩეული მიზნები" options={GOALS_LIST} selected={f.goalsMulti} />
+        <Field label="მომხმარებლის ქმედება" value={f.userAction} />
+        <Field label="მოსალოდნელია 6 თვეში" value={f.expected6Months} />
+        <OptionList title="არჩეული მიზნები" options={GOALS_LIST} selected={f.goalsMulti} />
       </SectionCard>
 
       {/* ── Project Type & Features (Stage 5) ── */}
-      <SectionCard title="პროექტის ტიპი — Project Type">
-        <Field label="Project Type / ტიპი" value={f.projectType} />
-        <OptionList title="Desired Features / სასურველი ფუნქციები" options={FEATURES_LIST} selected={f.desiredFeatures} />
+      <SectionCard title="პროექტის ტიპი">
+        <Field label="პროექტის ტიპი" value={f.projectType} />
+        <OptionList title="სასურველი ფუნქციები" options={FEATURES_LIST} selected={f.desiredFeatures} />
       </SectionCard>
 
       {/* ── Development Potential (Stage 6) ── */}
-      <SectionCard title="განვითარების პოტენციალი — Development Potential">
+      <SectionCard title="განვითარების პოტენციალი">
         {DEVELOPMENT_CRITERIA.map((crit) => {
           const radioKey = crit.key + "Radio";
           const radioVal = f[radioKey];
@@ -308,7 +308,7 @@ export default async function ApplicationDetailPage({
                 ))}
               </div>
               {String(textVal || "").trim() && (
-                <p className="text-xs text-[var(--color-fg-secondary)] italic mt-1">Justification: {String(textVal)}</p>
+                <p className="text-xs text-[var(--color-fg-secondary)] italic mt-1">დასაბუთება: {String(textVal)}</p>
               )}
             </div>
           );
@@ -316,12 +316,12 @@ export default async function ApplicationDetailPage({
       </SectionCard>
 
       {/* ── Materials & Cooperation (Stage 7) ── */}
-      <SectionCard title="მასალები და თანამშრომლობა — Materials & Cooperation">
-        <OptionList title="Ready Materials / მზა მასალები" options={READY_MATERIALS} selected={f.readyMaterials} />
-        <Field label="Material Delivery Time" value={f.materialDeliveryTime} />
-        <Field label="Feedback Time" value={f.feedbackTime} />
+      <SectionCard title="მასალები და თანამშრომლობა">
+        <OptionList title="მზა მასალები" options={READY_MATERIALS} selected={f.readyMaterials} />
+        <Field label="მასალის მიწოდების დრო" value={f.materialDeliveryTime} />
+        <Field label="უკუკავშირის დრო" value={f.feedbackTime} />
         <div className="sm:col-span-2 lg:col-span-3 space-y-1">
-          <p className="text-xs font-medium text-[var(--color-fg-tertiary)] uppercase tracking-wider">Cooperation Conditions</p>
+          <p className="text-xs font-medium text-[var(--color-fg-tertiary)] uppercase tracking-wider">თანამშრომლობის პირობები</p>
           {COOP_LABELS.map((c) => (
             <CheckboxField key={c.key} checked={!!f[c.key]} label={c.label_ka} />
           ))}
@@ -329,10 +329,10 @@ export default async function ApplicationDetailPage({
       </SectionCard>
 
       {/* ── Public Consents (Stage 8) ── */}
-      <SectionCard title="საჯარო კომუნიკაციის თანხმობა — Public Consents">
+      <SectionCard title="საჯარო კომუნიკაციის თანხმობა">
         <div className="sm:col-span-2 lg:col-span-3 space-y-1">
           <p className="text-xs font-medium text-[var(--color-fg-tertiary)] uppercase tracking-wider mb-1">
-            Required Consents / სავალდებულო თანხმობები
+            სავალდებულო თანხმობები
           </p>
           {CONSENT_LABELS.filter((c) => c.required).map((c) => (
             <CheckboxField key={c.key} checked={!!f[c.key]} label={c.label_ka} />
@@ -340,7 +340,7 @@ export default async function ApplicationDetailPage({
         </div>
         <div className="sm:col-span-2 lg:col-span-3 space-y-1">
           <p className="text-xs font-medium text-[var(--color-fg-tertiary)] uppercase tracking-wider mb-1">
-            Optional Consents / არასავალდებულო თანხმობები
+            არასავალდებულო თანხმობები
           </p>
           {CONSENT_LABELS.filter((c) => !c.required).map((c) => (
             <CheckboxField key={c.key} checked={!!f[c.key]} label={c.label_ka} />
@@ -349,7 +349,7 @@ export default async function ApplicationDetailPage({
       </SectionCard>
 
       {/* ── Declarations (Stage 9) ── */}
-      <SectionCard title="დეკლარაციები — Declarations">
+      <SectionCard title="დეკლარაციები">
         <div className="sm:col-span-2 lg:col-span-3 space-y-1">
           {DECLARATION_LABELS.map((d) => (
             <CheckboxField key={d.key} checked={!!f[d.key]} label={d.label_ka} />
@@ -358,11 +358,11 @@ export default async function ApplicationDetailPage({
       </SectionCard>
 
       {/* ── Submission Meta ── */}
-      <SectionCard title="გაგზავნის ინფორმაცია — Submission Info">
-        <Field label="Application Number" value={app.application_number} />
-        <Field label="Application ID" value={app.id} />
-        <Field label="Submitted At" value={app.submitted_at ? new Date(app.submitted_at).toLocaleString("ka-GE") : "—"} />
-        <Field label="Status / სტატუსი" value={statusLabels[app.status] || app.status} />
+      <SectionCard title="გაგზავნის ინფორმაცია">
+        <Field label="განაცხადის ნომერი" value={app.application_number} />
+        <Field label="განაცხადის ID" value={app.id} />
+        <Field label="გაგზავნის დრო" value={app.submitted_at ? new Date(app.submitted_at).toLocaleString("ka-GE") : "—"} />
+        <Field label="სტატუსი" value={statusLabels[app.status] || app.status} />
       </SectionCard>
     </div>
   );

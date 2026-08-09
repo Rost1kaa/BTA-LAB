@@ -7,6 +7,7 @@ type SecurityEvent =
   | "captcha_failed"
   | "contact_rate_limited"
   | "quiz_rate_limited"
+  | "questionnaire_rate_limited"
   | "upload_rejected"
   | "otp_send"
   | "otp_verify"

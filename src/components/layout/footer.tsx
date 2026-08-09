@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "@/lib/use-dictionary";
 
 interface FooterProps {
@@ -19,8 +20,15 @@ interface FooterProps {
 }
 
 export function Footer({ siteConfig }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
   const { t, dict } = useTranslation();
+  const currentYear = new Date().getFullYear();
+
+  // The public footer must never render inside the admin dashboard.
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   const copyrightText = (
     dict["footer.copyright"] || "© %year% BTA LAB. All rights reserved."
   ).replace("%year%", String(currentYear));

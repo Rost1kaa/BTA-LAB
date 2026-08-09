@@ -10,7 +10,7 @@ export const pricingData: PricingData = {
       {
         id: "landing-starter",
         name: "Landing Starter",
-        price: 199,
+        price: 300,
         billingLabel: "One-time payment",
         iconName: "Rocket",
         idealFor:
@@ -23,7 +23,7 @@ export const pricingData: PricingData = {
           "Contact button",
           "Responsive design",
           "Basic SEO optimization",
-          "7-day technical support",
+          "30-day technical support",
         ],
         deliveryTime: "1–3 business days",
         cta: "Choose Package",
@@ -31,7 +31,7 @@ export const pricingData: PricingData = {
       {
         id: "one-page-website",
         name: "One Page Website",
-        price: 300,
+        price: 500,
         billingLabel: "One-time payment",
         iconName: "Globe",
         idealFor:
@@ -49,7 +49,7 @@ export const pricingData: PricingData = {
           "Social media links",
           "Responsive design",
           "Basic SEO optimization",
-          "7-day technical support",
+          "30-day technical support",
         ],
         deliveryTime: "2–5 business days",
         cta: "Choose Package",
@@ -57,7 +57,7 @@ export const pricingData: PricingData = {
       {
         id: "business-website",
         name: "Business Website",
-        price: 799,
+        price: 999,
         billingLabel: "One-time payment",
         iconName: "Star",
         idealFor:
@@ -72,7 +72,7 @@ export const pricingData: PricingData = {
           "Google Maps integration",
           "Google Analytics setup",
           "API integrations",
-          "14-day technical support",
+          "30-day technical support",
         ],
         deliveryTime: "5–10 business days",
         cta: "Choose Package",
@@ -81,7 +81,7 @@ export const pricingData: PricingData = {
       {
         id: "online-store",
         name: "Online Store",
-        price: 999,
+        price: 1199,
         billingLabel: "One-time payment",
         iconName: "ShoppingCart",
         idealFor:

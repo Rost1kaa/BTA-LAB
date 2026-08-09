@@ -53,10 +53,10 @@ export default async function AdminDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
-            Dashboard
+            მთავარი
           </h1>
           <p className="mt-1 text-sm text-[var(--color-fg-tertiary)]">
-            Welcome back to BTA LAB Admin
+            კეთილი იყოს თქვენი დაბრუნება BTA LAB ადმინისტრაციაში
           </p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
             {stats.totalProjects}
           </p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Total Projects</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">პროექტები</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
             {stats.publishedProjects}
           </p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Published</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">გამოქვეყნებული</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
@@ -96,7 +96,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
             {stats.draftProjects}
           </p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Drafts</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">მონახაზები</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)]">
@@ -108,7 +108,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl font-bold tracking-tight text-[var(--color-fg-primary)]">
             {stats.totalTeam}
           </p>
-          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">Team Members</p>
+          <p className="text-xs text-[var(--color-fg-tertiary)] mt-1">გუნდის წევრები</p>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export default async function AdminDashboard() {
         <div className="lg:col-span-2">
           <div className="rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] p-6">
             <h2 className="text-sm font-semibold text-[var(--color-fg-primary)] mb-4">
-              Quick Actions
+              სწრაფი მოქმედებები
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <Link
@@ -126,8 +126,8 @@ export default async function AdminDashboard() {
               >
                 <Plus size={18} className="text-[var(--color-fg-tertiary)] shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">Add Project</p>
-                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">New portfolio project</p>
+                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">პროექტის დამატება</p>
+                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">ახალი პორტფოლიო პროექტი</p>
                 </div>
               </Link>
               <Link
@@ -136,8 +136,8 @@ export default async function AdminDashboard() {
               >
                 <FileText size={18} className="text-[var(--color-fg-tertiary)] shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">Edit Content</p>
-                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">Website text & media</p>
+                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">კონტენტის რედაქტირება</p>
+                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">ვებსაიტის ტექსტი და მედია</p>
                 </div>
               </Link>
               <Link
@@ -146,8 +146,8 @@ export default async function AdminDashboard() {
               >
                 <FolderKanban size={18} className="text-[var(--color-fg-tertiary)] shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">Manage Portfolio</p>
-                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">All projects</p>
+                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">პორტფოლიოს მართვა</p>
+                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">ყველა პროექტი</p>
                 </div>
               </Link>
               <a
@@ -158,8 +158,8 @@ export default async function AdminDashboard() {
               >
                 <ExternalLink size={18} className="text-[var(--color-fg-tertiary)] shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">View Website</p>
-                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">Open public site</p>
+                  <p className="text-sm font-medium text-[var(--color-fg-primary)]">ვებსაიტის ნახვა</p>
+                  <p className="text-xs text-[var(--color-fg-tertiary)]/70">საჯარო ვებსაიტის გახსნა</p>
                 </div>
               </a>
             </div>
@@ -170,13 +170,13 @@ export default async function AdminDashboard() {
         <div>
           <div className="rounded-2xl bg-[var(--color-bg-surface)] border border-[var(--color-border-primary)] p-6">
             <h2 className="text-sm font-semibold text-[var(--color-fg-primary)] mb-4">
-              Recent Updates
+              ბოლო განახლებები
             </h2>
             {stats.lastUpdated ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm text-[var(--color-fg-tertiary)]">
                   <Clock size={14} className="shrink-0" />
-                  <span>Last content update:</span>
+                  <span>კონტენტის ბოლო განახლება:</span>
                 </div>
                 <p className="text-xs text-[var(--color-fg-tertiary)]/70">
                   {new Date(stats.lastUpdated).toLocaleDateString("en-US", {
@@ -190,7 +190,7 @@ export default async function AdminDashboard() {
                 {stats.recentProjects.length > 0 && (
                   <div className="pt-3 border-t border-[var(--color-border-primary)]">
                     <p className="text-xs text-[var(--color-fg-tertiary)]/70 mb-2">
-                      Recent projects:
+                      ბოლო პროექტები:
                     </p>
                     {stats.recentProjects.slice(0, 3).map((p) => (
                       <div key={p.id} className="flex items-center gap-2 py-1">
@@ -205,7 +205,7 @@ export default async function AdminDashboard() {
               </div>
             ) : (
               <p className="text-sm text-[var(--color-fg-tertiary)]/70">
-                No content yet. Start by adding content via the CMS.
+                კონტენტი ჯერ არ არის. დაიწყეთ CMS-ით კონტენტის დამატება.
               </p>
             )}
           </div>

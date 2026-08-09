@@ -15,7 +15,7 @@ export interface ServicePackageKaLocalization {
 export const servicePackageKaLocalizations: Record<string, ServicePackageKaLocalization> = {
   "website:Landing Starter": {
     name: "ლენდინგ სტარტერი",
-    price: "199",
+    price: "300",
     billingLabel: "ერთჯერადი",
     idealFor: "მცირე ბიზნესებისთვის, ახალი სერვისებისთვის ან კონკრეტული შეთავაზების წარმოსაჩენად.",
     features: [
@@ -26,14 +26,14 @@ export const servicePackageKaLocalizations: Record<string, ServicePackageKaLocal
       "საკონტაქტო ღილაკი",
       "ადაპტირებული დიზაინი",
       "საბაზისო SEO ოპტიმიზაცია",
-      "7-დღიანი ტექნიკური მხარდაჭერა",
+      "30-დღიანი ტექნიკური მხარდაჭერა",
     ],
     deliveryTime: "1-3 სამუშაო დღე",
     cta: "პაკეტის არჩევა",
   },
   "website:One Page Website": {
     name: "ერთგვერდიანი ვებგვერდი",
-    price: "300",
+    price: "500",
     billingLabel: "ერთჯერადი",
     idealFor: "მცირე ბიზნესებისთვის, პერსონალური ბრენდებისთვის, სერვისის მომწოდებლებისა და კომპანიებისთვის, რომლებსაც სრული ერთგვერდიანი ვებგვერდი სჭირდებათ.",
     features: [
@@ -49,14 +49,14 @@ export const servicePackageKaLocalizations: Record<string, ServicePackageKaLocal
       "სოციალური ქსელების ბმულები",
       "ადაპტირებული დიზაინი",
       "საბაზისო SEO ოპტიმიზაცია",
-      "7-დღიანი ტექნიკური მხარდაჭერა",
+      "30-დღიანი ტექნიკური მხარდაჭერა",
     ],
     deliveryTime: "2-5 სამუშაო დღე",
     cta: "პაკეტის არჩევა",
   },
   "website:Business Website": {
     name: "ბიზნეს ვებგვერდი",
-    price: "799",
+    price: "999",
     billingLabel: "ერთჯერადი",
     idealFor: "კომპანიებისა და მზარდი ბიზნესებისთვის.",
     features: [
@@ -69,14 +69,14 @@ export const servicePackageKaLocalizations: Record<string, ServicePackageKaLocal
       "Google Maps ინტეგრაცია",
       "Google Analytics-ის გამართვა",
       "API ინტეგრაციები",
-      "14-დღიანი ტექნიკური მხარდაჭერა",
+      "30-დღიანი ტექნიკური მხარდაჭერა",
     ],
     deliveryTime: "5-10 სამუშაო დღე",
     cta: "პაკეტის არჩევა",
   },
   "website:Online Store": {
     name: "ონლაინ მაღაზია",
-    price: "999",
+    price: "1199",
     billingLabel: "ერთჯერადი",
     idealFor: "ონლაინ მაღაზიებისა და პროდუქტის გაყიდვაზე ორიენტირებული ბიზნესებისთვის.",
     features: [
