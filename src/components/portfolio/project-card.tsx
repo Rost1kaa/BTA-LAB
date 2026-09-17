@@ -11,12 +11,14 @@ function ProjectCardShell({
   categoryLabel,
   technologyLimit,
   imagePriority = false,
+  portfolioGrid = false,
   children,
 }: {
   project: PortfolioProject;
   categoryLabel: string;
   technologyLimit: number;
   imagePriority?: boolean;
+  portfolioGrid?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -25,10 +27,11 @@ function ProjectCardShell({
         imageSrc={project.cover_image || "/images/qey_ge.webp"}
         altText={project.alt_text || `${project.title} full website preview`}
         eager={imagePriority}
+        previewHeight={portfolioGrid ? "h-[310px] md:h-[340px] shrink-0" : undefined}
       />
       <div className="p-6 flex flex-col flex-1">
         <Badge variant="subtle" size="sm">{categoryLabel}</Badge>
-        <h3 className="mt-3 text-xl font-semibold text-[var(--color-fg-primary)]">{project.title}</h3>
+        <h3 className={`mt-3 text-xl font-semibold text-[var(--color-fg-primary)] ${portfolioGrid ? "line-clamp-2" : ""}`}>{project.title}</h3>
         <p className="mt-2 text-sm text-[var(--color-fg-tertiary)] leading-relaxed line-clamp-3 flex-1">{project.description}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {(project.technologies || []).slice(0, technologyLimit).map((technology) => (
@@ -78,7 +81,7 @@ export function PortfolioProjectCard({
   imagePriority?: boolean;
 }) {
   return (
-    <ProjectCardShell project={project} categoryLabel={categoryLabel} technologyLimit={5} imagePriority={imagePriority}>
+    <ProjectCardShell project={project} categoryLabel={categoryLabel} technologyLimit={5} imagePriority={imagePriority} portfolioGrid>
       <div className="mt-auto pt-6 flex items-center gap-3">
         {project.link && (
           <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-[var(--color-overlay)] text-[var(--color-fg-tertiary)]/80 hover:text-[var(--color-fg-primary)] transition-colors">
